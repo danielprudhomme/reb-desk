@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { parseRebFile } from '../services/reb-parser.ts';
 import { getOptimizationReports } from '../db/database.ts';
-import { OptimizationReport } from '@shared/models/optimization-report.ts';
+import type { OptimizationReport } from '@shared/models/optimization-report.ts';
 
 const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
 

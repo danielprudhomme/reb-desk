@@ -1,9 +1,9 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import type { OptimizationReport } from '@shared/models/optimization-report';
-import type { Currency } from '@shared/models/currency';
-import type { OpitmizationModel } from '@shared/models/optimization-model';
-import type { TimeUnit } from '@shared/models/time-unit';
+import type { OptimizationReport } from '@shared/models/optimization-report.ts';
+import type { Currency } from '@shared/models/currency.ts';
+import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
+import type { TimeUnit } from '@shared/models/time-unit.ts';
 
 function extractValue(lines: string[], key: string): string {
   const idx = lines.findIndex(l => l.trim() === key);
@@ -27,7 +27,7 @@ function parseCurrency(value: string): Currency {
 
 function parseModel(value: string): OpitmizationModel {
   if (value.toLowerCase().includes('ouverture') || value.toLowerCase().includes('opening')) {
-    return 'openingPrice';
+    return 'openingPriceOnly';
   }
   throw new Error(`Unknown model: ${value}`);
 }

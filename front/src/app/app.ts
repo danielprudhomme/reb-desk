@@ -14,12 +14,12 @@ export class App {
   private service = inject(OptimizationReportsService);
 
   constructor() {
-    // this.service.getAll().subscribe(r => {
-    //   console.log('reports', r);
-    // })
-
-    this.service.sync().subscribe(r => {
-      console.log('sync', r);
+    this.service.getAll().subscribe(r => {
+      console.log('reports', r);
     })
+
+    // this.service.sync().subscribe(r => {
+    //   console.log('sync', r);
+    // })
   }
 }
