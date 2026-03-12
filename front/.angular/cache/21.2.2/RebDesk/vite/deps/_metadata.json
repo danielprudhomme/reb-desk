@@ -1,0 +1,73 @@
+{
+  "hash": "32b3dd83",
+  "configHash": "a90e491b",
+  "lockfileHash": "b98c5c67",
+  "browserHash": "6b99b9ce",
+  "optimized": {
+    "@angular/common/http": {
+      "src": "../../../../../../node_modules/@angular/common/fesm2022/http.mjs",
+      "file": "@angular_common_http.js",
+      "fileHash": "bad5afa8",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "16379067",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "f5ec3c9d",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "8fca79dd",
+      "needsInterop": false
+    },
+    "@apollo/client/core": {
+      "src": "../../../../../../node_modules/@apollo/client/core/index.js",
+      "file": "@apollo_client_core.js",
+      "fileHash": "fce10f7a",
+      "needsInterop": false
+    },
+    "apollo-angular": {
+      "src": "../../../../../../node_modules/apollo-angular/fesm2022/apollo-angular.mjs",
+      "file": "apollo-angular.js",
+      "fileHash": "1dab15ac",
+      "needsInterop": false
+    },
+    "apollo-angular/http": {
+      "src": "../../../../../../node_modules/apollo-angular/fesm2022/apollo-angular-http.mjs",
+      "file": "apollo-angular_http.js",
+      "fileHash": "917547de",
+      "needsInterop": false
+    },
+    "rxjs": {
+      "src": "../../../../../../node_modules/rxjs/dist/esm5/index.js",
+      "file": "rxjs.js",
+      "fileHash": "b4482392",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-DDJXTXJX": {
+      "file": "chunk-DDJXTXJX.js"
+    },
+    "chunk-NNBUHJBR": {
+      "file": "chunk-NNBUHJBR.js"
+    },
+    "chunk-NFPYQ2PK": {
+      "file": "chunk-NFPYQ2PK.js"
+    },
+    "chunk-26UVOUDY": {
+      "file": "chunk-26UVOUDY.js"
+    },
+    "chunk-VITH7JYE": {
+      "file": "chunk-VITH7JYE.js"
+    }
+  }
+}
