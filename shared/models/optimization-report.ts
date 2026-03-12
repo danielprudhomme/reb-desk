@@ -4,6 +4,7 @@ import { TimeUnit } from "./time-unit";
 
 export interface OptimizationReport {
   id: string;
+  path: string;
   expert: string;
   symbol: string;
   timeframe: string;

@@ -16,6 +16,7 @@ export const typeDefs = /* GraphQL */ `
 
   type OptimizationReport {
     id: ID!
+    path: String!
     expert: String!
     symbol: String!
     timeframe: String!
@@ -32,6 +33,7 @@ export const typeDefs = /* GraphQL */ `
   }
 
   input OptimizationReportInput {
+    path: String!
     expert: String!
     symbol: String!
     timeframe: String!
