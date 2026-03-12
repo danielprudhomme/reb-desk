@@ -2,7 +2,7 @@ import Loki from 'lokijs';
 import type { OptimizationReport } from '@shared/models/optimization-report.ts';
 
 export const db = new Loki("reb-desk.db", {
-  autoload: true,
+  autoload: false,  // we control loading manually
   autosave: true,
   autosaveInterval: 5000
 })
@@ -10,8 +10,12 @@ export const db = new Loki("reb-desk.db", {
 let optimizationReports: Collection<OptimizationReport>
 
 export async function initDB(): Promise<void> {
-  return new Promise((resolve) => {
-    db.loadDatabase({}, () => {
+  return new Promise((resolve, reject) => {
+    db.loadDatabase({}, (err) => {
+      if (err) {
+        reject(err);
+        return;
+      }
 
       optimizationReports = db.getCollection<OptimizationReport>("optimizationReports")
 
@@ -24,8 +28,11 @@ export async function initDB(): Promise<void> {
         )
       }
 
-      console.log("DB ready")
-      resolve()
+      db.saveDatabase((err) => {
+        if (err) console.error("Initial save failed:", err);
+        else console.log("DB ready, file created at reb-desk.db");
+        resolve();
+      });
     })
   })
 }

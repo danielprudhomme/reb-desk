@@ -4,6 +4,7 @@ export const GET_OPTIMIZATION_REPORTS = gql`
   query GetOptimizationReports {
     optimizationReports {
       id
+      path
       expert
       symbol
       timeframe
