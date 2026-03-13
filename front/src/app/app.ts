@@ -1,11 +1,18 @@
 import { Component, inject, signal } from '@angular/core';
-import { RouterOutlet } from '@angular/router';
 import { OptimizationReportsService } from './services/optimization-report.service';
+import { RouterOutlet } from '@angular/router';
 
 @Component({
   selector: 'app-root',
   template: `<router-outlet />`,
   imports: [RouterOutlet],
+  styles: `
+    :host {
+      display: block;
+      height: 100%;
+      width: 100%;
+    }
+  `,
 })
 export class App {
   protected readonly title = signal('RebDesk');

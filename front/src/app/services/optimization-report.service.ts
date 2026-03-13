@@ -14,7 +14,7 @@ export class OptimizationReportsService extends GraphQlService {
     return this.query$(GET_OPTIMIZATION_REPORTS, 'optimizationReports');
   }
 
-  sync(): Observable<any> {
+  sync(): Observable<unknown> {
     return this.httpClient.get('http://localhost:4000/sync');
   }
 }
