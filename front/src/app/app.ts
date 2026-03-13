@@ -4,9 +4,8 @@ import { OptimizationReportsService } from './services/optimization-report.servi
 
 @Component({
   selector: 'app-root',
+  template: `<router-outlet />`,
   imports: [RouterOutlet],
-  templateUrl: './app.html',
-  styleUrl: './app.css'
 })
 export class App {
   protected readonly title = signal('RebDesk');
