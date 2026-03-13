@@ -6,7 +6,7 @@ import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 
 function extractValue(lines: string[], key: string): string {
-  const idx = lines.findIndex(l => l.trim() === key);
+  const idx = lines.findIndex((l) => l.trim() === key);
   if (idx === -1) throw new Error(`Key not found: ${key}`);
   return lines[idx + 1].trim();
 }
@@ -33,7 +33,9 @@ function parseModel(value: string): OpitmizationModel {
 }
 
 function extractExpertName(nomExpert: string): string {
-  const file = basename(nomExpert).replace(/\.ex5$/i, '').replace(/\.ex4$/i, '');
+  const file = basename(nomExpert)
+    .replace(/\.ex5$/i, '')
+    .replace(/\.ex4$/i, '');
   return file;
 }
 

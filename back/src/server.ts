@@ -1,15 +1,15 @@
-import { createServer } from "node:http"
-import { createSchema, createYoga } from "graphql-yoga"
-import { typeDefs } from "./db/graphql/schema.ts"
-import { resolvers } from "./db/graphql/resolvers.ts"
-import { initDB } from "./db/database.ts"
-import { handleSync } from "./routes/sync.ts"
+import { createServer } from 'node:http';
+import { createSchema, createYoga } from 'graphql-yoga';
+import { typeDefs } from './db/graphql/schema.ts';
+import { resolvers } from './db/graphql/resolvers.ts';
+import { initDB } from './db/database.ts';
+import { handleSync } from './routes/sync.ts';
 
 async function start() {
-  await initDB()
+  await initDB();
 
-  const schema = createSchema({ typeDefs, resolvers })
-  const yoga = createYoga({ schema })
+  const schema = createSchema({ typeDefs, resolvers });
+  const yoga = createYoga({ schema });
 
   const server = createServer((req, res) => {
     res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
@@ -27,12 +27,12 @@ async function start() {
     }
 
     return yoga(req, res);
-  })
+  });
 
   server.listen(4000, () => {
-    console.log("🚀 GraphQL API ready")
-    console.log("http://localhost:4000/graphql")
-  })
+    console.log('🚀 GraphQL API ready');
+    console.log('http://localhost:4000/graphql');
+  });
 }
 
-start()
+start();

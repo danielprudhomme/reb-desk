@@ -58,4 +58,4 @@ export const typeDefs = /* GraphQL */ `
     createOptimizationReport(input: OptimizationReportInput!): OptimizationReport!
     deleteOptimizationReport(id: ID!): Boolean!
   }
-`
+`;
