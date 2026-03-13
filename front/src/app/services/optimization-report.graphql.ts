@@ -21,4 +21,3 @@ export const GET_OPTIMIZATION_REPORTS = gql`
     }
   }
 `;
- 
