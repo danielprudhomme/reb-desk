@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal } from '@angular/core';
 import { OptimizationReportsService } from './services/optimization-report.service';
 import { RouterOutlet } from '@angular/router';
 
@@ -20,12 +20,8 @@ export class App {
   private service = inject(OptimizationReportsService);
 
   constructor() {
-    //  this.service.sync().subscribe(s => {
-    //       console.log('sync', s);
-
-    this.service.getAll().subscribe((r) => {
-      console.log('reports', r);
+    effect(() => {
+      console.log('sssss', this.service.reports());
     });
-    // })
   }
 }

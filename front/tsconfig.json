@@ -14,7 +14,8 @@
     "module": "preserve",
     "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@env": ["src/environments/environment"]
     }
   },
   "angularCompilerOptions": {
