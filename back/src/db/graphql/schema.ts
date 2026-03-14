@@ -14,10 +14,19 @@ export const typeDefs = /* GraphQL */ `
     openingPriceOnly
   }
 
+  enum ExpertAdvisor {
+    candleSuite
+    emaBb
+    ichimoku
+    rsiBreak
+    strategyCreator
+    autoBot
+  }
+
   type RebReport {
     id: ID!
     path: String!
-    expert: String!
+    expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
     leverage: Int!
@@ -34,7 +43,7 @@ export const typeDefs = /* GraphQL */ `
 
   input RebReportInput {
     path: String!
-    expert: String!
+    expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
     leverage: Int!

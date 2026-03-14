@@ -34,6 +34,6 @@ export async function initDB(): Promise<void> {
   });
 }
 
-export function getRebReports() {
+export function rebReportCollection() {
   return rebReports;
 }

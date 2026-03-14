@@ -4,6 +4,7 @@ import type { RebReport } from '@shared/models/reb-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 
 function extractValue(lines: string[], key: string): string {
   const idx = lines.findIndex((l) => l.trim() === key);
@@ -32,11 +33,27 @@ function parseModel(value: string): OpitmizationModel {
   throw new Error(`Unknown model: ${value}`);
 }
 
-function extractExpertName(nomExpert: string): string {
+function extractExpert(nomExpert: string): ExpertAdvisor {
   const file = basename(nomExpert)
     .replace(/\.ex5$/i, '')
     .replace(/\.ex4$/i, '');
-  return file;
+
+  const map: Record<string, ExpertAdvisor> = {
+    'REB Candle-Suite': 'candleSuite',
+    'REB EMA-BB': 'emaBb',
+    'REB Ichimoku-Bot': 'ichimoku',
+    'REB RSI-Break': 'rsiBreak',
+    'REB Strategy Creator': 'strategyCreator',
+    'REB AutoBot': 'autoBot',
+  };
+
+  const expert = map[file];
+
+  if (!expert) {
+    throw new Error(`Unknown expert advisor: ${file}`);
+  }
+
+  return expert;
 }
 
 function parseStartDate(value: string): string {
@@ -51,7 +68,7 @@ export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'i
 
   return {
     path: filePath,
-    expert: extractExpertName(extractValue(lines, 'NOM EXPERT :')),
+    expert: extractExpert(extractValue(lines, 'NOM EXPERT :')),
     symbol: extractValue(lines, 'SYMBOLE :'),
     timeframe: extractValue(lines, 'UNITE DE TEMPS :'),
     leverage: parseInt(extractValue(lines, 'SPREAD :')),

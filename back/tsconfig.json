@@ -5,6 +5,7 @@
     "moduleResolution": "NodeNext",
     "strict": true,
     "noEmit": true,
+    "skipLibCheck": true,
 
     "allowImportingTsExtensions": true,
 
@@ -12,5 +13,6 @@
     "paths": {
       "@shared/*": ["../shared/*"]
     }
-  }
+  },
+  "exclude": ["node_modules"]
 }

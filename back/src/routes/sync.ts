@@ -2,7 +2,7 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { parseRebFile } from '../services/reb-parser.ts';
-import { getRebReports } from '../db/database.ts';
+import { rebReportCollection } from '../db/database.ts';
 import type { RebReport } from '@shared/models/reb-report.ts';
 
 const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
@@ -33,7 +33,7 @@ export async function handleSync(req: IncomingMessage, res: ServerResponse) {
 
   try {
     const files = await findRebFiles(IMPORTS_DIR);
-    const collection = getRebReports();
+    const collection = rebReportCollection();
 
     const results = { inserted: 0, skipped: 0, errors: [] as string[] };
 

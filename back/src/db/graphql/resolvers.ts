@@ -1,15 +1,15 @@
 import { randomUUID } from 'node:crypto';
 import type { RebReport } from '@shared/models/reb-report.ts';
-import { getRebReports } from '../database.ts';
+import { rebReportCollection } from '../database.ts';
 
 export const resolvers = {
   Query: {
     rebReports: () => {
-      return getRebReports().find();
+      return rebReportCollection().find();
     },
 
     rebReport: (_: unknown, { id }: { id: string }) => {
-      return getRebReports().findOne({ id });
+      return rebReportCollection().findOne({ id });
     },
   },
 
@@ -20,11 +20,11 @@ export const resolvers = {
         ...input,
       };
 
-      return getRebReports().insert(report);
+      return rebReportCollection().insert(report);
     },
 
     deleteRebReport: (_: unknown, { id }: { id: string }) => {
-      const col = getRebReports();
+      const col = rebReportCollection();
       const report = col.findOne({ id });
 
       if (!report) return false;
