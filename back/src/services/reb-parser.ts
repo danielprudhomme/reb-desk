@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import type { RebReport } from '@shared/models/optimization-report.ts';
+import type { RebReport } from '@shared/models/reb-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';

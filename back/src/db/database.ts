@@ -2,7 +2,7 @@ import Loki from 'lokijs';
 import type { RebReport } from '@shared/models/reb-report.ts';
 
 export const db = new Loki('reb-desk.db', {
-  autoload: false, // we control loading manually
+  autoload: false,
   autosave: true,
   autosaveInterval: 5000,
 });
