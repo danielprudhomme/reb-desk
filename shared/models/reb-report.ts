@@ -1,8 +1,8 @@
-import { Currency } from "./currency";
-import { OpitmizationModel } from "./optimization-model";
-import { TimeUnit } from "./time-unit";
+import { Currency } from './currency';
+import { OpitmizationModel } from './optimization-model';
+import { TimeUnit } from './time-unit';
 
-export interface OptimizationReport {
+export interface RebReport {
   id: string;
   path: string;
   expert: string;

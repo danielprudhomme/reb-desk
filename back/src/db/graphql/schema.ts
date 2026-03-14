@@ -14,7 +14,7 @@ export const typeDefs = /* GraphQL */ `
     openingPriceOnly
   }
 
-  type OptimizationReport {
+  type RebReport {
     id: ID!
     path: String!
     expert: String!
@@ -32,7 +32,7 @@ export const typeDefs = /* GraphQL */ `
     longTermUnit: TimeUnit!
   }
 
-  input OptimizationReportInput {
+  input RebReportInput {
     path: String!
     expert: String!
     symbol: String!
@@ -50,12 +50,12 @@ export const typeDefs = /* GraphQL */ `
   }
 
   type Query {
-    optimizationReports: [OptimizationReport!]!
-    optimizationReport(id: ID!): OptimizationReport
+    rebReports: [RebReport!]!
+    rebReport(id: ID!): RebReport
   }
 
   type Mutation {
-    createOptimizationReport(input: OptimizationReportInput!): OptimizationReport!
-    deleteOptimizationReport(id: ID!): Boolean!
+    createRebReport(input: RebReportInput!): RebReport!
+    deleteRebReport(id: ID!): Boolean!
   }
 `;

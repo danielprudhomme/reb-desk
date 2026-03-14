@@ -1,19 +1,17 @@
 import { inject, Injectable } from '@angular/core';
-import { OptimizationReport } from '@shared/models/optimization-report';
+import { RebReport } from '@shared/models/reb-report';
 import { Observable } from 'rxjs';
-import { GET_OPTIMIZATION_REPORTS } from './optimization-report.graphql';
+import { GET_REB_REPORTS } from './reb-report.graphql';
 import { HttpClient } from '@angular/common/http';
 import { GraphQlService } from '../core/graphql/graphql.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
-export class OptimizationReportsService extends GraphQlService {
+export class RebReportsService extends GraphQlService {
   private httpClient = inject(HttpClient);
 
-  reports = toSignal(
-    this.query$<OptimizationReport[]>(GET_OPTIMIZATION_REPORTS, 'optimizationReports'),
-  );
+  reports = toSignal(this.query$<RebReport[]>(GET_REB_REPORTS, 'rebReports'));
 
   sync(): Observable<unknown> {
     return this.httpClient.get(`${environment.apiUrl}/sync`);

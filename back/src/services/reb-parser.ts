@@ -1,6 +1,6 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import type { OptimizationReport } from '@shared/models/optimization-report.ts';
+import type { RebReport } from '@shared/models/optimization-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
@@ -45,7 +45,7 @@ function parseStartDate(value: string): string {
   return `${year}-${month}-${day}`;
 }
 
-export async function parseRebFile(filePath: string): Promise<Omit<OptimizationReport, 'id'>> {
+export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'id'>> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
 

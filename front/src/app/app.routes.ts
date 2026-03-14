@@ -1,5 +1,5 @@
 import { Routes } from '@angular/router';
-import { OptimizationReportList } from './components/optimization-report-list';
+import { RebReportList } from './components/optimization-report-list';
 import { Layout } from './core/components/layout';
 
 export const routes: Routes = [
@@ -9,7 +9,7 @@ export const routes: Routes = [
     children: [
       {
         path: '',
-        component: OptimizationReportList,
+        component: RebReportList,
       },
     ],
   },

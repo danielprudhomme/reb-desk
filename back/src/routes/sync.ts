@@ -2,8 +2,8 @@ import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import type { IncomingMessage, ServerResponse } from 'node:http';
 import { parseRebFile } from '../services/reb-parser.ts';
-import { getOptimizationReports } from '../db/database.ts';
-import type { OptimizationReport } from '@shared/models/optimization-report.ts';
+import { getRebReports } from '../db/database.ts';
+import type { RebReport } from '@shared/models/reb-report.ts';
 
 const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
 
@@ -33,7 +33,7 @@ export async function handleSync(req: IncomingMessage, res: ServerResponse) {
 
   try {
     const files = await findRebFiles(IMPORTS_DIR);
-    const collection = getOptimizationReports();
+    const collection = getRebReports();
 
     const results = { inserted: 0, skipped: 0, errors: [] as string[] };
 
@@ -47,7 +47,7 @@ export async function handleSync(req: IncomingMessage, res: ServerResponse) {
         }
 
         const report = await parseRebFile(filePath);
-        collection.insert({ ...report, id: crypto.randomUUID() } as OptimizationReport);
+        collection.insert({ ...report, id: crypto.randomUUID() } as RebReport);
         results.inserted++;
       } catch (err) {
         results.errors.push(`${filePath}: ${String(err)}`);

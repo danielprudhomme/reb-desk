@@ -1,33 +1,30 @@
 import { randomUUID } from 'node:crypto';
-import type { OptimizationReport } from '@shared/models/optimization-report.ts';
-import { getOptimizationReports } from '../database.ts';
+import type { RebReport } from '@shared/models/reb-report.ts';
+import { getRebReports } from '../database.ts';
 
 export const resolvers = {
   Query: {
-    optimizationReports: () => {
-      return getOptimizationReports().find();
+    rebReports: () => {
+      return getRebReports().find();
     },
 
-    optimizationReport: (_: unknown, { id }: { id: string }) => {
-      return getOptimizationReports().findOne({ id });
+    rebReport: (_: unknown, { id }: { id: string }) => {
+      return getRebReports().findOne({ id });
     },
   },
 
   Mutation: {
-    createOptimizationReport: (
-      _: unknown,
-      { input }: { input: Omit<OptimizationReport, 'id'> },
-    ) => {
-      const report: OptimizationReport = {
+    createRebReport: (_: unknown, { input }: { input: Omit<RebReport, 'id'> }) => {
+      const report: RebReport = {
         id: randomUUID(),
         ...input,
       };
 
-      return getOptimizationReports().insert(report);
+      return getRebReports().insert(report);
     },
 
-    deleteOptimizationReport: (_: unknown, { id }: { id: string }) => {
-      const col = getOptimizationReports();
+    deleteRebReport: (_: unknown, { id }: { id: string }) => {
+      const col = getRebReports();
       const report = col.findOne({ id });
 
       if (!report) return false;

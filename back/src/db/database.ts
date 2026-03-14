@@ -1,5 +1,5 @@
 import Loki from 'lokijs';
-import type { OptimizationReport } from '@shared/models/optimization-report.ts';
+import type { RebReport } from '@shared/models/reb-report.ts';
 
 export const db = new Loki('reb-desk.db', {
   autoload: false, // we control loading manually
@@ -7,7 +7,7 @@ export const db = new Loki('reb-desk.db', {
   autosaveInterval: 5000,
 });
 
-let optimizationReports: Collection<OptimizationReport>;
+let rebReports: Collection<RebReport>;
 
 export async function initDB(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -17,10 +17,10 @@ export async function initDB(): Promise<void> {
         return;
       }
 
-      optimizationReports = db.getCollection<OptimizationReport>('optimizationReports');
+      rebReports = db.getCollection<RebReport>('rebReports');
 
-      if (!optimizationReports) {
-        optimizationReports = db.addCollection<OptimizationReport>('optimizationReports', {
+      if (!rebReports) {
+        rebReports = db.addCollection<RebReport>('rebReports', {
           indices: ['id', 'symbol', 'expert'],
         });
       }
@@ -34,6 +34,6 @@ export async function initDB(): Promise<void> {
   });
 }
 
-export function getOptimizationReports() {
-  return optimizationReports;
+export function getRebReports() {
+  return rebReports;
 }

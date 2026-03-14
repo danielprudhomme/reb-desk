@@ -5,4 +5,4 @@ import { Component } from '@angular/core';
   imports: [],
   templateUrl: 'optimization-report-list.html',
 })
-export class OptimizationReportList {}
+export class RebReportList {}

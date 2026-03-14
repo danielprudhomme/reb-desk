@@ -1,8 +1,8 @@
 import { gql } from 'apollo-angular';
 
-export const GET_OPTIMIZATION_REPORTS = gql`
-  query GetOptimizationReports {
-    optimizationReports {
+export const GET_REB_REPORTS = gql`
+  query GetRebReports {
+    rebReports {
       id
       path
       expert
