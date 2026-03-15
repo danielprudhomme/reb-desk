@@ -1,5 +1,5 @@
-import { RebReport } from '@shared/models/reb-report.ts';
 import { db } from './database.ts';
+import { createRebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 
 export async function initDB(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -9,13 +9,7 @@ export async function initDB(): Promise<void> {
         return;
       }
 
-      const rebReports = db.getCollection<RebReport>('rebReports');
-
-      if (!rebReports) {
-        db.addCollection<RebReport>('rebReports', {
-          indices: ['id', 'symbol', 'expert'],
-        });
-      }
+      createRebReportCollection();
 
       db.saveDatabase((err) => {
         if (err) console.error('Initial save failed:', err);

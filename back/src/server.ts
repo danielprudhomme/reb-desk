@@ -1,15 +1,13 @@
-import { createSchema, createYoga } from 'graphql-yoga';
-import { typeDefs } from './db/graphql/schema.ts';
-import { resolvers } from './db/graphql/resolvers.ts';
+import { createYoga } from 'graphql-yoga';
 import express from 'express';
 import cors from 'cors';
 import { syncRouter } from './routes/sync.route.ts';
 import { initDB } from './db/init.ts';
+import { schema } from './graphql/schema.ts';
 
 async function start() {
   await initDB();
 
-  const schema = createSchema({ typeDefs, resolvers });
   const yoga = createYoga({ schema });
 
   const app = express();
