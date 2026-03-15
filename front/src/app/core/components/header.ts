@@ -1,20 +1,14 @@
-import { Component, inject } from '@angular/core';
-import { MatButtonModule } from '@angular/material/button';
-import { RebReportsService } from 'src/app/services/reb-report.service';
+import { Component } from '@angular/core';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-header',
   template: `
-    <div>
-      <button matButton="filled" (click)="sync()">Synchronize</button>
+    <div class="w-full flex items-center justify-center gap-6">
+      <a [routerLink]="['']">REB Reports</a>
+      <a [routerLink]="['actions']">Actions</a>
     </div>
   `,
-  imports: [MatButtonModule],
+  imports: [RouterLink],
 })
-export class Header {
-  private service = inject(RebReportsService);
-
-  sync() {
-    this.service.sync().subscribe();
-  }
-}
+export class Header {}

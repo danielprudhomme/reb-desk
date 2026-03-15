@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
-import { RebReportList } from './components/optimization-report-list';
+import { RebReportList } from './components/reb-report-list';
 import { Layout } from './core/components/layout';
+import { Actions } from './components/actions';
 
 export const routes: Routes = [
   {
@@ -10,6 +11,10 @@ export const routes: Routes = [
       {
         path: '',
         component: RebReportList,
+      },
+      {
+        path: 'actions',
+        component: Actions,
       },
     ],
   },

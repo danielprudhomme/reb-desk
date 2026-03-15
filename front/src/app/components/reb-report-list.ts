@@ -1,8 +1,8 @@
 import { Component } from '@angular/core';
 
 @Component({
-  selector: 'app-optimization-report-list',
+  selector: 'app-reb-report-list',
   imports: [],
-  templateUrl: 'optimization-report-list.html',
+  template: `reb report list`,
 })
 export class RebReportList {}
