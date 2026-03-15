@@ -1,5 +1,5 @@
 import { Component, effect, inject, signal } from '@angular/core';
-import { RebReportsService } from './services/reb-report.service';
+import { RebReportService } from './services/reb-report.service';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -17,11 +17,11 @@ import { RouterOutlet } from '@angular/router';
 export class App {
   protected readonly title = signal('RebDesk');
 
-  private service = inject(RebReportsService);
+  private service = inject(RebReportService);
 
   constructor() {
     effect(() => {
-      console.log('sssss', this.service.reports());
+      console.log('reports', this.service.reports());
     });
   }
 }

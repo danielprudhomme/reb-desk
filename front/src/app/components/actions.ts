@@ -1,8 +1,9 @@
 import { Component } from '@angular/core';
+import { ImportFolder } from './import-folder';
 
 @Component({
   selector: 'app-actions',
-  imports: [],
-  template: `ACTIONS`,
+  imports: [ImportFolder],
+  template: ` <app-import-folder /> `,
 })
 export class Actions {}
