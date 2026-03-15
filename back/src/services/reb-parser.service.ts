@@ -124,7 +124,7 @@ function addDuration(date: Date, duration: number, unit: TimeUnit): Date {
   return d;
 }
 
-export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'id'>> {
+export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'id' | 'mtime'>> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
 

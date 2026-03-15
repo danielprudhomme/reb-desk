@@ -1,4 +1,4 @@
-import { readdir } from 'node:fs/promises';
+import { readdir, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseRebFile } from './reb-parser.service.ts';
 import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
@@ -26,27 +26,67 @@ export async function runSync() {
   const files = await findRebFiles(IMPORTS_DIR);
   const collection = rebReportCollection();
 
-  const results = { inserted: 0, skipped: 0, errors: [] as string[] };
+  const results = {
+    inserted: 0,
+    updated: 0,
+    skipped: 0,
+    deleted: 0,
+    errors: [] as string[],
+  };
+
+  const existingReports = collection.find();
+  const existingMap = new Map(existingReports.map((r) => [r.path, r]));
+
+  const seenPaths = new Set<string>();
 
   for (const filePath of files) {
     try {
-      const existing = collection.findOne({ path: filePath });
+      const stats = await stat(filePath);
+      const mtime = stats.mtimeMs;
 
-      if (existing) {
+      const existing = existingMap.get(filePath);
+      seenPaths.add(filePath);
+
+      // ---------- NEW FILE ----------
+      if (!existing) {
+        const report = await parseRebFile(filePath);
+
+        collection.insert({
+          ...report,
+          id: crypto.randomUUID(),
+          mtime,
+        });
+
+        results.inserted++;
+        continue;
+      }
+
+      // ---------- UNCHANGED ----------
+      if (existing.mtime === mtime) {
         results.skipped++;
         continue;
       }
 
+      // ---------- MODIFIED ----------
       const report = await parseRebFile(filePath);
 
-      collection.insert({
-        ...report,
-        id: crypto.randomUUID(),
-      });
+      existing.mtime = mtime;
+      existing.importStatus = report.importStatus;
+      existing.lastValidatedDate = report.lastValidatedDate;
 
-      results.inserted++;
+      collection.update(existing);
+
+      results.updated++;
     } catch (err) {
       results.errors.push(`${filePath}: ${String(err)}`);
+    }
+  }
+
+  // ---------- DELETED FILES ----------
+  for (const report of existingReports) {
+    if (!seenPaths.has(report.path)) {
+      collection.remove(report);
+      results.deleted++;
     }
   }
 

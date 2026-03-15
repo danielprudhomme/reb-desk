@@ -6,6 +6,7 @@ import { ImportStatus } from './import-status';
 
 export interface RebReport {
   id: string;
+  mtime: number;
   importStatus: ImportStatus;
   path: string;
   expert: ExpertAdvisor;

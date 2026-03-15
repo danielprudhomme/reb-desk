@@ -5,6 +5,8 @@ export const GET_REB_REPORTS = gql`
     rebReports {
       id
       path
+      mtimeDate
+      importStatus
       expert
       symbol
       timeframe

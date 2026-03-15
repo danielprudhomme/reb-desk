@@ -32,6 +32,8 @@ export const typeDefs = /* GraphQL */ `
   type RebReport {
     id: ID!
     path: String!
+    mtime: Float!
+    mtimeDate: String!
     importStatus: ImportStatus!
     expert: ExpertAdvisor!
     symbol: String!
@@ -51,7 +53,6 @@ export const typeDefs = /* GraphQL */ `
 
   input RebReportInput {
     path: String!
-    importStatus: ImportStatus!
     expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
@@ -60,7 +61,6 @@ export const typeDefs = /* GraphQL */ `
     currency: Currency!
     model: OptimizationModel!
     startDate: String!
-    lastValidatedDate: String
     shortTermCount: Int!
     shortTermDuration: Int!
     shortTermUnit: TimeUnit!

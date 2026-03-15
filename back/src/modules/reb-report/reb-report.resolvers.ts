@@ -3,23 +3,20 @@ import type { RebReport } from '@shared/models/reb-report.ts';
 import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 
 export const rebReportResolvers = {
-  Query: {
-    rebReports: () => {
-      return rebReportCollection().find();
+  RebReport: {
+    mtimeDate: (report: RebReport) => {
+      return new Date(report.mtime).toISOString();
     },
+  },
 
-    rebReport: (_: unknown, { id }: { id: string }) => {
-      return rebReportCollection().findOne({ id });
-    },
+  Query: {
+    rebReports: () => rebReportCollection().find(),
+    rebReport: (_: unknown, { id }: { id: string }) => rebReportCollection().findOne({ id }),
   },
 
   Mutation: {
     createRebReport: (_: unknown, { input }: { input: Omit<RebReport, 'id'> }) => {
-      const report: RebReport = {
-        id: randomUUID(),
-        ...input,
-      };
-
+      const report: RebReport = { ...input, id: randomUUID(), mtime: Date.now() };
       return rebReportCollection().insert(report);
     },
 
@@ -30,7 +27,6 @@ export const rebReportResolvers = {
       if (!report) return false;
 
       col.remove(report);
-
       return true;
     },
   },
