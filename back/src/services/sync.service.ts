@@ -1,7 +1,7 @@
-import { rebReportCollection } from 'src/db/database.ts';
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
 import { parseRebFile } from './reb-parser.service.ts';
+import { rebReportCollection } from 'src/db/collections/reb-report.collection.ts';
 
 const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
 

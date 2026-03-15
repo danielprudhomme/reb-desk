@@ -1,8 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import type { RebReport } from '@shared/models/reb-report.ts';
-import { rebReportCollection } from '../collections/reb-report.collection.ts';
+import { rebReportCollection } from 'src/db/collections/reb-report.collection.ts';
 
-export const resolvers = {
+export const rebReportResolvers = {
   Query: {
     rebReports: () => {
       return rebReportCollection().find();
