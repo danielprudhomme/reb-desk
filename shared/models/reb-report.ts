@@ -2,9 +2,11 @@ import { Currency } from './currency';
 import { OptimizationModel } from './optimization-model';
 import { TimeUnit } from './time-unit';
 import { ExpertAdvisor } from './expert-advisor';
+import { ImportStatus } from './import-status';
 
 export interface RebReport {
   id: string;
+  importStatus: ImportStatus;
   path: string;
   expert: ExpertAdvisor;
   symbol: string;

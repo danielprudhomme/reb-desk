@@ -23,9 +23,16 @@ export const typeDefs = /* GraphQL */ `
     autoBot
   }
 
+  enum ImportStatus {
+    new
+    ongoing
+    done
+  }
+
   type RebReport {
     id: ID!
     path: String!
+    importStatus: ImportStatus!
     expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
@@ -34,6 +41,7 @@ export const typeDefs = /* GraphQL */ `
     currency: Currency!
     model: OptimizationModel!
     startDate: String!
+    lastValidatedDate: String
     shortTermCount: Int!
     shortTermDuration: Int!
     shortTermUnit: TimeUnit!
@@ -43,6 +51,7 @@ export const typeDefs = /* GraphQL */ `
 
   input RebReportInput {
     path: String!
+    importStatus: ImportStatus!
     expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
