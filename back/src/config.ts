@@ -1,6 +1,7 @@
 import path from 'path';
 
 export const APP_CONFIG = {
+  frontUrl: 'http://localhost:4200',
   dataDir: 'C:\\Metatrader\\RebDeskData',
   dbFile: 'reb-desk.db',
 };

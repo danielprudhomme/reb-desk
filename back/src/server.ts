@@ -4,6 +4,7 @@ import cors from 'cors';
 import { syncRouter } from './routes/sync.route.ts';
 import { initDB } from './db/init.ts';
 import { schema } from './graphql/schema.ts';
+import { APP_CONFIG } from './config.ts';
 
 async function start() {
   await initDB();
@@ -12,16 +13,13 @@ async function start() {
 
   const app = express();
 
-  app.use(cors({ origin: 'http://localhost:4200' }));
+  app.use(cors({ origin: APP_CONFIG.frontUrl }));
 
   app.use('/graphql', yoga);
 
   app.use(syncRouter);
 
-  app.listen(4000, () => {
-    console.log('🚀 API ready');
-    console.log('GraphQL: http://localhost:4000/graphql');
-  });
+  app.listen(4000, () => console.log('🚀 API ready'));
 }
 
 start();
