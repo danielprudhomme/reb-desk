@@ -13,7 +13,6 @@ export async function initDB(): Promise<void> {
 
       db.saveDatabase((err) => {
         if (err) console.error('Initial save failed:', err);
-        else console.log('DB ready, file created at reb-desk.db');
         resolve();
       });
     });

@@ -51,6 +51,7 @@ export const typeDefs = /* GraphQL */ `
     currency: Currency!
     model: OptimizationModel!
     startDate: String!
+    lastValidatedDate: String
     shortTermCount: Int!
     shortTermDuration: Int!
     shortTermUnit: TimeUnit!

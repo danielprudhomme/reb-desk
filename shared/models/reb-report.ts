@@ -14,6 +14,7 @@ export interface RebReport {
   currency: Currency;
   model: OptimizationModel;
   startDate: string;
+  lastValidatedDate?: string;
   shortTermCount: number;
   shortTermDuration: number;
   shortTermUnit: TimeUnit;

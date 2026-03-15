@@ -6,10 +6,17 @@ import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 
-function extractValue(lines: string[], key: string): string {
+function extractValue(lines: string[], key: string): string | undefined {
   const idx = lines.findIndex((l) => l.trim() === key);
-  if (idx === -1) throw new Error(`Key not found: ${key}`);
-  return lines[idx + 1].trim();
+  return idx === -1 ? undefined : lines[idx + 1].trim();
+}
+
+function requiredValue(lines: string[], key: string): string {
+  const value = extractValue(lines, key);
+  if (!value) {
+    throw new Error(`Missing value for ${key}`);
+  }
+  return value;
 }
 
 function parseTimeUnit(value: string): TimeUnit {
@@ -56,7 +63,7 @@ function extractExpert(nomExpert: string): ExpertAdvisor {
   return expert;
 }
 
-function parseStartDate(value: string): string {
+function parseDate(value: string): string {
   // DD/MM/YYYY → YYYY-MM-DD
   const [day, month, year] = value.split('/');
   return `${year}-${month}-${day}`;
@@ -66,20 +73,23 @@ export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'i
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
 
+  const lastValidated = extractValue(lines, 'DERNIERE DATE VALIDE :');
+
   return {
     path: filePath,
-    expert: extractExpert(extractValue(lines, 'NOM EXPERT :')),
-    symbol: extractValue(lines, 'SYMBOLE :'),
-    timeframe: extractValue(lines, 'UNITE DE TEMPS :'),
-    leverage: parseInt(extractValue(lines, 'SPREAD :')),
-    capital: parseFloat(extractValue(lines, 'CAPITAL :')),
-    currency: parseCurrency(extractValue(lines, 'DEVISE :')),
-    model: parseModel(extractValue(lines, "MODELE D'OPTIMISATION :")),
-    startDate: parseStartDate(extractValue(lines, 'DATE DE DEBUT TESTS :')),
-    shortTermCount: parseInt(extractValue(lines, 'NOMBRE DE COURT TERME :')),
-    shortTermDuration: parseInt(extractValue(lines, 'DUREE COURT TERME :')),
-    shortTermUnit: parseTimeUnit(extractValue(lines, 'UNITE COURT TERME :')),
-    longTermDuration: parseInt(extractValue(lines, 'DUREE LONG TERME :')),
-    longTermUnit: parseTimeUnit(extractValue(lines, 'UNITE LONG TERME :')),
+    expert: extractExpert(requiredValue(lines, 'NOM EXPERT :')),
+    symbol: requiredValue(lines, 'SYMBOLE :'),
+    timeframe: requiredValue(lines, 'UNITE DE TEMPS :'),
+    leverage: parseInt(requiredValue(lines, 'SPREAD :')),
+    capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
+    currency: parseCurrency(requiredValue(lines, 'DEVISE :')),
+    model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
+    startDate: parseDate(requiredValue(lines, 'DATE DE DEBUT TESTS :')),
+    lastValidatedDate: lastValidated ? parseDate(lastValidated) : undefined,
+    shortTermCount: parseInt(requiredValue(lines, 'NOMBRE DE COURT TERME :')),
+    shortTermDuration: parseInt(requiredValue(lines, 'DUREE COURT TERME :')),
+    shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
+    longTermDuration: parseInt(requiredValue(lines, 'DUREE LONG TERME :')),
+    longTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE LONG TERME :')),
   };
 }

@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { parseRebFile } from './reb-parser.service.ts';
 import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 
-const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
+const IMPORTS_DIR = 'C:\\Metatrader\\Imports\\RSI Opti 2';
 
 async function findRebFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
