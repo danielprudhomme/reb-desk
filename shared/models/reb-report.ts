@@ -1,5 +1,5 @@
 import { Currency } from './currency';
-import { OpitmizationModel } from './optimization-model';
+import { OptimizationModel } from './optimization-model';
 import { TimeUnit } from './time-unit';
 import { ExpertAdvisor } from './expert-advisor';
 
@@ -12,7 +12,7 @@ export interface RebReport {
   leverage: number;
   capital: number;
   currency: Currency;
-  model: OpitmizationModel;
+  model: OptimizationModel;
   startDate: string;
   shortTermCount: number;
   shortTermDuration: number;

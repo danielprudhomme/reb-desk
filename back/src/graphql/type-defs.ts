@@ -10,7 +10,7 @@ export const typeDefs = /* GraphQL */ `
     EUR
   }
 
-  enum OpitmizationModel {
+  enum OptimizationModel {
     openingPriceOnly
   }
 
@@ -32,7 +32,7 @@ export const typeDefs = /* GraphQL */ `
     leverage: Int!
     capital: Float!
     currency: Currency!
-    model: OpitmizationModel!
+    model: OptimizationModel!
     startDate: String!
     shortTermCount: Int!
     shortTermDuration: Int!
@@ -49,7 +49,7 @@ export const typeDefs = /* GraphQL */ `
     leverage: Int!
     capital: Float!
     currency: Currency!
-    model: OpitmizationModel!
+    model: OptimizationModel!
     startDate: String!
     shortTermCount: Int!
     shortTermDuration: Int!

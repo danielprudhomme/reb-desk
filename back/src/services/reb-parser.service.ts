@@ -2,7 +2,7 @@ import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
 import type { RebReport } from '@shared/models/reb-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
-import type { OpitmizationModel } from '@shared/models/optimization-model.ts';
+import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 
@@ -26,7 +26,7 @@ function parseCurrency(value: string): Currency {
   throw new Error(`Unknown currency: ${value}`);
 }
 
-function parseModel(value: string): OpitmizationModel {
+function parseModel(value: string): OptimizationModel {
   if (value.toLowerCase().includes('ouverture') || value.toLowerCase().includes('opening')) {
     return 'openingPriceOnly';
   }

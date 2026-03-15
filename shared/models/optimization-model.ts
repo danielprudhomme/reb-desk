@@ -1,1 +1,1 @@
-export type OpitmizationModel = 'openingPriceOnly';
+export type OptimizationModel = 'openingPriceOnly';
