@@ -1,9 +1,10 @@
-import { createServer } from 'node:http';
 import { createSchema, createYoga } from 'graphql-yoga';
 import { typeDefs } from './db/graphql/schema.ts';
 import { resolvers } from './db/graphql/resolvers.ts';
 import { initDB } from './db/database.ts';
 import { handleSync } from './routes/sync.ts';
+import express from 'express';
+import cors from 'cors';
 
 async function start() {
   await initDB();
@@ -11,27 +12,17 @@ async function start() {
   const schema = createSchema({ typeDefs, resolvers });
   const yoga = createYoga({ schema });
 
-  const server = createServer((req, res) => {
-    res.setHeader('Access-Control-Allow-Origin', 'http://localhost:4200');
-    res.setHeader('Access-Control-Allow-Methods', 'GET, POST, OPTIONS');
-    res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  const app = express();
 
-    if (req.method === 'OPTIONS') {
-      res.writeHead(204);
-      res.end();
-      return;
-    }
+  app.use(cors({ origin: 'http://localhost:4200' }));
 
-    if (req.url === '/sync') {
-      return handleSync(req, res);
-    }
+  app.use('/graphql', yoga);
 
-    return yoga(req, res);
-  });
+  app.get('/sync', handleSync);
 
-  server.listen(4000, () => {
-    console.log('🚀 GraphQL API ready');
-    console.log('http://localhost:4000/graphql');
+  app.listen(4000, () => {
+    console.log('🚀 API ready');
+    console.log('GraphQL: http://localhost:4000/graphql');
   });
 }
 

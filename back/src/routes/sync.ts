@@ -1,9 +1,8 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import type { IncomingMessage, ServerResponse } from 'node:http';
 import { parseRebFile } from '../services/reb-parser.ts';
 import { rebReportCollection } from '../db/database.ts';
-import type { RebReport } from '@shared/models/reb-report.ts';
+import { Request, Response } from 'express';
 
 const IMPORTS_DIR = 'C:\\Metatrader\\Imports';
 
@@ -24,13 +23,7 @@ async function findRebFiles(dir: string): Promise<string[]> {
   return results;
 }
 
-export async function handleSync(req: IncomingMessage, res: ServerResponse) {
-  if (req.method !== 'GET') {
-    res.writeHead(405, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Method not allowed' }));
-    return;
-  }
-
+export async function handleSync(req: Request, res: Response) {
   try {
     const files = await findRebFiles(IMPORTS_DIR);
     const collection = rebReportCollection();
@@ -39,25 +32,31 @@ export async function handleSync(req: IncomingMessage, res: ServerResponse) {
 
     for (const filePath of files) {
       try {
-        // Skip if already imported
         const existing = collection.findOne({ path: filePath });
+
         if (existing) {
           results.skipped++;
           continue;
         }
 
         const report = await parseRebFile(filePath);
-        collection.insert({ ...report, id: crypto.randomUUID() } as RebReport);
+
+        collection.insert({
+          ...report,
+          id: crypto.randomUUID(),
+        });
+
         results.inserted++;
       } catch (err) {
         results.errors.push(`${filePath}: ${String(err)}`);
       }
     }
 
-    res.writeHead(200, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify(results));
+    res.json(results);
   } catch (err) {
-    res.writeHead(500, { 'Content-Type': 'application/json' });
-    res.end(JSON.stringify({ error: 'Sync failed', detail: String(err) }));
+    res.status(500).json({
+      error: 'Sync failed',
+      detail: String(err),
+    });
   }
 }
