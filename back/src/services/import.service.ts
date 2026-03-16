@@ -6,8 +6,6 @@ import { rebReportCollection } from 'src/modules/reb-report/reb-report.collectio
 import crypto from 'node:crypto';
 import { IMPORTS_PATH } from 'src/config.ts';
 
-const SOURCE_DIR = 'C:\\Metatrader\\Imports\\RSI Opti 2';
-
 async function ensureDirectory(dir: string) {
   try {
     await access(dir, constants.F_OK);
@@ -34,10 +32,10 @@ async function findRebFiles(dir: string): Promise<string[]> {
   return results;
 }
 
-export async function runImport() {
+export async function runImport(folderPath: string) {
   await ensureDirectory(IMPORTS_PATH);
 
-  const files = await findRebFiles(SOURCE_DIR);
+  const files = await findRebFiles(folderPath);
   const collection = rebReportCollection();
 
   const results = {

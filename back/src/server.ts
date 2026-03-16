@@ -14,10 +14,11 @@ async function start() {
   const app = express();
 
   app.use(cors({ origin: APP_CONFIG.frontUrl }));
-
-  app.use('/graphql', yoga);
+  app.use(express.json());
 
   app.use(importRouter);
+
+  app.use('/graphql', yoga);
 
   app.listen(4000, () => console.log('🚀 API ready'));
 }
