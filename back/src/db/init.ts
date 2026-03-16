@@ -1,6 +1,5 @@
-import { createRebParameterCollection } from 'src/modules/reb-parameter/reb-parameter.collection.ts';
+import { collections } from './collections.ts';
 import { db } from './database.ts';
-import { createRebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 
 export async function initDB(): Promise<void> {
   return new Promise((resolve, reject) => {
@@ -10,8 +9,7 @@ export async function initDB(): Promise<void> {
         return;
       }
 
-      createRebReportCollection();
-      createRebParameterCollection();
+      collections.CreateAll();
 
       db.saveDatabase((err) => {
         if (err) console.error('Initial save failed:', err);

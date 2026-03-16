@@ -2,9 +2,9 @@ import { readdir, stat, mkdir, copyFile, access } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join, basename } from 'node:path';
 import { parseRebFile } from './reb-parser.service.ts';
-import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 import crypto from 'node:crypto';
 import { IMPORTS_PATH } from 'src/config.ts';
+import { collections } from 'src/db/collections.ts';
 
 async function ensureDirectory(dir: string) {
   try {
@@ -36,7 +36,7 @@ export async function runImport(folderPath: string) {
   await ensureDirectory(IMPORTS_PATH);
 
   const files = await findRebFiles(folderPath);
-  const collection = rebReportCollection();
+  const collection = collections.RebReport();
 
   const results = {
     inserted: 0,
