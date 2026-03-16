@@ -1,11 +1,12 @@
 import { randomUUID } from 'node:crypto';
 import type { RebReport } from '@shared/models/reb-report.ts';
 import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
+import { rebParameterCollection } from '../reb-parameter/reb-parameter.collection.ts';
 
 export const rebReportResolvers = {
   RebReport: {
-    mtimeDate: (report: RebReport) => {
-      return new Date(report.mtime).toISOString();
+    parameters: (report: RebReport) => {
+      return rebParameterCollection().find({ reportId: report.id });
     },
   },
 

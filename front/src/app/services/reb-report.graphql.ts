@@ -5,7 +5,6 @@ export const GET_REB_REPORTS = gql`
     rebReports {
       id
       path
-      mtimeDate
       importStatus
       expert
       symbol
@@ -20,6 +19,14 @@ export const GET_REB_REPORTS = gql`
       shortTermUnit
       longTermDuration
       longTermUnit
+
+      parameters {
+        name
+        value
+        start
+        stop
+        step
+      }
     }
   }
 `;

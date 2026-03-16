@@ -29,52 +29,63 @@ export const typeDefs = /* GraphQL */ `
     done
   }
 
+  type RebParameter {
+    id: ID!
+    reportId: ID!
+    name: String!
+
+    value: Float
+    start: Float
+    stop: Float
+    step: Float
+  }
+
   type RebReport {
     id: ID!
     path: String!
     mtime: Float!
-    mtimeDate: String!
     importStatus: ImportStatus!
+
     expert: ExpertAdvisor!
     symbol: String!
     timeframe: String!
+
     leverage: Int!
     capital: Float!
     currency: Currency!
     model: OptimizationModel!
+
     startDate: String!
     lastValidatedDate: String
+
     shortTermCount: Int!
     shortTermDuration: Int!
     shortTermUnit: TimeUnit!
+
     longTermDuration: Int!
     longTermUnit: TimeUnit!
+
+    parameters: [RebParameter!]!
   }
 
-  input RebReportInput {
-    path: String!
-    expert: ExpertAdvisor!
-    symbol: String!
-    timeframe: String!
-    leverage: Int!
-    capital: Float!
-    currency: Currency!
-    model: OptimizationModel!
-    startDate: String!
-    shortTermCount: Int!
-    shortTermDuration: Int!
-    shortTermUnit: TimeUnit!
-    longTermDuration: Int!
-    longTermUnit: TimeUnit!
+  input ParameterFilter {
+    name: String!
+    value: Float
+    min: Float
+    max: Float
+  }
+
+  input RebReportFilter {
+    parameters: [ParameterFilter!]
   }
 
   type Query {
-    rebReports: [RebReport!]!
+    rebReports(filter: RebReportFilter): [RebReport!]!
     rebReport(id: ID!): RebReport
   }
 
   type Mutation {
-    createRebReport(input: RebReportInput!): RebReport!
+    createRebReport: RebReport!
     deleteRebReport(id: ID!): Boolean!
   }
 `;

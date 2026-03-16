@@ -1,3 +1,4 @@
+import { createRebParameterCollection } from 'src/modules/reb-parameter/reb-parameter.collection.ts';
 import { db } from './database.ts';
 import { createRebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
 
@@ -10,6 +11,7 @@ export async function initDB(): Promise<void> {
       }
 
       createRebReportCollection();
+      createRebParameterCollection();
 
       db.saveDatabase((err) => {
         if (err) console.error('Initial save failed:', err);
