@@ -1,7 +1,7 @@
 import { createYoga } from 'graphql-yoga';
 import express from 'express';
 import cors from 'cors';
-import { syncRouter } from './routes/sync.route.ts';
+import { importRouter } from './routes/import.route.ts';
 import { initDB } from './db/init.ts';
 import { schema } from './graphql/schema.ts';
 import { APP_CONFIG } from './config.ts';
@@ -17,7 +17,7 @@ async function start() {
 
   app.use('/graphql', yoga);
 
-  app.use(syncRouter);
+  app.use(importRouter);
 
   app.listen(4000, () => console.log('🚀 API ready'));
 }

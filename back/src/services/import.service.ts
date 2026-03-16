@@ -1,9 +1,20 @@
-import { readdir, stat } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, stat, mkdir, copyFile, access } from 'node:fs/promises';
+import { constants } from 'node:fs';
+import { join, basename } from 'node:path';
 import { parseRebFile } from './reb-parser.service.ts';
 import { rebReportCollection } from 'src/modules/reb-report/reb-report.collection.ts';
+import crypto from 'node:crypto';
+import { IMPORTS_PATH } from 'src/config.ts';
 
-const IMPORTS_DIR = 'C:\\Metatrader\\Imports\\RSI Opti 2';
+const SOURCE_DIR = 'C:\\Metatrader\\Imports\\RSI Opti 2';
+
+async function ensureDirectory(dir: string) {
+  try {
+    await access(dir, constants.F_OK);
+  } catch {
+    await mkdir(dir, { recursive: true });
+  }
+}
 
 async function findRebFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -11,6 +22,7 @@ async function findRebFiles(dir: string): Promise<string[]> {
 
   for (const entry of entries) {
     const fullPath = join(dir, entry.name);
+
     if (entry.isDirectory()) {
       const nested = await findRebFiles(fullPath);
       results.push(...nested);
@@ -22,8 +34,10 @@ async function findRebFiles(dir: string): Promise<string[]> {
   return results;
 }
 
-export async function runSync() {
-  const files = await findRebFiles(IMPORTS_DIR);
+export async function runImport() {
+  await ensureDirectory(IMPORTS_PATH);
+
+  const files = await findRebFiles(SOURCE_DIR);
   const collection = rebReportCollection();
 
   const results = {
@@ -31,25 +45,32 @@ export async function runSync() {
     updated: 0,
     skipped: 0,
     deleted: 0,
+    copied: 0,
     errors: [] as string[],
   };
 
   const existingReports = collection.find();
   const existingMap = new Map(existingReports.map((r) => [r.path, r]));
-
   const seenPaths = new Set<string>();
 
   for (const filePath of files) {
     try {
-      const stats = await stat(filePath);
+      const fileName = basename(filePath);
+      const destPath = join(IMPORTS_PATH, fileName);
+
+      // 📁 Copy file to Imports folder
+      await copyFile(filePath, destPath);
+      results.copied++;
+
+      const stats = await stat(destPath);
       const mtime = stats.mtimeMs;
 
-      const existing = existingMap.get(filePath);
-      seenPaths.add(filePath);
+      const existing = existingMap.get(destPath);
+      seenPaths.add(destPath);
 
-      // ---------- NEW FILE ----------
+      // ---------- NEW ----------
       if (!existing) {
-        const report = await parseRebFile(filePath);
+        const report = await parseRebFile(destPath);
 
         collection.insert({
           ...report,
@@ -68,7 +89,7 @@ export async function runSync() {
       }
 
       // ---------- MODIFIED ----------
-      const report = await parseRebFile(filePath);
+      const report = await parseRebFile(destPath);
 
       existing.mtime = mtime;
       existing.importStatus = report.importStatus;
@@ -82,7 +103,7 @@ export async function runSync() {
     }
   }
 
-  // ---------- DELETED FILES ----------
+  // ---------- DELETED ----------
   for (const report of existingReports) {
     if (!seenPaths.has(report.path)) {
       collection.remove(report);
