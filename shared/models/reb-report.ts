@@ -3,6 +3,7 @@ import { OptimizationModel } from './optimization-model';
 import { TimeUnit } from './time-unit';
 import { ExpertAdvisor } from './expert-advisor';
 import { ImportStatus } from './import-status';
+import { RebParameter } from './reb-parameter';
 
 export interface RebReport {
   id: string;
@@ -23,4 +24,5 @@ export interface RebReport {
   shortTermUnit: TimeUnit;
   longTermDuration: number;
   longTermUnit: TimeUnit;
+  parameters: RebParameter[];
 }

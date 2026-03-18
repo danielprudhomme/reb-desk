@@ -3,9 +3,11 @@ import { basename } from 'node:path';
 import type { RebReport } from '@shared/models/reb-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OptimizationModel } from '@shared/models/optimization-model.ts';
+import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
+import { RebParameter } from '@shared/models/reb-parameter.ts';
 
 function extractValue(lines: string[], key: string): string | undefined {
   const idx = lines.findIndex((l) => l.trim() === key);
@@ -124,7 +126,54 @@ function addDuration(date: Date, duration: number, unit: TimeUnit): Date {
   return d;
 }
 
-export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'id' | 'mtime'>> {
+function parseOptimizationParameters(content: string, allowed: string[]): ParsedRebParameter[] {
+  const start = content.indexOf('==PARAMETRES OPTIMISATION==');
+  const end = content.indexOf('==FIN PARAMETRES OPTIMISATION==');
+
+  if (start === -1 || end === -1) return [];
+
+  const block = content.slice(start, end);
+  const lines = block.split(/\r?\n/);
+
+  const parameters: ParsedRebParameter[] = [];
+
+  for (const line of lines) {
+    const trimmed = line.trim();
+    if (!trimmed.includes('=')) continue;
+
+    const [name, raw] = trimmed.split('=');
+    const paramName = name.trim();
+
+    if (!allowed.includes(paramName)) continue;
+
+    const parts = raw.split('||');
+
+    const optimized = parts[4] === 'Y';
+
+    if (optimized) {
+      parameters.push({
+        name: paramName,
+        start: Number(parts[1]),
+        step: Number(parts[2]),
+        stop: Number(parts[3]),
+      });
+    } else {
+      parameters.push({
+        name: paramName,
+        value: Number(parts[0]),
+      });
+    }
+  }
+
+  return parameters;
+}
+
+export type ParsedRebReport = Omit<RebReport, 'id' | 'mtime' | 'parameters'>;
+export type ParsedRebParameter = Omit<RebParameter, 'id' | 'reportId'>;
+
+export async function parseRebFile(
+  filePath: string,
+): Promise<{ report: ParsedRebReport; parameters: ParsedRebParameter[] }> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
 
@@ -140,23 +189,29 @@ export async function parseRebFile(filePath: string): Promise<Omit<RebReport, 'i
     longTermDuration,
     longTermUnit,
   });
+  const expert = extractExpert(requiredValue(lines, 'NOM EXPERT :'));
+  const allowedParameters = rebParamsDefinitions.EXPERT_PARAMETERS[expert] ?? [];
+  const parameters = parseOptimizationParameters(content, allowedParameters);
 
   return {
-    path: filePath,
-    importStatus,
-    expert: extractExpert(requiredValue(lines, 'NOM EXPERT :')),
-    symbol: requiredValue(lines, 'SYMBOLE :'),
-    timeframe: requiredValue(lines, 'UNITE DE TEMPS :'),
-    leverage: parseInt(requiredValue(lines, 'SPREAD :')),
-    capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
-    currency: parseCurrency(requiredValue(lines, 'DEVISE :')),
-    model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
-    startDate,
-    lastValidatedDate,
-    shortTermCount: parseInt(requiredValue(lines, 'NOMBRE DE COURT TERME :')),
-    shortTermDuration: parseInt(requiredValue(lines, 'DUREE COURT TERME :')),
-    shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
-    longTermDuration,
-    longTermUnit,
+    report: {
+      path: filePath,
+      importStatus,
+      expert,
+      symbol: requiredValue(lines, 'SYMBOLE :'),
+      timeframe: requiredValue(lines, 'UNITE DE TEMPS :'),
+      leverage: parseInt(requiredValue(lines, 'SPREAD :')),
+      capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
+      currency: parseCurrency(requiredValue(lines, 'DEVISE :')),
+      model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
+      startDate,
+      lastValidatedDate,
+      shortTermCount: parseInt(requiredValue(lines, 'NOMBRE DE COURT TERME :')),
+      shortTermDuration: parseInt(requiredValue(lines, 'DUREE COURT TERME :')),
+      shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
+      longTermDuration,
+      longTermUnit,
+    },
+    parameters,
   };
 }
