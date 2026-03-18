@@ -1,11 +1,11 @@
 import { inject, Injectable } from '@angular/core';
-import { RebReport } from '@shared/models/reb-report';
 import { Observable } from 'rxjs';
 import { GET_REB_REPORTS } from './reb-report.graphql';
 import { HttpClient } from '@angular/common/http';
 import { GraphQlService } from '../core/graphql/graphql.service';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '@env';
+import { RebReport } from '../core/models/reb-report';
 
 @Injectable({ providedIn: 'root' })
 export class RebReportService extends GraphQlService {

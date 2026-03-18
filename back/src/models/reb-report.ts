@@ -1,9 +1,8 @@
-import { Currency } from './currency';
-import { OptimizationModel } from './optimization-model';
-import { TimeUnit } from './time-unit';
-import { ExpertAdvisor } from './expert-advisor';
-import { ImportStatus } from './import-status';
-import { RebParameter } from './reb-parameter';
+import { Currency } from '../../../shared/models/currency.ts';
+import { OptimizationModel } from '../../../shared/models/optimization-model.ts';
+import { TimeUnit } from '../../../shared/models/time-unit.ts';
+import { ExpertAdvisor } from '../../../shared/models/expert-advisor.ts';
+import { ImportStatus } from '../../../shared/models/import-status.ts';
 
 export interface RebReport {
   id: string;

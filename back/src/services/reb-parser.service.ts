@@ -1,13 +1,13 @@
 import { readFile } from 'node:fs/promises';
 import { basename } from 'node:path';
-import type { RebReport } from '@shared/models/reb-report.ts';
+import type { RebReport } from 'src/models/reb-report.ts';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
-import { RebParameter } from '@shared/models/reb-parameter.ts';
+import { RebParameter } from 'src/models/reb-parameter.ts';
 
 function extractValue(lines: string[], key: string): string | undefined {
   const idx = lines.findIndex((l) => l.trim() === key);

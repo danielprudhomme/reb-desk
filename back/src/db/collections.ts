@@ -1,6 +1,6 @@
-import { RebReport } from '@shared/models/reb-report.ts';
+import { RebReport } from 'src/models/reb-report.ts';
 import { db } from './database.ts';
-import { RebParameter } from '@shared/models/reb-parameter.ts';
+import { RebParameter } from 'src/models/reb-parameter.ts';
 
 function getOrCreateCollection<T extends object>(
   name: string,
