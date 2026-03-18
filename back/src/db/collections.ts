@@ -2,18 +2,23 @@ import { RebReport } from '@shared/models/reb-report.ts';
 import { db } from './database.ts';
 import { RebParameter } from '@shared/models/reb-parameter.ts';
 
-function getOrCreateCollection<T extends object>(name: string, indices: (keyof T)[] = []) {
+function getOrCreateCollection<T extends object>(
+  name: string,
+  indices: (keyof T)[] = [],
+  unique: (keyof T)[] = [],
+) {
   let collection = db.getCollection<T>(name);
 
   if (!collection) {
-    collection = db.addCollection<T>(name, { indices });
+    collection = db.addCollection<T>(name, { indices, unique });
   }
 
   return collection;
 }
 
 export const collections = {
-  RebReport: () => getOrCreateCollection<RebReport>('rebReports', ['id', 'symbol', 'expert']),
+  RebReport: () =>
+    getOrCreateCollection<RebReport>('rebReports', ['id', 'symbol', 'expert'], ['fingerprint']),
   RebParameter: () => getOrCreateCollection<RebParameter>('rebParameters', ['reportId', 'name']),
 
   CreateAll: () => {

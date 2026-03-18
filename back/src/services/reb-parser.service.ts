@@ -96,7 +96,7 @@ function computeImportStatus(params: {
   const target = targetDate.toISOString().split('T')[0];
 
   if (lastValidatedDate === target) {
-    return 'done';
+    return 'completed';
   }
 
   return 'ongoing';
@@ -168,7 +168,7 @@ function parseOptimizationParameters(content: string, allowed: string[]): Parsed
   return parameters;
 }
 
-export type ParsedRebReport = Omit<RebReport, 'id' | 'mtime' | 'parameters'>;
+export type ParsedRebReport = Omit<RebReport, 'id' | 'mtime' | 'fingerprint'>;
 export type ParsedRebParameter = Omit<RebParameter, 'id' | 'reportId'>;
 
 export async function parseRebFile(

@@ -1,1 +1,1 @@
-export type ImportStatus = 'new' | 'ongoing' | 'done';
+export type ImportStatus = 'new' | 'ongoing' | 'completed';

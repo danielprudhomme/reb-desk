@@ -26,7 +26,7 @@ export const typeDefs = /* GraphQL */ `
   enum ImportStatus {
     new
     ongoing
-    done
+    completed
   }
 
   type RebParameter {
