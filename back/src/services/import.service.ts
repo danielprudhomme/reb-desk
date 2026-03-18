@@ -1,4 +1,4 @@
-import { readdir, mkdir, access } from 'node:fs/promises';
+import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join } from 'node:path';
 import { ParsedRebParameter, ParsedRebReport, parseRebFile } from './reb-parser.service.ts';
@@ -43,16 +43,9 @@ export async function runImport(folderPath: string) {
   const results = {
     notCompleted: 0,
     inserted: 0,
-    updated: 0,
-    skipped: 0,
-    deleted: 0,
-    copied: 0,
+    alreadyImported: 0,
     errors: [] as string[],
   };
-
-  // const existingReports = collection.find();
-  // const existingMap = new Map(existingReports.map((r) => [r.path, r]));
-  // const seenPaths = new Set<string>();
 
   for (const filePath of files) {
     try {
@@ -69,14 +62,17 @@ export async function runImport(folderPath: string) {
       const existingByFingerprint = collection.findOne({ fingerprint });
 
       if (existingByFingerprint) {
-        results.skipped++;
+        results.alreadyImported++;
         continue;
       }
+
+      const newPath = await copyAndRenameRebFile(filePath, fingerprint);
 
       const reportId = crypto.randomUUID();
 
       collection.insert({
         ...parsedReport,
+        path: newPath,
         id: reportId,
         mtime: Date.now(),
         fingerprint,
@@ -91,63 +87,10 @@ export async function runImport(folderPath: string) {
       }
 
       results.inserted++;
-      continue;
-
-      // const fileName = basename(filePath);
-      // const destPath = join(IMPORTS_PATH, fileName);
-
-      // // 📁 Copy file to Imports folder
-      // await copyFile(filePath, destPath);
-      // results.copied++;
-
-      // const stats = await stat(destPath);
-      // const mtime = stats.mtimeMs;
-
-      // const existing = existingMap.get(destPath);
-      // seenPaths.add(destPath);
-
-      // // ---------- NEW ----------
-      // if (!existing) {
-      //   const report = await parseRebFile(destPath);
-
-      //   collection.insert({
-      //     ...report,
-      //     id: crypto.randomUUID(),
-      //     mtime,
-      //   });
-
-      //   results.inserted++;
-      //   continue;
-      // }
-
-      // // ---------- UNCHANGED ----------
-      // if (existing.mtime === mtime) {
-      //   results.skipped++;
-      //   continue;
-      // }
-
-      // // ---------- MODIFIED ----------
-      // const report = await parseRebFile(destPath);
-
-      // existing.mtime = mtime;
-      // existing.importStatus = report.importStatus;
-      // existing.lastValidatedDate = report.lastValidatedDate;
-
-      // collection.update(existing);
-
-      // results.updated++;
     } catch (err) {
       results.errors.push(`${filePath}: ${String(err)}`);
     }
   }
-
-  // ---------- DELETED ----------
-  // for (const report of existingReports) {
-  //   if (!seenPaths.has(report.path)) {
-  //     collection.remove(report);
-  //     results.deleted++;
-  //   }
-  // }
 
   return results;
 }
@@ -180,4 +123,28 @@ function buildFingerprintHash(report: ParsedRebReport, parameters: ParsedRebPara
   };
   const json = JSON.stringify(obj);
   return createHash('sha1').update(json).digest('hex');
+}
+
+function replaceValue(lines: string[], key: string, newValue: string) {
+  const idx = lines.findIndex((l) => l.trim() === key);
+  if (idx !== -1 && lines[idx + 1]) {
+    lines[idx + 1] = newValue;
+  }
+}
+
+async function copyAndRenameRebFile(filePath: string, fingerprint: string) {
+  const content = await readFile(filePath, 'utf-8');
+  const lines = content.split(/\r?\n/);
+
+  const newProjectName = fingerprint;
+
+  replaceValue(lines, 'NOM PROJET :', newProjectName);
+
+  const newContent = lines.join('\n');
+
+  const newPath = join(IMPORTS_PATH, `${fingerprint}.reb`);
+
+  await writeFile(newPath, newContent, 'utf-8');
+
+  return newPath;
 }
