@@ -33,57 +33,21 @@ async function findRebFiles(dir: string): Promise<string[]> {
   return results;
 }
 
-export async function runImport(folderPath: string) {
+async function processRebFiles(
+  folderPath: string,
+  processFile: (
+    parsedReport: ParsedRebReport,
+    parsedParameters: ParsedRebParameter[],
+    fingerprint: string,
+    filePath: string,
+  ) => Promise<'skipped' | 'inserted' | 'updated'>,
+) {
   await ensureDirectory(IMPORTS_PATH);
 
   const files = await findRebFiles(folderPath);
 
   const results = {
-    notCompleted: 0,
-    inserted: 0,
-    alreadyImported: 0,
-    errors: [] as string[],
-  };
-
-  for (const filePath of files) {
-    try {
-      const { report: parsedReport, parameters: parsedParameters } = await parseRebFile(filePath);
-
-      // Only import completed reports
-      if (parsedReport.importStatus !== 'completed') {
-        results.notCompleted++;
-        continue;
-      }
-
-      const fingerprint = buildFingerprintHash(parsedReport, parsedParameters);
-
-      const existingByFingerprint = collections.RebReport().findOne({ fingerprint });
-
-      if (existingByFingerprint) {
-        results.alreadyImported++;
-        continue;
-      }
-
-      const newPath = await copyAndRenameRebFile(filePath, fingerprint);
-
-      insert(parsedReport, parsedParameters, newPath, fingerprint);
-
-      results.inserted++;
-    } catch (err) {
-      results.errors.push(`${filePath}: ${String(err)}`);
-    }
-  }
-
-  return results;
-}
-
-export async function runRebuild() {
-  await ensureDirectory(IMPORTS_PATH);
-
-  const files = await findRebFiles(IMPORTS_PATH);
-
-  const results = {
-    notCompleted: 0,
+    skipped: 0,
     inserted: 0,
     updated: 0,
     errors: [] as string[],
@@ -95,39 +59,83 @@ export async function runRebuild() {
 
       // Only import completed reports
       if (parsedReport.importStatus !== 'completed') {
-        results.notCompleted++;
+        results.skipped++;
         continue;
       }
 
       const fingerprint = buildFingerprintHash(parsedReport, parsedParameters);
 
-      const existingByPath = collections.RebReport().findOne({ path: filePath });
-
-      if (!existingByPath) {
-        insert(parsedReport, parsedParameters, filePath, fingerprint);
-        results.inserted++;
-        continue;
-      }
-
-      collections.RebReport().update({ ...existingByPath, ...parsedReport, fingerprint });
-
-      const paramCollection = collections.RebParameter();
-
-      paramCollection
-        .find({ reportId: existingByPath.id })
-        .forEach((p) => paramCollection.remove(p));
-
-      for (const param of parsedParameters) {
-        paramCollection.insert({
-          ...param,
-          id: crypto.randomUUID(),
-          reportId: existingByPath.id,
-        });
+      switch (await processFile(parsedReport, parsedParameters, fingerprint, filePath)) {
+        case 'updated':
+          results.updated++;
+          break;
+        case 'inserted':
+          results.inserted++;
+          break;
+        case 'skipped':
+          results.skipped++;
+          break;
       }
     } catch (err) {
       results.errors.push(`${filePath}: ${String(err)}`);
     }
   }
+
+  return results;
+}
+
+export async function runImport(folderPath: string) {
+  const importFile = async (
+    parsedReport: ParsedRebReport,
+    parsedParameters: ParsedRebParameter[],
+    fingerprint: string,
+    filePath: string,
+  ): Promise<'skipped' | 'inserted' | 'updated'> => {
+    const existingByFingerprint = collections.RebReport().findOne({ fingerprint });
+
+    if (existingByFingerprint) {
+      return 'skipped';
+    }
+
+    const newPath = await copyAndRenameRebFile(filePath, fingerprint);
+    insert(parsedReport, parsedParameters, newPath, fingerprint);
+    return 'inserted';
+  };
+
+  await processRebFiles(folderPath, importFile);
+}
+
+export async function runRebuild() {
+  const upsertFile = async (
+    parsedReport: ParsedRebReport,
+    parsedParameters: ParsedRebParameter[],
+    fingerprint: string,
+    filePath: string,
+  ): Promise<'skipped' | 'inserted' | 'updated'> => {
+    const existingByPath = collections.RebReport().findOne({ path: filePath });
+
+    if (!existingByPath) {
+      insert(parsedReport, parsedParameters, filePath, fingerprint);
+      return 'inserted';
+    }
+
+    collections.RebReport().update({ ...existingByPath, ...parsedReport, fingerprint });
+
+    const paramCollection = collections.RebParameter();
+    paramCollection.find({ reportId: existingByPath.id }).forEach((p) => paramCollection.remove(p));
+
+    for (const param of parsedParameters) {
+      paramCollection.insert({
+        ...param,
+        id: crypto.randomUUID(),
+        reportId: existingByPath.id,
+      });
+    }
+
+    return 'updated';
+  };
+
+  await processRebFiles(IMPORTS_PATH, upsertFile);
 }
 
 function insert(
