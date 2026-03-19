@@ -1,7 +1,7 @@
 import { createYoga } from 'graphql-yoga';
 import express from 'express';
 import cors from 'cors';
-import { importRouter } from './routes/import.route.ts';
+import { reportRouter } from './routes/report.route.ts';
 import { initDB } from './db/init.ts';
 import { schema } from './graphql/schema.ts';
 import { APP_CONFIG } from './config.ts';
@@ -16,7 +16,7 @@ async function start() {
   app.use(cors({ origin: APP_CONFIG.frontUrl }));
   app.use(express.json());
 
-  app.use(importRouter);
+  app.use('/report', reportRouter);
 
   app.use('/graphql', yoga);
 

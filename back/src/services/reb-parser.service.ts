@@ -137,30 +137,27 @@ function parseOptimizationParameters(content: string, allowed: string[]): Parsed
 
   const parameters: ParsedRebParameter[] = [];
 
-  for (const line of lines) {
+  for (const line of lines.filter((line) => line.includes('='))) {
     const trimmed = line.trim();
-    if (!trimmed.includes('=')) continue;
+    const parts = trimmed.split('=');
+    const name = parts[0].trim();
 
-    const [name, raw] = trimmed.split('=');
-    const paramName = name.trim();
+    if (!allowed.includes(name)) continue;
 
-    if (!allowed.includes(paramName)) continue;
-
-    const parts = raw.split('||');
-
-    const optimized = parts[4] === 'Y';
+    const values = parts[1].split('||');
+    const optimized = values[4] === 'Y';
 
     if (optimized) {
       parameters.push({
-        name: paramName,
-        start: Number(parts[1]),
-        step: Number(parts[2]),
-        stop: Number(parts[3]),
+        name,
+        start: parseNumericValue(values[1]),
+        step: parseNumericValue(values[2]),
+        stop: parseNumericValue(values[3]),
       });
     } else {
       parameters.push({
-        name: paramName,
-        value: Number(parts[0]),
+        name,
+        value: parseNumericValue(values[0]),
       });
     }
   }
@@ -214,4 +211,19 @@ export async function parseRebFile(
     },
     parameters,
   };
+}
+
+function parseNumericValue(raw: string): number {
+  const v = raw.trim().toLowerCase();
+
+  if (v === 'true') return 1;
+  if (v === 'false') return 0;
+
+  const num = parseFloat(v);
+
+  if (Number.isNaN(num)) {
+    throw new Error(`Invalid numeric value: ${raw}`);
+  }
+
+  return num;
 }

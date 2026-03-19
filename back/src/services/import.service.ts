@@ -37,8 +37,6 @@ export async function runImport(folderPath: string) {
   await ensureDirectory(IMPORTS_PATH);
 
   const files = await findRebFiles(folderPath);
-  const collection = collections.RebReport();
-  const paramCollection = collections.RebParameter();
 
   const results = {
     notCompleted: 0,
@@ -59,7 +57,7 @@ export async function runImport(folderPath: string) {
 
       const fingerprint = buildFingerprintHash(parsedReport, parsedParameters);
 
-      const existingByFingerprint = collection.findOne({ fingerprint });
+      const existingByFingerprint = collections.RebReport().findOne({ fingerprint });
 
       if (existingByFingerprint) {
         results.alreadyImported++;
@@ -68,23 +66,7 @@ export async function runImport(folderPath: string) {
 
       const newPath = await copyAndRenameRebFile(filePath, fingerprint);
 
-      const reportId = crypto.randomUUID();
-
-      collection.insert({
-        ...parsedReport,
-        path: newPath,
-        id: reportId,
-        mtime: Date.now(),
-        fingerprint,
-      });
-
-      for (const param of parsedParameters) {
-        paramCollection.insert({
-          ...param,
-          id: crypto.randomUUID(),
-          reportId,
-        });
-      }
+      insert(parsedReport, parsedParameters, newPath, fingerprint);
 
       results.inserted++;
     } catch (err) {
@@ -93,6 +75,84 @@ export async function runImport(folderPath: string) {
   }
 
   return results;
+}
+
+export async function runRebuild() {
+  await ensureDirectory(IMPORTS_PATH);
+
+  const files = await findRebFiles(IMPORTS_PATH);
+
+  const results = {
+    notCompleted: 0,
+    inserted: 0,
+    updated: 0,
+    errors: [] as string[],
+  };
+
+  for (const filePath of files) {
+    try {
+      const { report: parsedReport, parameters: parsedParameters } = await parseRebFile(filePath);
+
+      // Only import completed reports
+      if (parsedReport.importStatus !== 'completed') {
+        results.notCompleted++;
+        continue;
+      }
+
+      const fingerprint = buildFingerprintHash(parsedReport, parsedParameters);
+
+      const existingByPath = collections.RebReport().findOne({ path: filePath });
+
+      if (!existingByPath) {
+        insert(parsedReport, parsedParameters, filePath, fingerprint);
+        results.inserted++;
+        continue;
+      }
+
+      collections.RebReport().update({ ...existingByPath, ...parsedReport, fingerprint });
+
+      const paramCollection = collections.RebParameter();
+
+      paramCollection
+        .find({ reportId: existingByPath.id })
+        .forEach((p) => paramCollection.remove(p));
+
+      for (const param of parsedParameters) {
+        paramCollection.insert({
+          ...param,
+          id: crypto.randomUUID(),
+          reportId: existingByPath.id,
+        });
+      }
+    } catch (err) {
+      results.errors.push(`${filePath}: ${String(err)}`);
+    }
+  }
+}
+
+function insert(
+  parsedReport: ParsedRebReport,
+  parsedParameters: ParsedRebParameter[],
+  newPath: string,
+  fingerprint: string,
+) {
+  const reportId = crypto.randomUUID();
+
+  collections.RebReport().insert({
+    ...parsedReport,
+    path: newPath,
+    id: reportId,
+    mtime: Date.now(),
+    fingerprint,
+  });
+
+  for (const param of parsedParameters) {
+    collections.RebParameter().insert({
+      ...param,
+      id: crypto.randomUUID(),
+      reportId,
+    });
+  }
 }
 
 function buildFingerprintHash(report: ParsedRebReport, parameters: ParsedRebParameter[]): string {

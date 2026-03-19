@@ -13,11 +13,11 @@ export class RebReportService extends GraphQlService {
 
   reports = toSignal(this.query$<RebReport[]>(GET_REB_REPORTS, 'rebReports'));
 
-  sync(): Observable<unknown> {
-    return this.httpClient.get(`${environment.apiUrl}/sync`);
+  import(folderPath: string): Observable<unknown> {
+    return this.httpClient.post(`${environment.apiUrl}/report/import`, { folderPath });
   }
 
-  import(folderPath: string): Observable<unknown> {
-    return this.httpClient.post(`${environment.apiUrl}/import`, { folderPath });
+  rebuild(): Observable<unknown> {
+    return this.httpClient.post(`${environment.apiUrl}/report/rebuild`, {});
   }
 }
