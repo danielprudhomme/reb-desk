@@ -1,11 +1,13 @@
 import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join } from 'node:path';
-import { ParsedRebParameter, ParsedRebReport, parseRebFile } from './reb-parser.service.ts';
+import { parseRebFile } from './reb-parser.service.ts';
 import crypto from 'node:crypto';
 import { IMPORTS_PATH } from 'src/config.ts';
 import { collections } from 'src/db/collections.ts';
 import { createHash } from 'node:crypto';
+import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
+import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
 
 async function ensureDirectory(dir: string) {
   try {
