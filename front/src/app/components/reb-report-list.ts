@@ -1,10 +1,11 @@
 import { Component, inject } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { RebReportService } from '../services/reb-report.service';
+import { MatButtonModule } from '@angular/material/button';
 
 @Component({
   selector: 'app-reb-report-list',
-  imports: [MatTableModule],
+  imports: [MatButtonModule, MatTableModule],
   template: `
     @if (reports(); as reports) {
       <table mat-table [dataSource]="reports" class="mat-elevation-z8">
@@ -42,6 +43,13 @@ import { RebReportService } from '../services/reb-report.service';
           </td>
         </ng-container>
 
+        <ng-container matColumnDef="actions">
+          <th mat-header-cell *matHeaderCellDef></th>
+          <td mat-cell *matCellDef="let report">
+            <button matButton="filled" (click)="analyze(report.id)">Analyze</button>
+          </td>
+        </ng-container>
+
         <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
@@ -49,7 +57,8 @@ import { RebReportService } from '../services/reb-report.service';
   `,
 })
 export class RebReportList {
-  reports = inject(RebReportService).reports;
+  private rebReportService = inject(RebReportService);
+  reports = this.rebReportService.reports;
   displayedColumns: string[] = [
     'expert',
     'symbol',
@@ -57,5 +66,10 @@ export class RebReportList {
     'startDate',
     'shortTerm',
     'longTerm',
+    'actions',
   ];
+
+  analyze(reportId: string) {
+    this.rebReportService.analyze(reportId).subscribe();
+  }
 }

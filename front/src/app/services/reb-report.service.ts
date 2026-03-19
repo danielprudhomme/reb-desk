@@ -20,4 +20,8 @@ export class RebReportService extends GraphQlService {
   rebuild(): Observable<unknown> {
     return this.httpClient.post(`${environment.apiUrl}/report/rebuild`, {});
   }
+
+  analyze(reportId: string): Observable<unknown> {
+    return this.httpClient.get(`${environment.apiUrl}/report/${reportId}/analyze`);
+  }
 }
