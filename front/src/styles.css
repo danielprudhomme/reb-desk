@@ -9,3 +9,52 @@ body {
   margin: 0;
   padding: 0;
 }
+
+body {
+  background: linear-gradient(-45deg, #020617, #020617, #0b1120, #0f172a, #020617);
+  background-size: 400% 400%;
+  animation: gradientMove 20s ease infinite;
+  min-height: 100vh;
+  position: relative;
+  color: rgba(255, 255, 255, 0.87);
+}
+
+/* subtle market glow accents */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+
+  background:
+    radial-gradient(circle at 15% 30%, rgba(0, 255, 163, 0.1), transparent 40%),
+    radial-gradient(circle at 85% 70%, rgba(255, 59, 48, 0.1), transparent 40%),
+    radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.08), transparent 50%);
+
+  pointer-events: none;
+}
+
+/* subtle grid (like chart background) */
+body::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+
+  background-image:
+    linear-gradient(rgba(255, 255, 255, 0.04) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.04) 1px, transparent 1px);
+
+  background-size: 60px 60px;
+  pointer-events: none;
+}
+
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}

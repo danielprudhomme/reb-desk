@@ -5,7 +5,7 @@ import { Header } from './header';
 @Component({
   selector: 'app-layout',
   template: `
-    <div class="bg-gray-900 text-white h-full p-6 flex flex-col gap-4">
+    <div class="h-full p-6 flex flex-col gap-4">
       <app-header />
       <router-outlet />
     </div>
