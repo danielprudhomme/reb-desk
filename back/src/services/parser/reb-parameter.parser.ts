@@ -1,14 +1,8 @@
 import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
-import { parseParameterValue } from './parser-helper.ts';
+import { getLinesSection, parseParameterValue } from './parser-helper.ts';
 
 export function parseParameters(content: string, allowed: string[]): ParsedRebParameter[] {
-  const start = content.indexOf('==PARAMETRES OPTIMISATION==');
-  const end = content.indexOf('==FIN PARAMETRES OPTIMISATION==');
-
-  if (start === -1 || end === -1) return [];
-
-  const block = content.slice(start, end);
-  const lines = block.split(/\r?\n/);
+  const lines = getLinesSection(content, 'PARAMETRES OPTIMISATION');
 
   const parameters: ParsedRebParameter[] = [];
 

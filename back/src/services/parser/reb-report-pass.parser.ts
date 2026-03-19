@@ -1,13 +1,12 @@
 import { readFile } from 'node:fs/promises';
-import { extractExpert, parseParameterValue } from './parser-helper.ts';
+import { extractExpert, getLinesSection, parseParameterValue } from './parser-helper.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import { parseParameters } from './reb-parameter.parser.ts';
 import { BacktestPassParameter } from 'src/models/backtest-pass-parameter.ts';
 import { BacktestPass } from 'src/models/backtest-pass.ts';
 import { BacktestPassResult } from 'src/models/backtest-pass-result.ts';
 
-export async function parseRebFileForPass(filePath: string): Promise<boolean> {
-  console.log(filePath);
+export async function parseRebFileForPass(filePath: string): Promise<BacktestPass[]> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
 
@@ -16,55 +15,25 @@ export async function parseRebFileForPass(filePath: string): Promise<boolean> {
   const parameters = parseParameters(content, allowedParameters);
   const fixedParameters = parameters.filter((x) => !!x.value);
 
-  const passesId = parsePasses(content);
+  const passIds = getLinesSection(content, 'SENS DES PASSAGES').map((id) => +id);
   const passParameters = parsePassParameters(content);
-  const passShortTermResults = parseShortTermResults(content);
-  const passLongTermResults = parseLongTermResults(content);
+  const passShortTermResults = parseResults(content, 'RESULTATS COURT TERME');
+  const passLongTermResults = parseResults(content, 'RESULTATS LONG TERME');
 
-  if (passesId.length !== passParameters.length) {
-    throw new Error('Passes and parameters length do not match');
-  }
-
-  const passes: BacktestPass[] = passesId.map((passId, index) => {
+  const passes: BacktestPass[] = passIds.map((passId, index) => {
     return {
-      id: +passId,
+      id: passId,
       parameters: [...fixedParameters, ...passParameters[index]],
       shortTermResults: passShortTermResults[index],
       longTermResults: passLongTermResults[index],
     };
   });
 
-  console.log('ppp', passes[0].longTermResults[0]);
-
-  return true;
-}
-
-export function parsePasses(content: string): string[] {
-  const start = content.indexOf('==SENS DES PASSAGES==');
-  const end = content.indexOf('==FIN SENS DES PASSAGES==');
-
-  if (start === -1 || end === -1) return [];
-
-  const block = content.slice(start + '==SENS DES PASSAGES=='.length, end);
-  const passesId = block
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line);
-
-  return passesId;
+  return passes;
 }
 
 function parsePassParameters(content: string): BacktestPassParameter[][] {
-  const start = content.indexOf('==PARAMETRES IMPORT==');
-  const end = content.indexOf('==FIN PARAMETRES IMPORT==');
-
-  if (start === -1 || end === -1) return [];
-
-  const block = content.slice(start + '==PARAMETRES IMPORT=='.length, end);
-  const lines = block
-    .split(/\r?\n/)
-    .map((line) => line.trim())
-    .filter((line) => line);
+  const lines = getLinesSection(content, 'PARAMETRES IMPORT');
 
   return lines.map((line) => {
     const parts = line
@@ -84,26 +53,8 @@ function parsePassParameters(content: string): BacktestPassParameter[][] {
   });
 }
 
-function parseShortTermResults(content: string): BacktestPassResult[][] {
-  return parseResults(content, '==RESULTATS COURT TERME==', '==FIN RESULTATS COURT TERME==');
-}
-
-function parseLongTermResults(content: string): BacktestPassResult[][] {
-  return parseResults(content, '==RESULTATS LONG TERME==', '==FIN RESULTATS LONG TERME==');
-}
-
-function parseResults(content: string, startStr: string, endStr: string): BacktestPassResult[][] {
-  const start = content.indexOf(startStr);
-  const end = content.indexOf(endStr);
-
-  if (start === -1 || end === -1) return [];
-
-  const block = content.slice(start + '==RESULTATS COURT TERME=='.length, end);
-
-  const lines = block
-    .split(/\r?\n/)
-    .map((l) => l.trim())
-    .filter((l) => l);
+function parseResults(content: string, section: string): BacktestPassResult[][] {
+  const lines = getLinesSection(content, section);
 
   return lines.map((line) => {
     const rawValues = line

@@ -52,3 +52,18 @@ export function parseParameterValue(raw: string): number {
 
   return num;
 }
+
+export function getLinesSection(content: string, section: string): string[] {
+  const start = content.indexOf(`==${section}==`);
+  const end = content.indexOf(`==FIN ${section}==`);
+
+  if (start === -1 || end === -1) return [];
+
+  const block = content.slice(start + `==${section}==`.length, end);
+  const lines = block
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .filter((line) => line);
+
+  return lines;
+}
