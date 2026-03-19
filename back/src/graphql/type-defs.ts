@@ -43,7 +43,6 @@ export const typeDefs = /* GraphQL */ `
   type RebReport {
     id: ID!
     path: String!
-    mtime: Float!
     importStatus: ImportStatus!
 
     expert: ExpertAdvisor!

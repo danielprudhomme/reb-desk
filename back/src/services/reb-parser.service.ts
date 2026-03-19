@@ -165,7 +165,7 @@ function parseOptimizationParameters(content: string, allowed: string[]): Parsed
   return parameters;
 }
 
-export type ParsedRebReport = Omit<RebReport, 'id' | 'mtime' | 'fingerprint'>;
+export type ParsedRebReport = Omit<RebReport, 'id' | 'fingerprint'>;
 export type ParsedRebParameter = Omit<RebParameter, 'id' | 'reportId'>;
 
 export async function parseRebFile(

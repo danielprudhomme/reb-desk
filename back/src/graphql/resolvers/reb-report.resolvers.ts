@@ -16,7 +16,7 @@ export const rebReportResolvers = {
 
   Mutation: {
     createRebReport: (_: unknown, { input }: { input: Omit<RebReport, 'id'> }) => {
-      const report: RebReport = { ...input, id: randomUUID(), mtime: Date.now() };
+      const report: RebReport = { ...input, id: randomUUID() };
       return collections.RebReport().insert(report);
     },
 

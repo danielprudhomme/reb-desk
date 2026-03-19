@@ -150,7 +150,6 @@ function insert(
     ...parsedReport,
     path: newPath,
     id: reportId,
-    mtime: Date.now(),
     fingerprint,
   });
 

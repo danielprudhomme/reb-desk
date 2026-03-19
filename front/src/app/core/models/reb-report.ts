@@ -7,7 +7,6 @@ import { RebParameter } from './reb-parameter';
 
 export interface RebReport {
   id: string;
-  mtime: number;
   fingerprint: string;
   importStatus: ImportStatus;
   path: string;

@@ -6,7 +6,6 @@ import { ImportStatus } from '../../../shared/models/import-status.ts';
 
 export interface RebReport {
   id: string;
-  mtime: number;
   fingerprint: string;
   importStatus: ImportStatus;
   path: string;
