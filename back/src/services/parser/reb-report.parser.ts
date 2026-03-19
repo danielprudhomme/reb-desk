@@ -1,26 +1,13 @@
 import { readFile } from 'node:fs/promises';
-import { basename } from 'node:path';
 import type { Currency } from '@shared/models/currency.ts';
 import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
-import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
 import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
 import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
-
-function extractValue(lines: string[], key: string): string | undefined {
-  const idx = lines.findIndex((l) => l.trim() === key);
-  return idx === -1 ? undefined : lines[idx + 1].trim();
-}
-
-function requiredValue(lines: string[], key: string): string {
-  const value = extractValue(lines, key);
-  if (!value) {
-    throw new Error(`Missing value for ${key}`);
-  }
-  return value;
-}
+import { parseParameters } from './reb-parameter.parser.ts';
+import { extractExpert, extractValue, requiredValue } from './parser-helper.ts';
 
 function parseTimeUnit(value: string): TimeUnit {
   const v = value.toLowerCase();
@@ -41,29 +28,6 @@ function parseModel(value: string): OptimizationModel {
     return 'openingPriceOnly';
   }
   throw new Error(`Unknown model: ${value}`);
-}
-
-function extractExpert(nomExpert: string): ExpertAdvisor {
-  const file = basename(nomExpert)
-    .replace(/\.ex5$/i, '')
-    .replace(/\.ex4$/i, '');
-
-  const map: Record<string, ExpertAdvisor> = {
-    'REB Candle-Suite': 'candleSuite',
-    'REB EMA-BB': 'emaBb',
-    'REB Ichimoku-Bot': 'ichimoku',
-    'REB RSI-Break': 'rsiBreak',
-    'REB Strategy Creator': 'strategyCreator',
-    'REB AutoBot': 'autoBot',
-  };
-
-  const expert = map[file];
-
-  if (!expert) {
-    throw new Error(`Unknown expert advisor: ${file}`);
-  }
-
-  return expert;
 }
 
 function parseDate(value: string): string {
@@ -126,45 +90,6 @@ function addDuration(date: Date, duration: number, unit: TimeUnit): Date {
   return d;
 }
 
-function parseOptimizationParameters(content: string, allowed: string[]): ParsedRebParameter[] {
-  const start = content.indexOf('==PARAMETRES OPTIMISATION==');
-  const end = content.indexOf('==FIN PARAMETRES OPTIMISATION==');
-
-  if (start === -1 || end === -1) return [];
-
-  const block = content.slice(start, end);
-  const lines = block.split(/\r?\n/);
-
-  const parameters: ParsedRebParameter[] = [];
-
-  for (const line of lines.filter((line) => line.includes('='))) {
-    const trimmed = line.trim();
-    const parts = trimmed.split('=');
-    const name = parts[0].trim();
-
-    if (!allowed.includes(name)) continue;
-
-    const values = parts[1].split('||');
-    const optimized = values[4] === 'Y';
-
-    if (optimized) {
-      parameters.push({
-        name,
-        start: parseNumericValue(values[1]),
-        step: parseNumericValue(values[2]),
-        stop: parseNumericValue(values[3]),
-      });
-    } else {
-      parameters.push({
-        name,
-        value: parseNumericValue(values[0]),
-      });
-    }
-  }
-
-  return parameters;
-}
-
 export async function parseRebFile(
   filePath: string,
 ): Promise<{ report: ParsedRebReport; parameters: ParsedRebParameter[] }> {
@@ -183,9 +108,9 @@ export async function parseRebFile(
     longTermDuration,
     longTermUnit,
   });
-  const expert = extractExpert(requiredValue(lines, 'NOM EXPERT :'));
+  const expert = extractExpert(lines);
   const allowedParameters = rebParamsDefinitions.EXPERT_PARAMETERS[expert] ?? [];
-  const parameters = parseOptimizationParameters(content, allowedParameters);
+  const parameters = parseParameters(content, allowedParameters);
 
   return {
     report: {
@@ -208,19 +133,4 @@ export async function parseRebFile(
     },
     parameters,
   };
-}
-
-function parseNumericValue(raw: string): number {
-  const v = raw.trim().toLowerCase();
-
-  if (v === 'true') return 1;
-  if (v === 'false') return 0;
-
-  const num = parseFloat(v);
-
-  if (Number.isNaN(num)) {
-    throw new Error(`Invalid numeric value: ${raw}`);
-  }
-
-  return num;
 }

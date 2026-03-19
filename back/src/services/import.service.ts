@@ -1,7 +1,7 @@
 import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join } from 'node:path';
-import { parseRebFile } from './reb-parser.service.ts';
+import { parseRebFile } from './parser/reb-report.parser.ts';
 import crypto from 'node:crypto';
 import { IMPORTS_PATH } from 'src/config.ts';
 import { collections } from 'src/db/collections.ts';

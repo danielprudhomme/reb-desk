@@ -3,7 +3,7 @@
 // import { BacktestThreshold } from '@shared/models/backtest-threshold.js';
 
 import { collections } from 'src/db/collections.ts';
-import { parseRebFile } from './reb-parser.service.ts';
+import { parseRebFileForPass } from './parser/reb-report-pass.parser.ts';
 
 export async function runAnalysis(reportId: string) {
   const report = collections.RebReport().findOne({ id: reportId });
@@ -12,7 +12,7 @@ export async function runAnalysis(reportId: string) {
     throw new Error(`Report not found for id ${reportId}`);
   }
 
-  const pp = await parseRebFile(report.path);
+  const pp = await parseRebFileForPass(report.path);
 
   console.log('report', pp);
 
