@@ -1,5 +1,6 @@
 // import definitions from '@shared/constants/backtest-threshold-definitions.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.js';
+import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.js';
 import { collections } from 'src/db/collections.ts';
 import { parseRebFileForPass } from './parser/reb-report-pass.parser.ts';
 import { BacktestPass } from 'src/models/backtest-pass.ts';
@@ -33,7 +34,7 @@ function compare(value: number, operator: '>' | '<', threshold: number): boolean
 }
 
 function getValue(
-  type: BacktestThreshold['type'],
+  type: BacktestThresholdType,
   passResult: BacktestPassResult,
   capital: number,
 ): number {
