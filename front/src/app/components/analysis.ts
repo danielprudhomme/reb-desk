@@ -17,7 +17,7 @@ import { DisplayPipe } from '../core/models/display-pipe';
       <div class="h-full overflow-auto">
         <table mat-table [dataSource]="analysis">
           <ng-container matColumnDef="id">
-            <th mat-header-cell *matHeaderCellDef>Pass</th>
+            <th mat-header-cell *matHeaderCellDef>Number</th>
             <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
           </ng-container>
 
@@ -67,11 +67,16 @@ import { DisplayPipe } from '../core/models/display-pipe';
 
               <td mat-cell *matCellDef="let pass">
                 @if (pass.checksMap[thresholdType]; as check) {
-                  <div class="text-blue-300">
-                    {{ formatValue(check.worstValue, $any(displayConfig)[thresholdType]?.pipe) }}
-                  </div>
+                  <div [class.text-green-300]="check.ok" [class.text-red-300]="!check.ok">
+                    <div>
+                      {{ formatValue(check.worstValue, $any(displayConfig)[thresholdType]?.pipe) }}
+                    </div>
 
-                  <div class="text-xs opacity-70">{{ check.rate | number: '1.0-0' }}%</div>
+                    <div class="text-xs opacity-70">
+                      {{ check.rate | number: '1.0-0' }}% /
+                      {{ check.requiredRate | number: '1.0-0' }}%
+                    </div>
+                  </div>
                 }
               </td>
             </ng-container>
