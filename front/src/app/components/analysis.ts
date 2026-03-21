@@ -34,12 +34,12 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
         matSortDirection="desc"
         matSortDisableClear
       >
-        <ng-container matColumnDef="id">
+        <ng-container matColumnDef="id" [sticky]="true">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Number</th>
           <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
         </ng-container>
 
-        <ng-container matColumnDef="score">
+        <ng-container matColumnDef="score" [sticky]="true">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Score</th>
           <td mat-cell *matCellDef="let pass">
             <span
@@ -126,14 +126,28 @@ export class Analysis implements AfterViewInit {
 
       this.dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
 
+      this.dataSource.sortingDataAccessor = (item, property) => {
+        if (property === 'id') return item.id;
+        if (property === 'score') return item.score;
+        if (property === 'ok') return item.ok ? 1 : 0;
+        if (item.parametersMap?.[property]) return item.parametersMap[property].value;
+
+        if (item.checksMap?.[property]) {
+          const check = item.checksMap[property];
+          return check.type.includes('longTerm')
+            ? check.worstValue
+            : check.ok
+              ? 1000 + check.rate
+              : check.rate;
+        }
+
+        return 0;
+      };
+
       if (analysis.length) {
         const firstPass = analysis[0];
-
-        // 👇 paramètres dynamiques (non fixed)
         this.parameterColumns = firstPass.parameters.filter((p) => !p.fixed).map((p) => p.name);
-
         this.checkColumns = firstPass.checks.map((c) => c.type);
-
         this.displayedColumns = ['id', 'score', ...this.parameterColumns, ...this.checkColumns];
       }
 
