@@ -7,7 +7,7 @@ import { parseRebFileForPass } from './parser/reb-report-pass.parser.ts';
 import { BacktestPass } from 'src/models/backtest-pass.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 
-export async function runAnalysis(reportId: string) {
+export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysis[]> {
   const report = collections.RebReport().findOne({ id: reportId });
 
   if (!report) {
@@ -17,12 +17,7 @@ export async function runAnalysis(reportId: string) {
   const passes = await parseRebFileForPass(report.path);
   const analysis = analyzePasses(passes, thresholds, report.capital);
 
-  const validPasses = analysis
-    .filter((a) => a.ok)
-    .map((a) => passes.find((p) => p.id === a.passId)!);
-
-  console.log(`Valid passes: ${validPasses.length}`);
-  console.log(`analysis: ${JSON.stringify(analysis[0])}`);
+  return analysis;
 }
 
 export function analyzePasses(
@@ -32,14 +27,8 @@ export function analyzePasses(
 ): BacktestPassAnalysis[] {
   return passes.map((pass) => {
     const checks = thresholds.map((threshold) => checkThreshold(pass, threshold, capital));
-
     const ok = checks.every((c) => c.ok);
-
-    return {
-      passId: pass.id,
-      ok,
-      checks,
-    };
+    return { ...pass, ok, checks };
   });
 }
 

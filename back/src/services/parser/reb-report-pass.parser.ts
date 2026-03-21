@@ -13,7 +13,9 @@ export async function parseRebFileForPass(filePath: string): Promise<BacktestPas
   const expert = extractExpert(lines);
   const allowedParameters = rebParamsDefinitions.EXPERT_PARAMETERS[expert] ?? [];
   const parameters = parseParameters(content, allowedParameters);
-  const fixedParameters = parameters.filter((x) => !!x.value);
+  const fixedParameters = parameters
+    .filter((x) => !!x.value)
+    .map((x) => ({ name: x.name, value: x.value!, fixed: true }));
 
   const passIds = getLinesSection(content, 'SENS DES PASSAGES').map((id) => +id);
   const passParameters = parsePassParameters(content);
@@ -45,7 +47,7 @@ function parsePassParameters(content: string): BacktestPassParameter[][] {
       .map((part) => {
         const match = part.match(/^::(\w+)=(.+)$/);
         if (match) {
-          return { name: match[1], value: parseParameterValue(match[2]) };
+          return { name: match[1], value: parseParameterValue(match[2]), fixed: false };
         }
         return null;
       })

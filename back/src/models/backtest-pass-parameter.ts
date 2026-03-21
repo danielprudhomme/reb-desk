@@ -1,4 +1,5 @@
 export interface BacktestPassParameter {
   name: string;
-  value?: number;
+  value: number;
+  fixed: boolean;
 }
