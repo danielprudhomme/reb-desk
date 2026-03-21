@@ -57,3 +57,38 @@ body::after {
     background-position: 0% 50%;
   }
 }
+
+/* Layout */
+router-outlet + * {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+}
+
+/* Scrollbars */
+/* works on WebKit browsers */
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: rgba(120, 120, 120, 0.4) transparent;
+  }
+
+  *::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+
+  *::-webkit-scrollbar-thumb {
+    background: rgba(120, 120, 120, 0.35);
+    border-radius: 999px;
+  }
+
+  *::-webkit-scrollbar-thumb:hover {
+    background: rgba(120, 120, 120, 0.6);
+  }
+
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
