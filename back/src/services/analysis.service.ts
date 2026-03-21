@@ -126,41 +126,41 @@ const thresholds: BacktestThreshold[] = [
     operator: '>',
     value: 0,
     passRate: 100,
-    weight: 2, // important
+    weight: 3,
   },
   {
     type: 'shortTermResultPercent',
     operator: '>',
     value: 0,
     passRate: 80,
-    weight: 2,
+    weight: 1,
   },
   {
     type: 'longTermGainLossRatio',
     operator: '>',
     value: 1,
     passRate: 100,
-    weight: 2,
+    weight: 3,
   },
   {
     type: 'shortTermTrades',
     operator: '>',
     value: 1,
     passRate: 100,
-    weight: 0.5, // peu important
+    weight: 0.5,
   },
   {
     type: 'shortTermDrawdownPercent',
     operator: '<',
     value: 15,
     passRate: 80,
-    weight: 3, // 🔥 très important
+    weight: 1,
   },
   {
     type: 'longTermDrawdownAmount',
     operator: '<',
     value: 550,
     passRate: 100,
-    weight: 3, // 🔥 très important
+    weight: 1,
   },
 ];
