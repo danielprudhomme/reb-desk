@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, OnInit, viewChild } from '@angular/core';
+import { AfterViewInit, ChangeDetectorRef, Component, inject, viewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { RebReportService } from '../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -26,7 +26,14 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
   imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule, MatTooltipModule, MatSortModule],
   template: `
     <div class="h-full overflow-auto">
-      <table mat-table [dataSource]="dataSource" matSort>
+      <table
+        mat-table
+        [dataSource]="dataSource"
+        matSort
+        matSortActive="score"
+        matSortDirection="desc"
+        matSortDisableClear
+      >
         <ng-container matColumnDef="id">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Number</th>
           <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
@@ -97,7 +104,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
     </div>
   `,
 })
-export class Analysis implements OnInit {
+export class Analysis implements AfterViewInit {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
   private cdr = inject(ChangeDetectorRef);
@@ -109,7 +116,7 @@ export class Analysis implements OnInit {
   parameterColumns: string[] = [];
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 
-  ngOnInit() {
+  ngAfterViewInit() {
     this.rebReportService.analyze(this.reportId).subscribe((analysis) => {
       const analysisWithAdditionalMaps = analysis.map((pass) => ({
         ...pass,
@@ -131,6 +138,10 @@ export class Analysis implements OnInit {
       }
 
       this.cdr.detectChanges();
+
+      setTimeout(() => {
+        this.dataSource.sort = this.sort();
+      });
     });
   }
 
