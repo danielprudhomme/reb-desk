@@ -6,4 +6,5 @@ export interface BacktestThresholdCheck {
   worstValue: number;
   rate: number;
   requiredRate: number;
+  score: number;
 }
