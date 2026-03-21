@@ -10,33 +10,35 @@ import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
   imports: [MatButtonModule, MatTableModule],
   template: `
     @if (analysis) {
-      <table mat-table [dataSource]="analysis" class="mat-elevation-z8">
-        <ng-container matColumnDef="id">
-          <th mat-header-cell *matHeaderCellDef>Pass</th>
-          <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
-        </ng-container>
-
-        <ng-container matColumnDef="ok">
-          <th mat-header-cell *matHeaderCellDef>Ok</th>
-          <td mat-cell *matCellDef="let pass">{{ pass.ok ? 'OK' : 'NOK' }}</td>
-        </ng-container>
-
-        @for (col of checkColumns; track col) {
-          <ng-container [matColumnDef]="col">
-            <th mat-header-cell *matHeaderCellDef>
-              {{ col }}
-            </th>
-
-            <td mat-cell *matCellDef="let pass">
-              {{ pass.checksMap[col]?.worstValue }}
-              {{ pass.checksMap[col]?.rate }}
-            </td>
+      <div class="h-full overflow-auto">
+        <table mat-table [dataSource]="analysis">
+          <ng-container matColumnDef="id">
+            <th mat-header-cell *matHeaderCellDef>Pass</th>
+            <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
           </ng-container>
-        }
 
-        <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-        <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
-      </table>
+          <ng-container matColumnDef="ok">
+            <th mat-header-cell *matHeaderCellDef>Ok</th>
+            <td mat-cell *matCellDef="let pass">{{ pass.ok ? 'OK' : 'NOK' }}</td>
+          </ng-container>
+
+          @for (col of checkColumns; track col) {
+            <ng-container [matColumnDef]="col">
+              <th mat-header-cell *matHeaderCellDef>
+                {{ col }}
+              </th>
+
+              <td mat-cell *matCellDef="let pass">
+                {{ pass.checksMap[col]?.worstValue }}
+                {{ pass.checksMap[col]?.rate }}
+              </td>
+            </ng-container>
+          }
+
+          <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
+          <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
+        </table>
+      </div>
     }
   `,
 })
