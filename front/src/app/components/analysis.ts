@@ -2,6 +2,7 @@ import { ChangeDetectorRef, Component, inject, OnInit } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { RebReportService } from '../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../core/constants/backtest-threshold-display.constants';
@@ -10,7 +11,7 @@ import { DisplayPipe } from '../core/models/display-pipe';
 
 @Component({
   selector: 'app-analysis',
-  imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule],
+  imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule, MatTooltipModule],
   template: `
     @if (analysis) {
       <div class="h-full overflow-auto">
@@ -39,10 +40,29 @@ import { DisplayPipe } from '../core/models/display-pipe';
             </td>
           </ng-container>
 
+          @for (paramName of parameterColumns; track paramName) {
+            <ng-container [matColumnDef]="paramName">
+              <th
+                mat-header-cell
+                *matHeaderCellDef
+                class="max-w-[100px] truncate"
+                [matTooltip]="paramName"
+              >
+                {{ paramName }}
+              </th>
+
+              <td mat-cell *matCellDef="let pass">
+                {{ pass.parametersMap[paramName]?.value }}
+              </td>
+            </ng-container>
+          }
+
           @for (thresholdType of checkColumns; track thresholdType) {
             <ng-container [matColumnDef]="thresholdType">
               <th mat-header-cell *matHeaderCellDef>
-                {{ $any(displayConfig)[thresholdType]?.label || thresholdType }}
+                <span class="whitespace-nowrap block w-30">
+                  {{ $any(displayConfig)[thresholdType]?.label || thresholdType }}
+                </span>
               </th>
 
               <td mat-cell *matCellDef="let pass">
@@ -71,6 +91,7 @@ export class Analysis implements OnInit {
   analysis?: BacktestPassAnalysis[];
   displayedColumns: string[] = ['id', 'ok'];
   checkColumns: string[] = [];
+  parameterColumns: string[] = [];
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 
   ngOnInit() {
@@ -78,11 +99,18 @@ export class Analysis implements OnInit {
       this.analysis = analysis.map((pass) => ({
         ...pass,
         checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
+        parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
       }));
 
       if (analysis.length) {
-        this.checkColumns = analysis[0].checks.map((c) => c.type);
-        this.displayedColumns = ['id', 'ok', ...this.checkColumns];
+        const firstPass = analysis[0];
+
+        // 👇 paramètres dynamiques (non fixed)
+        this.parameterColumns = firstPass.parameters.filter((p) => !p.fixed).map((p) => p.name);
+
+        this.checkColumns = firstPass.checks.map((c) => c.type);
+
+        this.displayedColumns = ['id', 'ok', ...this.parameterColumns, ...this.checkColumns];
       }
 
       this.cdr.detectChanges();
@@ -104,5 +132,14 @@ export class Analysis implements OnInit {
       default:
         return value.toString();
     }
+  }
+
+  sliceMiddle(str: string, maxLength: number): string {
+    if (str.length <= maxLength) return str;
+
+    const startLength = Math.ceil(maxLength / 2) - 1;
+    const endLength = Math.floor(maxLength / 2) - 1;
+
+    return str.slice(0, startLength) + '…' + str.slice(str.length - endLength);
   }
 }
