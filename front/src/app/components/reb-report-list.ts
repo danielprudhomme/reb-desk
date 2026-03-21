@@ -2,10 +2,11 @@ import { Component, inject } from '@angular/core';
 import { MatTableModule } from '@angular/material/table';
 import { RebReportService } from '../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
+import { RouterLink } from '@angular/router';
 
 @Component({
   selector: 'app-reb-report-list',
-  imports: [MatButtonModule, MatTableModule],
+  imports: [RouterLink, MatButtonModule, MatTableModule],
   template: `
     @if (reports(); as reports) {
       <table mat-table [dataSource]="reports" class="mat-elevation-z8">
@@ -46,7 +47,7 @@ import { MatButtonModule } from '@angular/material/button';
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef></th>
           <td mat-cell *matCellDef="let report">
-            <button matButton="filled" (click)="analyze(report.id)">Analyze</button>
+            <button matButton="filled" [routerLink]="[report.id, 'analyze']">Analyze</button>
           </td>
         </ng-container>
 

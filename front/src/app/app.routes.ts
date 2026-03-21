@@ -2,6 +2,7 @@ import { Routes } from '@angular/router';
 import { RebReportList } from './components/reb-report-list';
 import { Layout } from './core/components/layout';
 import { Actions } from './components/actions';
+import { Analysis } from './components/analysis';
 
 export const routes: Routes = [
   {
@@ -9,13 +10,18 @@ export const routes: Routes = [
     component: Layout,
     children: [
       {
-        path: '',
+        path: 'report',
         component: RebReportList,
+      },
+      {
+        path: 'report/:reportId/analyze',
+        component: Analysis,
       },
       {
         path: 'actions',
         component: Actions,
       },
+      { path: '', redirectTo: 'report', pathMatch: 'full' },
     ],
   },
 ];

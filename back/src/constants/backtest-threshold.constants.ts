@@ -1,5 +1,5 @@
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
-import { BacktestPass } from 'src/models/backtest-pass.ts';
+import { BacktestPass } from '@shared/models/backtest-pass.ts';
 
 type ThresholdComputation = (pass: BacktestPass, capital: number) => number[];
 

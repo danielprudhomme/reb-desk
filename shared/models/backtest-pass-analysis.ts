@@ -1,5 +1,5 @@
-import { BacktestPass } from 'src/models/backtest-pass';
 import { BacktestThresholdCheck } from './backtest-threshold-check';
+import { BacktestPass } from './backtest-pass';
 
 export interface BacktestPassAnalysis extends BacktestPass {
   ok: boolean;

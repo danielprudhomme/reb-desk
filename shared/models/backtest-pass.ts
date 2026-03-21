@@ -1,5 +1,5 @@
-import { BacktestPassParameter } from './backtest-pass-parameter.ts';
-import { BacktestPassResult } from './backtest-pass-result.ts';
+import { BacktestPassParameter } from './backtest-pass-parameter';
+import { BacktestPassResult } from './backtest-pass-result';
 
 export interface BacktestPass {
   id: number;

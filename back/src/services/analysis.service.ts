@@ -4,7 +4,7 @@ import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.js';
 import { collections } from 'src/db/collections.ts';
 import { parseRebFileForPass } from './parser/reb-report-pass.parser.ts';
-import { BacktestPass } from 'src/models/backtest-pass.ts';
+import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 
 export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysis[]> {

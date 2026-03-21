@@ -2,9 +2,9 @@ import { readFile } from 'node:fs/promises';
 import { extractExpert, getLinesSection, parseParameterValue } from './parser-helper.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import { parseParameters } from './reb-parameter.parser.ts';
-import { BacktestPassParameter } from 'src/models/backtest-pass-parameter.ts';
-import { BacktestPass } from 'src/models/backtest-pass.ts';
-import { BacktestPassResult } from 'src/models/backtest-pass-result.ts';
+import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter.ts';
+import type { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
+import type { BacktestPass } from '@shared/models/backtest-pass.ts';
 
 export async function parseRebFileForPass(filePath: string): Promise<BacktestPass[]> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
