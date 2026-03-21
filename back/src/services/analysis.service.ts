@@ -28,9 +28,17 @@ export function analyzePasses(
   return passes.map((pass) => {
     const checks = thresholds.map((threshold) => checkThreshold(pass, threshold, capital));
     const ok = checks.every((c) => c.ok);
-    // totalScore = moyenne des scores des critères
-    const score = checks.reduce((acc, c) => acc + c.score, 0) / checks.length;
-    return { ...pass, ok, checks, score };
+
+    const weightMap = Object.fromEntries(thresholds.map((t) => [t.type, t.weight ?? 1]));
+    const totalWeight = checks.reduce((acc, c) => acc + weightMap[c.type], 0);
+    const score = checks.reduce((acc, c) => acc + c.score * weightMap[c.type], 0) / totalWeight;
+
+    const hasCriticalFail = checks.some(
+      (c) => !c.ok && (thresholds.find((t) => t.type === c.type)?.weight ?? 1) >= 3,
+    );
+    const finalScore = hasCriticalFail ? score * 0.7 : score;
+
+    return { ...pass, ok, checks, score: finalScore };
   });
 }
 
@@ -117,36 +125,42 @@ const thresholds: BacktestThreshold[] = [
     type: 'longTermResultPercent',
     operator: '>',
     value: 0,
-    passRate: 100, // toujours 100% pour LT
+    passRate: 100,
+    weight: 2, // important
   },
   {
     type: 'shortTermResultPercent',
     operator: '>',
     value: 0,
-    passRate: 80, // ex. passage validé si ≥ 80% des passages CT respectent ce seuil
+    passRate: 80,
+    weight: 2,
   },
   {
     type: 'longTermGainLossRatio',
     operator: '>',
     value: 1,
-    passRate: 100, // LT
+    passRate: 100,
+    weight: 2,
   },
   {
     type: 'shortTermTrades',
     operator: '>',
     value: 1,
-    passRate: 100, // peut être 100% ou moins selon ta logique
+    passRate: 100,
+    weight: 0.5, // peu important
   },
   {
     type: 'shortTermDrawdownPercent',
     operator: '<',
     value: 15,
-    passRate: 80, // validé si 80% des passages CT respectent le seuil
+    passRate: 80,
+    weight: 3, // 🔥 très important
   },
   {
     type: 'longTermDrawdownAmount',
     operator: '<',
     value: 550,
-    passRate: 100, // LT
+    passRate: 100,
+    weight: 3, // 🔥 très important
   },
 ];

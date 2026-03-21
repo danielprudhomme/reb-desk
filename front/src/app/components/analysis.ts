@@ -43,7 +43,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
                 'bg-red-100 text-red-700': pass.score < 0.4,
               }"
             >
-              {{ pass.score * 100 | number: '1.0-0' }}%
+              {{ pass.score * 100 | number: '1.2-2' }}%
             </span>
           </td>
         </ng-container>
@@ -118,7 +118,6 @@ export class Analysis implements OnInit {
       }));
 
       this.dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
-      this.dataSource.sort = this.sort();
 
       if (analysis.length) {
         const firstPass = analysis[0];
