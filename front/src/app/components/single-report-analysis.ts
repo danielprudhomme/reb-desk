@@ -51,24 +51,6 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
           </td>
         </ng-container>
 
-        @for (paramName of parameterColumns; track paramName) {
-          <ng-container [matColumnDef]="paramName">
-            <th
-              mat-header-cell
-              *matHeaderCellDef
-              mat-sort-header
-              class="max-w-[100px] truncate"
-              [matTooltip]="paramName"
-            >
-              {{ paramName }}
-            </th>
-
-            <td mat-cell *matCellDef="let pass">
-              {{ pass.parametersMap[paramName]?.value }}
-            </td>
-          </ng-container>
-        }
-
         @for (thresholdType of checkColumns; track thresholdType) {
           <ng-container [matColumnDef]="thresholdType">
             <th mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -90,6 +72,24 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
                   </div>
                 </div>
               }
+            </td>
+          </ng-container>
+        }
+
+        @for (paramName of parameterColumns; track paramName) {
+          <ng-container [matColumnDef]="paramName">
+            <th
+              mat-header-cell
+              *matHeaderCellDef
+              mat-sort-header
+              class="max-w-[100px] truncate"
+              [matTooltip]="paramName"
+            >
+              {{ paramName }}
+            </th>
+
+            <td mat-cell *matCellDef="let pass">
+              {{ pass.parametersMap[paramName]?.value }}
             </td>
           </ng-container>
         }
@@ -144,7 +144,7 @@ export class SingleReportAnalysis implements AfterViewInit {
         const firstPass = analysis[0];
         this.parameterColumns = firstPass.parameters.filter((p) => !p.fixed).map((p) => p.name);
         this.checkColumns = firstPass.checks.map((c) => c.type);
-        this.displayedColumns = ['id', 'score', ...this.parameterColumns, ...this.checkColumns];
+        this.displayedColumns = ['id', 'score', ...this.checkColumns, ...this.parameterColumns];
       }
 
       this.cdr.detectChanges();
