@@ -78,8 +78,4 @@ export class RebReportList {
     'longTerm',
     'actions',
   ];
-
-  analyze(reportId: string) {
-    this.rebReportService.analyze(reportId).subscribe();
-  }
 }

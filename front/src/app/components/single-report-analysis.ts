@@ -18,7 +18,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
 };
 
 @Component({
-  selector: 'app-analysis',
+  selector: 'app-single-report-analysis',
   imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule, MatTooltipModule, MatSortModule],
   template: `
     <div class="h-full overflow-auto">
@@ -100,7 +100,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
     </div>
   `,
 })
-export class Analysis implements AfterViewInit {
+export class SingleReportAnalysis implements AfterViewInit {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
   private cdr = inject(ChangeDetectorRef);
@@ -113,7 +113,7 @@ export class Analysis implements AfterViewInit {
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 
   ngAfterViewInit() {
-    this.rebReportService.analyze(this.reportId).subscribe((analysis) => {
+    this.rebReportService.analyze({ reportId: this.reportId }).subscribe((analysis) => {
       const analysisWithAdditionalMaps = analysis.map((pass) => ({
         ...pass,
         checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),

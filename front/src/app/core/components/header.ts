@@ -7,6 +7,7 @@ import { RouterLink } from '@angular/router';
     <div class="w-full flex items-center justify-center gap-6">
       <a [routerLink]="['']">REB Reports</a>
       <a [routerLink]="['actions']">Actions</a>
+      <a [routerLink]="['analysis']">Analysis</a>
     </div>
   `,
   imports: [RouterLink],

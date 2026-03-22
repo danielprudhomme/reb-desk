@@ -2,7 +2,8 @@ import { Routes } from '@angular/router';
 import { RebReportList } from './components/reb-report-list';
 import { Layout } from './core/components/layout';
 import { Actions } from './components/actions';
-import { Analysis } from './components/analysis';
+import { SingleReportAnalysis } from './components/single-report-analysis';
+import { MultipleReportsAnalysis } from './components/multiple-reports-analysis';
 
 export const routes: Routes = [
   {
@@ -15,11 +16,15 @@ export const routes: Routes = [
       },
       {
         path: 'report/:reportId/analyze',
-        component: Analysis,
+        component: SingleReportAnalysis,
       },
       {
         path: 'actions',
         component: Actions,
+      },
+      {
+        path: 'analysis',
+        component: MultipleReportsAnalysis,
       },
       { path: '', redirectTo: 'report', pathMatch: 'full' },
     ],

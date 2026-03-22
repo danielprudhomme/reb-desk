@@ -22,9 +22,11 @@ export class RebReportService extends GraphQlService {
     return this.httpClient.post(`${environment.apiUrl}/report/rebuild`, {});
   }
 
-  analyze(reportId: string): Observable<BacktestPassAnalysis[]> {
-    return this.httpClient.post<BacktestPassAnalysis[]>(`${environment.apiUrl}/analysis`, {
-      reportId,
-    });
+  analyze(params: {
+    reportId?: string;
+    symbol?: string;
+    timeframe?: string;
+  }): Observable<BacktestPassAnalysis[]> {
+    return this.httpClient.post<BacktestPassAnalysis[]>(`${environment.apiUrl}/analysis`, params);
   }
 }

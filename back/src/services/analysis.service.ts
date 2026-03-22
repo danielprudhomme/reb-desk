@@ -20,27 +20,36 @@ export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysi
   return analysis;
 }
 
-// export async function runAnalysisForReports(filters: {
-//   symbol?: string;
-//   timeframe?: string;
-// }): Promise<Record<string, BacktestPassAnalysis[]>> {
-//   const reports = collections.RebReport().find(filters);
+export async function runAnalysisForReports(filters: {
+  symbol?: string;
+  timeframe?: string;
+}): Promise<Record<string, BacktestPassAnalysis[]>> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const query: any = {};
+  if (filters.symbol) {
+    query.symbol = filters.symbol;
+  }
+  if (filters.timeframe) {
+    query.timeframe = filters.timeframe;
+  }
 
-//   // if (!reports.length) {
-//   //   throw new Error('No reports found for given filters');
-//   // }
+  const reports = collections.RebReport().find(query);
 
-//   // const results: Record<string, BacktestPassAnalysis[]> = {};
+  if (!reports.length) {
+    throw new Error('No reports found for given filters');
+  }
 
-//   // for (const report of reports) {
-//   //   const passes = await parseRebFileForPass(report.path);
-//   //   const analysis = analyzePasses(passes, thresholds, report.capital);
+  const results: Record<string, BacktestPassAnalysis[]> = {};
 
-//   //   results[report.id] = analysis;
-//   // }
+  for (const report of reports) {
+    const passes = await parseRebFileForPass(report.path);
+    const analysis = analyzePasses(passes, thresholds, report.capital);
 
-//   return results;
-// }
+    results[report.id] = analysis;
+  }
+
+  return results;
+}
 
 export function analyzePasses(
   passes: BacktestPass[],
