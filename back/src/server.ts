@@ -5,6 +5,7 @@ import { reportRouter } from './routes/report.route.ts';
 import { initDB } from './db/init.ts';
 import { schema } from './graphql/schema.ts';
 import { APP_CONFIG } from './config.ts';
+import { analysisRouter } from './routes/analysis.route.ts';
 
 async function start() {
   await initDB();
@@ -17,6 +18,7 @@ async function start() {
   app.use(express.json());
 
   app.use('/report', reportRouter);
+  app.use('/analysis', analysisRouter);
 
   app.use('/graphql', yoga);
 

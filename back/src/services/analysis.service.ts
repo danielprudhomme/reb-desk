@@ -20,6 +20,28 @@ export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysi
   return analysis;
 }
 
+// export async function runAnalysisForReports(filters: {
+//   symbol?: string;
+//   timeframe?: string;
+// }): Promise<Record<string, BacktestPassAnalysis[]>> {
+//   const reports = collections.RebReport().find(filters);
+
+//   // if (!reports.length) {
+//   //   throw new Error('No reports found for given filters');
+//   // }
+
+//   // const results: Record<string, BacktestPassAnalysis[]> = {};
+
+//   // for (const report of reports) {
+//   //   const passes = await parseRebFileForPass(report.path);
+//   //   const analysis = analyzePasses(passes, thresholds, report.capital);
+
+//   //   results[report.id] = analysis;
+//   // }
+
+//   return results;
+// }
+
 export function analyzePasses(
   passes: BacktestPass[],
   thresholds: BacktestThreshold[],
