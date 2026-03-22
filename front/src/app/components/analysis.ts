@@ -13,12 +13,8 @@ import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check';
 
 type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
-  checksMap: {
-    [k: string]: BacktestThresholdCheck;
-  };
-  parametersMap: {
-    [k: string]: BacktestPassParameter;
-  };
+  checksMap: { [k: string]: BacktestThresholdCheck };
+  parametersMap: { [k: string]: BacktestPassParameter };
 };
 
 @Component({
