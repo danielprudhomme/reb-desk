@@ -23,7 +23,7 @@ export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysi
 export async function runAnalysisForReports(filters: {
   symbol?: string;
   timeframe?: string;
-}): Promise<Record<string, BacktestPassAnalysis[]>> {
+}): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (filters.symbol) {
@@ -39,16 +39,14 @@ export async function runAnalysisForReports(filters: {
     throw new Error('No reports found for given filters');
   }
 
-  const results: Record<string, BacktestPassAnalysis[]> = {};
+  const analysis: BacktestPassAnalysis[] = [];
 
   for (const report of reports) {
     const passes = await parseRebFileForPass(report.path);
-    const analysis = analyzePasses(passes, thresholds, report.capital);
-
-    results[report.id] = analysis;
+    analysis.push(...analyzePasses(passes, thresholds, report.capital));
   }
 
-  return results;
+  return analysis;
 }
 
 export function analyzePasses(
