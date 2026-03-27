@@ -1,4 +1,3 @@
-import { Currency } from '@shared/models/currency.js';
 import { OptimizationModel } from '@shared/models/optimization-model.js';
 import { TimeUnit } from '@shared/models/time-unit.js';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.js';
@@ -15,7 +14,6 @@ export interface RebReport {
   timeframe: string;
   leverage: number;
   capital: number;
-  currency: Currency;
   model: OptimizationModel;
   startDate: string;
   lastValidatedDate?: string;

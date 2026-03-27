@@ -11,7 +11,6 @@ export const GET_REB_REPORTS = gql`
       timeframe
       leverage
       capital
-      currency
       model
       startDate
       shortTermCount
@@ -22,10 +21,7 @@ export const GET_REB_REPORTS = gql`
 
       parameters {
         name
-        value
-        start
-        stop
-        step
+        values
       }
     }
   }

@@ -8,6 +8,7 @@ import { createHash } from 'node:crypto';
 import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
 import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
 import { parseRebReport } from './parser/reb-report.parser.ts';
+import expertConst from '@shared/constants/expert.constants.ts';
 
 async function ensureDirectory(dir: string) {
   try {
@@ -99,7 +100,7 @@ export async function runImport(folderPath: string) {
       return 'skipped';
     }
 
-    const newPath = await copyAndRenameRebFile(filePath, fingerprint);
+    const newPath = await copyAndRenameRebFile(filePath, parsedReport, fingerprint);
     insert(parsedReport, parsedParameters, newPath, fingerprint);
     return 'inserted';
   };
@@ -163,7 +164,6 @@ function buildFingerprintHash(report: ParsedRebReport, parameters: ParsedRebPara
     timeframe: report.timeframe,
     leverage: report.leverage,
     capital: report.capital,
-    currency: report.currency,
     model: report.model,
     startDate: report.startDate,
     shortTermCount: report.shortTermCount,
@@ -184,17 +184,25 @@ function replaceValue(lines: string[], key: string, newValue: string) {
   }
 }
 
-async function copyAndRenameRebFile(filePath: string, fingerprint: string) {
+async function copyAndRenameRebFile(
+  filePath: string,
+  parsedReport: ParsedRebReport,
+  fingerprint: string,
+) {
   const content = await readFile(filePath, 'utf-8');
   const lines = content.split(/\r?\n/);
 
-  const newProjectName = fingerprint;
+  const expertName = expertConst.EXPERT_NAMES[parsedReport.expert].replaceAll(' ', '');
+  const startDate = parsedReport.startDate.replaceAll('-', '').substring(2);
+  const shortTerm = `${parsedReport.shortTermCount}x${parsedReport.shortTermDuration}${parsedReport.shortTermUnit.toString()[0]}`;
+  const longTerm = `${parsedReport.longTermDuration}${parsedReport.longTermUnit.toString()[0]}`;
+  const newProjectName = `${parsedReport.symbol}-${parsedReport.timeframe}-${expertName}-${parsedReport.capital}-${startDate}-${shortTerm}-${longTerm}-${fingerprint}`;
 
   replaceValue(lines, 'NOM PROJET :', newProjectName);
 
   const newContent = lines.join('\n');
 
-  const newPath = join(IMPORTS_PATH, `${fingerprint}.reb`);
+  const newPath = join(IMPORTS_PATH, `${newProjectName}.reb`);
 
   await writeFile(newPath, newContent, 'utf-8');
 

@@ -1,5 +1,4 @@
 import { readFile } from 'node:fs/promises';
-import type { Currency } from '@shared/models/currency.ts';
 import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
@@ -46,7 +45,6 @@ export async function parseRebReport(filePath: string): Promise<{
       timeframe: requiredValue(lines, 'UNITE DE TEMPS :'),
       leverage: parseInt(requiredValue(lines, 'SPREAD :')),
       capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
-      currency: parseCurrency(requiredValue(lines, 'DEVISE :')),
       model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
       startDate,
       lastValidatedDate,
@@ -118,11 +116,6 @@ function parseTimeUnit(value: string): TimeUnit {
   if (v.includes('semaine') || v.includes('week')) return 'week';
   if (v.includes('jour') || v.includes('day')) return 'day';
   throw new Error(`Unknown time unit: ${value}`);
-}
-
-function parseCurrency(value: string): Currency {
-  if (value.trim().toUpperCase() === 'EUR') return 'EUR';
-  throw new Error(`Unknown currency: ${value}`);
 }
 
 function parseModel(value: string): OptimizationModel {
