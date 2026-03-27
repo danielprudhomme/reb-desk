@@ -1,13 +1,13 @@
 import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join } from 'node:path';
-import { parseRebFile } from './parser/reb-report.parser.ts';
 import crypto from 'node:crypto';
 import { IMPORTS_PATH } from 'src/config.ts';
 import { collections } from 'src/db/collections.ts';
 import { createHash } from 'node:crypto';
 import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
 import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
+import { parseRebReport } from './parser/reb-report.parser.ts';
 
 async function ensureDirectory(dir: string) {
   try {
@@ -57,7 +57,7 @@ async function processRebFiles(
 
   for (const filePath of files) {
     try {
-      const { report: parsedReport, parameters: parsedParameters } = await parseRebFile(filePath);
+      const { report: parsedReport, parameters: parsedParameters } = await parseRebReport(filePath);
 
       // Only import completed reports
       if (parsedReport.importStatus !== 'completed') {
@@ -127,11 +127,7 @@ export async function runRebuild() {
     paramCollection.find({ reportId: existingByPath.id }).forEach((p) => paramCollection.remove(p));
 
     for (const param of parsedParameters) {
-      paramCollection.insert({
-        ...param,
-        id: crypto.randomUUID(),
-        reportId: existingByPath.id,
-      });
+      paramCollection.insert({ ...param, reportId: existingByPath.id });
     }
 
     return 'updated';
@@ -156,11 +152,7 @@ function insert(
   });
 
   for (const param of parsedParameters) {
-    collections.RebParameter().insert({
-      ...param,
-      id: crypto.randomUUID(),
-      reportId,
-    });
+    collections.RebParameter().insert({ ...param, reportId });
   }
 }
 
@@ -179,16 +171,7 @@ function buildFingerprintHash(report: ParsedRebReport, parameters: ParsedRebPara
     shortTermUnit: report.shortTermUnit,
     longTermDuration: report.longTermDuration,
     longTermUnit: report.longTermUnit,
-
-    parameters: parameters
-      .map((p) => ({
-        name: p.name,
-        value: p.value ?? null,
-        start: p.start ?? null,
-        step: p.step ?? null,
-        stop: p.stop ?? null,
-      }))
-      .sort((a, b) => a.name.localeCompare(b.name)),
+    parameters: parameters.sort((a, b) => a.name.localeCompare(b.name)),
   };
   const json = JSON.stringify(obj);
   return createHash('sha1').update(json).digest('hex');

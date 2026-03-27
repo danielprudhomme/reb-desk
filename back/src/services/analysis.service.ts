@@ -3,9 +3,9 @@ import { BacktestThreshold } from '@shared/models/backtest-threshold.js';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.js';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.js';
 import { collections } from 'src/db/collections.ts';
-import { parseRebFileForPass } from './parser/reb-report-pass.parser.ts';
 import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
+import { parseRebPass } from './parser/reb-report.parser.ts';
 
 export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysis[]> {
   const report = collections.RebReport().findOne({ id: reportId });
@@ -14,7 +14,7 @@ export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysi
     throw new Error(`Report not found for id ${reportId}`);
   }
 
-  const passes = await parseRebFileForPass(report.path);
+  const passes = await parseRebPass(report.path);
   const analysis = analyzePasses(passes, thresholds, report.capital);
 
   return analysis;
@@ -42,7 +42,7 @@ export async function runAnalysisForReports(filters: {
   const analysis: BacktestPassAnalysis[] = [];
 
   for (const report of reports) {
-    const passes = await parseRebFileForPass(report.path);
+    const passes = await parseRebPass(report.path);
     analysis.push(...analyzePasses(passes, thresholds, report.capital));
   }
 

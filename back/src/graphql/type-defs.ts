@@ -30,14 +30,9 @@ export const typeDefs = /* GraphQL */ `
   }
 
   type RebParameter {
-    id: ID!
     reportId: ID!
     name: String!
-
-    value: Float
-    start: Float
-    stop: Float
-    step: Float
+    values: [Float!]!
   }
 
   type RebReport {
