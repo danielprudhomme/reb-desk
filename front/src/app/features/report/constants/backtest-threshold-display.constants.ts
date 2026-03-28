@@ -1,5 +1,5 @@
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type';
-import { ThresholdDisplayConfig } from '../models/threshold-display-config';
+import { ThresholdDisplayConfig } from '../../../core/models/threshold-display-config';
 
 export const BACKTEST_THRESHOLD_DISPLAY: Record<BacktestThresholdType, ThresholdDisplayConfig> = {
   // ===== RESULT =====

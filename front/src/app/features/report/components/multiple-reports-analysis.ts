@@ -3,7 +3,7 @@ import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { RebReportService } from '../../services/reb-report.service';
+import { RebReportService } from '../../../services/reb-report.service';
 import { firstValueFrom, map } from 'rxjs';
 
 @Component({

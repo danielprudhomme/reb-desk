@@ -1,5 +1,5 @@
 import { Component, effect, inject, resource } from '@angular/core';
-import { RebReportService } from '../../services/reb-report.service';
+import { RebReportService } from '../../../services/reb-report.service';
 import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { PassAnalysisTable } from './pass-analysis-table';
