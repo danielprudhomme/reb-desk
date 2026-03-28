@@ -1,6 +1,12 @@
-import { AfterViewInit, ChangeDetectorRef, Component, inject, viewChild } from '@angular/core';
+import {
+  AfterViewInit,
+  ChangeDetectorRef,
+  Component,
+  inject,
+  input,
+  viewChild,
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { RebReportService } from '../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
@@ -18,7 +24,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
 };
 
 @Component({
-  selector: 'app-single-report-analysis',
+  selector: 'app-pass-analysis-table',
   imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule, MatTooltipModule, MatSortModule],
   template: `
     <div class="h-full overflow-auto">
@@ -76,7 +82,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
           </ng-container>
         }
 
-        @for (paramName of parameterColumns; track paramName) {
+        <!-- @for (paramName of parameterColumns; track paramName) {
           <ng-container [matColumnDef]="paramName">
             <th
               mat-header-cell
@@ -92,7 +98,7 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
               {{ pass.parametersMap[paramName]?.value }}
             </td>
           </ng-container>
-        }
+        } -->
 
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
@@ -100,9 +106,9 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
     </div>
   `,
 })
-export class SingleReportAnalysis implements AfterViewInit {
+export class PassAnalysisTable implements AfterViewInit {
+  analysis = input.required<BacktestPassAnalysis[]>();
   private sort = viewChild.required(MatSort);
-  private rebReportService = inject(RebReportService);
   private cdr = inject(ChangeDetectorRef);
   private reportId = inject(ActivatedRoute).snapshot.paramMap.get('reportId')!;
   dataSource: MatTableDataSource<BacktestPassAnalysisWithAdditionalMaps> =
@@ -113,45 +119,45 @@ export class SingleReportAnalysis implements AfterViewInit {
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 
   ngAfterViewInit() {
-    this.rebReportService.analyze({ reportId: this.reportId }).subscribe((analysis) => {
-      const analysisWithAdditionalMaps = analysis.map((pass) => ({
-        ...pass,
-        checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
-        parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
-      }));
+    const analysis = this.analysis();
+    const analysisWithAdditionalMaps = analysis.map((pass) => ({
+      ...pass,
+      checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
+      parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
+    }));
 
-      this.dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
+    this.dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
 
-      this.dataSource.sortingDataAccessor = (item, property) => {
-        if (property === 'id') return item.id;
-        if (property === 'score') return item.score;
-        if (property === 'ok') return item.ok ? 1 : 0;
-        if (item.parametersMap?.[property]) return item.parametersMap[property].value;
+    this.dataSource.sortingDataAccessor = (item, property) => {
+      if (property === 'id') return item.id;
+      if (property === 'score') return item.score;
+      if (property === 'ok') return item.ok ? 1 : 0;
+      if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
-        if (item.checksMap?.[property]) {
-          const check = item.checksMap[property];
-          return check.type.includes('longTerm')
-            ? check.worstValue
-            : check.ok
-              ? 1000 + check.rate
-              : check.rate;
-        }
-
-        return 0;
-      };
-
-      if (analysis.length) {
-        const firstPass = analysis[0];
-        this.parameterColumns = firstPass.parameters.filter((p) => !p.fixed).map((p) => p.name);
-        this.checkColumns = firstPass.checks.map((c) => c.type);
-        this.displayedColumns = ['id', 'score', ...this.checkColumns, ...this.parameterColumns];
+      if (item.checksMap?.[property]) {
+        const check = item.checksMap[property];
+        return check.type.includes('longTerm')
+          ? check.worstValue
+          : check.ok
+            ? 1000 + check.rate
+            : check.rate;
       }
 
-      this.cdr.detectChanges();
+      return 0;
+    };
 
-      setTimeout(() => {
-        this.dataSource.sort = this.sort();
-      });
+    if (analysis.length) {
+      const firstPass = analysis[0];
+      // this.parameterColumns = firstPass.parameters.filter((p) => !p.fixed).map((p) => p.name);
+      this.checkColumns = firstPass.checks.map((c) => c.type);
+      // this.displayedColumns = ['id', 'score', ...this.checkColumns, ...this.parameterColumns];
+      this.displayedColumns = ['id', 'score', ...this.checkColumns];
+    }
+
+    this.cdr.detectChanges();
+
+    setTimeout(() => {
+      this.dataSource.sort = this.sort();
     });
   }
 
