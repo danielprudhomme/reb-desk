@@ -1,9 +1,9 @@
 import { Routes } from '@angular/router';
-import { RebReportList } from './components/reb-report-list';
-import { Layout } from './core/components/layout';
-import { Actions } from './components/actions';
-import { MultipleReportsAnalysis } from './components/multiple-reports-analysis';
-import { ReportAnalysis } from './components/report-analysis';
+import { RebReportList } from './features/report/reb-report-list';
+import { Layout } from './layout/layout';
+import { Actions } from './features/admin/actions';
+import { MultipleReportsAnalysis } from './features/report/multiple-reports-analysis';
+import { ReportAnalysis } from './features/report/report-analysis';
 
 export const routes: Routes = [
   {

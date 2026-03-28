@@ -3,7 +3,7 @@ import { form, FormField, FormRoot } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { RebReportService } from '../services/reb-report.service';
+import { RebReportService } from '../../services/reb-report.service';
 import { firstValueFrom, map } from 'rxjs';
 
 @Component({
@@ -27,7 +27,7 @@ import { firstValueFrom, map } from 'rxjs';
 })
 export class MultipleReportsAnalysis {
   private rebReportService = inject(RebReportService);
-  model = signal({ symbol: 'EURAUD', timeframe: 'H1' });
+  model = signal({ symbol: 'AUDCAD', timeframe: 'H1' });
   form = form(this.model, {
     submission: {
       action: async () =>

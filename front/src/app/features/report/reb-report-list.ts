@@ -1,10 +1,10 @@
 import { Component, computed, inject, viewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { RebReportService } from '../services/reb-report.service';
+import { RebReportService } from '../../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatSort, MatSortModule } from '@angular/material/sort';
-import { RebReport } from '../core/models/reb-report';
+import { RebReport } from '../../core/models/reb-report';
 
 @Component({
   selector: 'app-reb-report-list',

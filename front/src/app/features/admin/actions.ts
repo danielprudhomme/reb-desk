@@ -1,6 +1,6 @@
 import { Component, inject } from '@angular/core';
 import { ImportFolder } from './import-folder';
-import { RebReportService } from '../services/reb-report.service';
+import { RebReportService } from '../../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
 
 @Component({

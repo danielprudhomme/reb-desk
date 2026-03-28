@@ -12,9 +12,9 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ActivatedRoute } from '@angular/router';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
-import { BACKTEST_THRESHOLD_DISPLAY } from '../core/constants/backtest-threshold-display.constants';
+import { BACKTEST_THRESHOLD_DISPLAY } from '../../core/constants/backtest-threshold-display.constants';
 import { DecimalPipe, NgClass } from '@angular/common';
-import { DisplayPipe } from '../core/models/display-pipe';
+import { DisplayPipe } from '../../core/models/display-pipe';
 import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check';
 
