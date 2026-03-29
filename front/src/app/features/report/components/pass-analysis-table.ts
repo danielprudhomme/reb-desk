@@ -10,13 +10,13 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatButtonModule } from '@angular/material/button';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { MatTooltipModule } from '@angular/material/tooltip';
-import { ActivatedRoute } from '@angular/router';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-display.constants';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { DisplayPipe } from '../../../core/models/display-pipe';
 import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check';
+import { ScrollingModule } from '@angular/cdk/scrolling';
 
 type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
   checksMap: { [k: string]: BacktestThresholdCheck };
@@ -25,9 +25,22 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
 
 @Component({
   selector: 'app-pass-analysis-table',
-  imports: [NgClass, DecimalPipe, MatButtonModule, MatTableModule, MatTooltipModule, MatSortModule],
+  imports: [
+    NgClass,
+    DecimalPipe,
+    MatButtonModule,
+    MatTableModule,
+    MatTooltipModule,
+    MatSortModule,
+    ScrollingModule,
+  ],
   template: `
-    <div class="h-full overflow-auto">
+    <cdk-virtual-scroll-viewport
+      class="h-full overflow-auto"
+      [itemSize]="52"
+      [maxBufferPx]="1200"
+      [minBufferPx]="400"
+    >
       <table
         mat-table
         [dataSource]="dataSource"
@@ -103,14 +116,13 @@ type BacktestPassAnalysisWithAdditionalMaps = BacktestPassAnalysis & {
         <tr mat-header-row *matHeaderRowDef="displayedColumns; sticky: true"></tr>
         <tr mat-row *matRowDef="let row; columns: displayedColumns"></tr>
       </table>
-    </div>
+    </cdk-virtual-scroll-viewport>
   `,
 })
 export class PassAnalysisTable implements AfterViewInit {
   analysis = input.required<BacktestPassAnalysis[]>();
   private sort = viewChild.required(MatSort);
   private cdr = inject(ChangeDetectorRef);
-  private reportId = inject(ActivatedRoute).snapshot.paramMap.get('reportId')!;
   dataSource: MatTableDataSource<BacktestPassAnalysisWithAdditionalMaps> =
     new MatTableDataSource<BacktestPassAnalysisWithAdditionalMaps>([]);
   displayedColumns: string[] = [];

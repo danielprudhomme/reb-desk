@@ -64,7 +64,9 @@ export class RebReportList {
   private rebReportService = inject(RebReportService);
 
   dataSource = computed(() => {
-    const dataSource = new MatTableDataSource<RebReport>(this.rebReportService.reports());
+    const dataSource = new MatTableDataSource<RebReport>(
+      this.rebReportService.reports()?.filter((x) => x.expert === 'candleSuite'),
+    );
     dataSource.sort = this.sort();
     return dataSource;
   });
