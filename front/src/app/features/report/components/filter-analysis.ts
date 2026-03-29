@@ -1,15 +1,13 @@
-import { Component, inject, resource, signal } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { RebReportService } from '../../../services/reb-report.service';
-import { firstValueFrom } from 'rxjs';
-import { PassAnalysisTable } from './pass-analysis-table';
+import { FilterAnalysisResult } from './filter-analysis-result';
 
 @Component({
   selector: 'app-filter-analysis',
-  imports: [MatInputModule, MatFormFieldModule, MatButtonModule, FormField, PassAnalysisTable],
+  imports: [MatInputModule, MatFormFieldModule, MatButtonModule, FormField, FilterAnalysisResult],
   template: `
     <div class="h-full w-full">
       <div class="flex items-center gap-4">
@@ -26,30 +24,20 @@ import { PassAnalysisTable } from './pass-analysis-table';
         <button matButton="filled" (click)="runAnalysis()">Run analysis</button>
       </div>
 
-      @if (analysisResource.isLoading()) {
-        Analysis loading...
-      }
-
-      @if (analysisResource.value(); as analysis) {
-        <app-pass-analysis-table class="flex-1" [analysis]="analysis" />
+      @if (run()) {
+        <app-filter-analysis-result [filter]="model()" />
+      } @else {
+        enter filter...
       }
     </div>
   `,
 })
 export class FilterAnalysis {
-  private rebReportService = inject(RebReportService);
-  private model = signal({ symbol: 'AUDCAD', timeframe: 'H1' });
-  private runTrigger = signal(0);
+  model = signal({ symbol: 'AUDCAD', timeframe: 'H1' });
+  run = signal(false);
   form = form(this.model);
 
-  analysisResource = resource({
-    params: () => this.runTrigger(),
-    loader: async ({ params }) => {
-      return params === 0 ? undefined : firstValueFrom(this.rebReportService.analyze(this.model()));
-    },
-  });
-
   runAnalysis() {
-    this.runTrigger.update((v) => v + 1);
+    this.run.set(true);
   }
 }

@@ -4,6 +4,7 @@ import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.js';
 import { collections } from 'src/db/collections.ts';
 import { BacktestPass } from '@shared/models/backtest-pass.ts';
+import { ReportFilter } from '@shared/models/report-filter.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 import { parseRebPass } from './parser/reb-report.parser.ts';
 
@@ -20,17 +21,17 @@ export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysi
   return analysis;
 }
 
-export async function runAnalysisForReports(filters: {
-  symbol?: string;
-  timeframe?: string;
-}): Promise<BacktestPassAnalysis[]> {
+export async function runAnalysisForReports(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
-  if (filters.symbol) {
-    query.symbol = filters.symbol;
+  if (filter.expert) {
+    query.expert = filter.expert;
   }
-  if (filters.timeframe) {
-    query.timeframe = filters.timeframe;
+  if (filter.symbol) {
+    query.symbol = filter.symbol;
+  }
+  if (filter.timeframe) {
+    query.timeframe = filter.timeframe;
   }
 
   const reports = collections.RebReport().find(query);

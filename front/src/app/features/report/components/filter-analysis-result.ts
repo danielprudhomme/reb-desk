@@ -1,11 +1,11 @@
-import { Component, inject, resource } from '@angular/core';
+import { Component, inject, input, resource } from '@angular/core';
 import { RebReportService } from '../../../services/reb-report.service';
-import { ActivatedRoute } from '@angular/router';
 import { firstValueFrom } from 'rxjs';
 import { PassAnalysisTable } from './pass-analysis-table';
+import { ReportFilter } from '@shared/models/report-filter';
 
 @Component({
-  selector: 'app-report-analysis',
+  selector: 'app-filter-analysis-result',
   imports: [PassAnalysisTable],
   template: `
     <div class="h-full w-full">
@@ -19,10 +19,10 @@ import { PassAnalysisTable } from './pass-analysis-table';
     </div>
   `,
 })
-export class ReportAnalysis {
+export class FilterAnalysisResult {
+  filter = input.required<ReportFilter>();
   private rebReportService = inject(RebReportService);
-  private reportId = inject(ActivatedRoute).snapshot.paramMap.get('reportId')!;
   analysisResource = resource({
-    loader: async () => firstValueFrom(this.rebReportService.analyze({ reportId: this.reportId })),
+    loader: async () => firstValueFrom(this.rebReportService.analyze(this.filter())),
   });
 }
