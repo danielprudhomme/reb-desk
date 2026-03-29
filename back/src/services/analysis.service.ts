@@ -8,30 +8,21 @@ import { ReportFilter } from '@shared/models/report-filter.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 import { parseRebPass } from './parser/reb-report.parser.ts';
 
-export async function runAnalysis(reportId: string): Promise<BacktestPassAnalysis[]> {
-  const report = collections.RebReport().findOne({ id: reportId });
-
-  if (!report) {
-    throw new Error(`Report not found for id ${reportId}`);
-  }
-
-  const passes = await parseRebPass(report.path);
-  const analysis = analyzePasses(passes, thresholds, report.capital);
-
-  return analysis;
-}
-
-export async function runAnalysisForReports(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
+export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
-  if (filter.expert) {
-    query.expert = filter.expert;
-  }
-  if (filter.symbol) {
-    query.symbol = filter.symbol;
-  }
-  if (filter.timeframe) {
-    query.timeframe = filter.timeframe;
+  if (filter.reportId) {
+    query.id = filter.reportId;
+  } else {
+    if (filter.expert) {
+      query.expert = filter.expert;
+    }
+    if (filter.symbol) {
+      query.symbol = filter.symbol;
+    }
+    if (filter.timeframe) {
+      query.timeframe = filter.timeframe;
+    }
   }
 
   const reports = collections.RebReport().find(query);

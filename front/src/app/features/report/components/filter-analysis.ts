@@ -3,13 +3,13 @@ import { form, FormField } from '@angular/forms/signals';
 import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { FilterAnalysisResult } from './filter-analysis-result';
+import { PassAnalysisTable } from './pass-analysis-table';
 
 @Component({
   selector: 'app-filter-analysis',
-  imports: [MatInputModule, MatFormFieldModule, MatButtonModule, FormField, FilterAnalysisResult],
+  imports: [MatInputModule, MatFormFieldModule, MatButtonModule, FormField, PassAnalysisTable],
   template: `
-    <div class="h-full w-full">
+    <div class="h-full w-full flex flex-col">
       <div class="flex items-center gap-4">
         <mat-form-field class="w-100">
           <mat-label>Symbol</mat-label>
@@ -24,11 +24,13 @@ import { FilterAnalysisResult } from './filter-analysis-result';
         <button matButton="filled" (click)="runAnalysis()">Run analysis</button>
       </div>
 
-      @if (run()) {
-        <app-filter-analysis-result [filter]="model()" />
-      } @else {
-        enter filter...
-      }
+      <div class="flex-1 min-h-0 overflow-auto">
+        @if (run()) {
+          <app-pass-analysis-table [filter]="model()" />
+        } @else {
+          enter filter...
+        }
+      </div>
     </div>
   `,
 })

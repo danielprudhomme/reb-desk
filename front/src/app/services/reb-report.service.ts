@@ -7,6 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '@env';
 import { RebReport } from '../core/models/reb-report';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+import { ReportFilter } from '@shared/models/report-filter';
 
 @Injectable({ providedIn: 'root' })
 export class RebReportService extends GraphQlService {
@@ -22,11 +23,7 @@ export class RebReportService extends GraphQlService {
     return this.httpClient.post(`${environment.apiUrl}/report/rebuild`, {});
   }
 
-  analyze(params: {
-    reportId?: string;
-    symbol?: string;
-    timeframe?: string;
-  }): Observable<BacktestPassAnalysis[]> {
-    return this.httpClient.post<BacktestPassAnalysis[]>(`${environment.apiUrl}/analysis`, params);
+  analyze(filter: ReportFilter): Observable<BacktestPassAnalysis[]> {
+    return this.httpClient.post<BacktestPassAnalysis[]>(`${environment.apiUrl}/analysis`, filter);
   }
 }
