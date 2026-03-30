@@ -27,8 +27,6 @@ import { PassAnalysisTable } from './pass-analysis-table';
       <div class="flex-1 min-h-0 overflow-auto">
         @if (run()) {
           <app-pass-analysis-table [filter]="model()" />
-        } @else {
-          enter filter...
         }
       </div>
     </div>

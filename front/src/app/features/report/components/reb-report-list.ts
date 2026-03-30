@@ -5,6 +5,7 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { RebReport } from '../../../core/models/reb-report';
+import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 
 @Component({
   selector: 'app-reb-report-list',
@@ -14,7 +15,7 @@ import { RebReport } from '../../../core/models/reb-report';
       <table mat-table [dataSource]="dataSource()" matSort>
         <ng-container matColumnDef="expert">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Expert</th>
-          <td mat-cell *matCellDef="let report">{{ report.expert }}</td>
+          <td mat-cell *matCellDef="let report">{{ expertNames[report.expert] }}</td>
         </ng-container>
 
         <ng-container matColumnDef="symbol">
@@ -62,11 +63,10 @@ import { RebReport } from '../../../core/models/reb-report';
 export class RebReportList {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
+  expertNames = EXPERT_NAMES;
 
   dataSource = computed(() => {
-    const dataSource = new MatTableDataSource<RebReport>(
-      this.rebReportService.reports()?.filter((x) => x.expert === 'candleSuite'),
-    );
+    const dataSource = new MatTableDataSource<RebReport>(this.rebReportService.reports());
     dataSource.sort = this.sort();
     return dataSource;
   });
