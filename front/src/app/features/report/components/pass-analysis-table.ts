@@ -2,16 +2,25 @@ import { Component, computed, inject, input, resource, viewChild } from '@angula
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-display.constants';
-import { DecimalPipe, NgClass } from '@angular/common';
+import { DecimalPipe, NgClass, PercentPipe } from '@angular/common';
 import { DisplayPipe } from '../../../core/models/display-pipe';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ReportFilter } from '@shared/models/report-filter';
 import { RebReportService } from 'src/app/services/reb-report.service';
 import { firstValueFrom } from 'rxjs';
+import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+
+interface BacktestLongTermSummary {
+  averageResult: number;
+  averageMonthlyPerformance: number;
+  worstDrawdownAmount: number;
+  worstDrawdownPercent: number;
+  averageRewardRatio: number;
+}
 
 @Component({
   selector: 'app-pass-analysis-table',
-  imports: [NgClass, DecimalPipe, MatTableModule, MatSortModule, ScrollingModule],
+  imports: [NgClass, DecimalPipe, PercentPipe, MatTableModule, MatSortModule, ScrollingModule],
   template: `
     <table
       mat-table
@@ -37,8 +46,48 @@ import { firstValueFrom } from 'rxjs';
               'bg-red-100 text-red-700': pass.score < 0.4,
             }"
           >
-            {{ pass.score * 100 | number: '1.2-2' }}%
+            {{ pass.score | percent: '1.2-2' }}
           </span>
+        </td>
+      </ng-container>
+
+      <ng-container matColumnDef="summary">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-center">Summary</th>
+
+        <td mat-cell *matCellDef="let pass" class="text-center">
+          <div class="flex flex-col items-center gap-1 text-sm">
+            <div class="flex items-baseline justify-center gap-2">
+              <span
+                class="text-lg font-bold"
+                [ngClass]="{
+                  'text-green-600': pass.summary.averageMonthlyPerformance > 0,
+                  'text-red-600': pass.summary.averageMonthlyPerformance < 0,
+                }"
+              >
+                {{ pass.summary.averageMonthlyPerformance | percent: '1.2-2' }}
+              </span>
+
+              <span class="text-xs text-gray-500">/month</span>
+
+              <span class="text-sm text-gray-400">
+                {{ pass.summary.averageResult | number: '1.2-2' }} €
+              </span>
+            </div>
+
+            <div class="flex justify-center gap-2 text-xs">
+              <span class="text-red-500">
+                {{ pass.summary.worstDrawdownAmount | number: '1.2-2' }} €
+              </span>
+              <span class="text-red-400">
+                {{ pass.summary.worstDrawdownPercent / 100 | percent: '1.2-2' }}
+              </span>
+            </div>
+
+            <div class="text-xs text-gray-400">
+              {{ pass.summary.averageRewardRatio | number: '1.2-2' }}
+              <span class="ml-1">€ / DD</span>
+            </div>
+          </div>
         </td>
       </ng-container>
 
@@ -104,6 +153,7 @@ export class PassAnalysisTable {
       ...pass,
       checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
       parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
+      summary: this.getSummary(pass),
     }));
 
     const dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
@@ -112,6 +162,7 @@ export class PassAnalysisTable {
       if (property === 'id') return item.id;
       if (property === 'score') return item.score;
       if (property === 'ok') return item.ok ? 1 : 0;
+      if (property === 'summary') return item.summary.averageMonthlyPerformance;
       if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
       if (item.checksMap?.[property]) {
@@ -136,7 +187,7 @@ export class PassAnalysisTable {
     const firstPass = analysis[0];
     return firstPass.checks.map((c) => c.type);
   });
-  displayedColumns = computed(() => ['id', 'score', ...this.checkColumns()]);
+  displayedColumns = computed(() => ['id', 'score', 'summary', ...this.checkColumns()]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 
   formatValue(value: number, pipe: DisplayPipe): string {
@@ -163,5 +214,29 @@ export class PassAnalysisTable {
     const endLength = Math.floor(maxLength / 2) - 1;
 
     return str.slice(0, startLength) + '…' + str.slice(str.length - endLength);
+  }
+
+  getSummary(pass: BacktestPassAnalysis): BacktestLongTermSummary {
+    if (pass.longTermUnit !== 'year') {
+      throw new Error('Calculation not yet implemented. Only YEAR.');
+    }
+
+    const results = pass.longTermResults;
+    const avg = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
+
+    console.log(
+      results.map((r) => r.drawdownPercent),
+      Math.max(...results.map((r) => r.drawdownPercent)),
+    );
+
+    return {
+      averageResult: avg(results.map((r) => r.result)),
+      averageMonthlyPerformance: avg(
+        results.map((r) => r.result / pass.capital / pass.longTermDuration / 12),
+      ),
+      worstDrawdownAmount: Math.max(...results.map((r) => r.drawdownAmount)),
+      worstDrawdownPercent: Math.max(...results.map((r) => r.drawdownPercent)),
+      averageRewardRatio: avg(results.map((r) => r.result / r.drawdownAmount)),
+    };
   }
 }

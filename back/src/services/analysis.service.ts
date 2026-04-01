@@ -1,12 +1,12 @@
-// import definitions from '@shared/constants/backtest-threshold-definitions.ts';
-import { BacktestThreshold } from '@shared/models/backtest-threshold.js';
-import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.js';
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.js';
+import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
+import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
+import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from 'src/db/collections.ts';
 import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { ReportFilter } from '@shared/models/report-filter.ts';
 import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 import { parseRebPass } from './parser/reb-report.parser.ts';
+import { RebReport } from 'src/db/models/reb-report.ts';
 
 export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -37,19 +37,19 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
 
   for (const report of reports) {
     const passes = await parseRebPass(report.path);
-    analysis.push(...analyzePasses(passes, thresholds, report.capital));
+    analysis.push(...analyzePasses(report, passes, thresholds));
   }
 
   return analysis;
 }
 
 export function analyzePasses(
+  report: RebReport,
   passes: BacktestPass[],
   thresholds: BacktestThreshold[],
-  capital: number,
 ): BacktestPassAnalysis[] {
   return passes.map((pass) => {
-    const checks = thresholds.map((threshold) => checkThreshold(pass, threshold, capital));
+    const checks = thresholds.map((threshold) => checkThreshold(pass, threshold, report.capital));
     const ok = checks.every((c) => c.ok);
 
     const weightMap = Object.fromEntries(thresholds.map((t) => [t.type, t.weight ?? 1]));
@@ -61,7 +61,18 @@ export function analyzePasses(
     );
     const finalScore = hasCriticalFail ? score * 0.7 : score;
 
-    return { ...pass, ok, checks, score: finalScore };
+    return {
+      ...pass,
+      ok,
+      checks,
+      score: finalScore,
+      capital: report.capital,
+      shortTermCount: report.shortTermCount,
+      shortTermDuration: report.shortTermDuration,
+      shortTermUnit: report.shortTermUnit,
+      longTermDuration: report.longTermDuration,
+      longTermUnit: report.longTermUnit,
+    };
   });
 }
 
