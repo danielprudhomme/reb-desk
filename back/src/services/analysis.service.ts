@@ -14,14 +14,16 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
   if (filter.reportId) {
     query.id = filter.reportId;
   } else {
-    if (filter.expert) {
-      query.expert = filter.expert;
+    if (filter.experts?.length) {
+      query.expert = { $in: filter.experts };
     }
-    if (filter.symbol) {
-      query.symbol = filter.symbol;
+
+    if (filter.symbols?.length) {
+      query.symbol = { $in: filter.symbols };
     }
-    if (filter.timeframe) {
-      query.timeframe = filter.timeframe;
+
+    if (filter.timeframes?.length) {
+      query.timeframe = { $in: filter.timeframes };
     }
   }
 

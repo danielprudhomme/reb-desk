@@ -1,4 +1,4 @@
-import { Component, computed, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, signal, viewChild } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { RebReportService } from '../../../services/reb-report.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -6,16 +6,21 @@ import { RouterLink } from '@angular/router';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { RebReport } from '../../../core/models/reb-report';
 import { EXPERT_NAMES } from '@shared/constants/expert.constants';
+import { FilterForm } from './filter-form';
+import { form, FormField } from '@angular/forms/signals';
+import { ReportFilter } from '@shared/models/report-filter';
 
 @Component({
   selector: 'app-reb-report-list',
-  imports: [RouterLink, MatButtonModule, MatTableModule, MatSortModule],
+  imports: [RouterLink, MatButtonModule, MatTableModule, MatSortModule, FilterForm, FormField],
   template: `
+    <app-filter-form [formField]="filterForm" />
+
     <div class="h-full overflow-auto">
       <table mat-table [dataSource]="dataSource()" matSort>
         <ng-container matColumnDef="expert">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Expert</th>
-          <td mat-cell *matCellDef="let report">{{ expertNames[report.expert] }}</td>
+          <td mat-cell *matCellDef="let report">{{ $any(expertNames)[report.expert] }}</td>
         </ng-container>
 
         <ng-container matColumnDef="symbol">
@@ -64,9 +69,21 @@ export class RebReportList {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
   expertNames = EXPERT_NAMES;
+  filterModel = signal<ReportFilter>({ symbols: [], timeframes: [], experts: [] });
+  filterForm = form(this.filterModel);
 
   dataSource = computed(() => {
-    const dataSource = new MatTableDataSource<RebReport>(this.rebReportService.reports());
+    const { symbols, timeframes, experts } = this.filterModel();
+    const reports = this.rebReportService
+      .reports()
+      ?.filter(
+        (report) =>
+          (symbols.length === 0 || symbols.includes(report.symbol)) &&
+          (timeframes.length === 0 || timeframes.includes(report.timeframe)) &&
+          (experts.length === 0 || experts.includes(report.expert)),
+      );
+
+    const dataSource = new MatTableDataSource<RebReport>(reports);
     dataSource.sort = this.sort();
     return dataSource;
   });

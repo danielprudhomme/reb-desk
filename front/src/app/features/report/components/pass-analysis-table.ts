@@ -105,7 +105,6 @@ export class PassAnalysisTable {
       checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
       parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
     }));
-    console.log('DS', analysisWithAdditionalMaps);
 
     const dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
 
