@@ -3,24 +3,26 @@ import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-display.constants';
 import { DecimalPipe, NgClass, PercentPipe } from '@angular/common';
-import { DisplayPipe } from '../../../core/models/display-pipe';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ReportFilter } from '@shared/models/report-filter';
 import { RebReportService } from 'src/app/services/reb-report.service';
 import { firstValueFrom } from 'rxjs';
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
-
-interface BacktestLongTermSummary {
-  averageResult: number;
-  averageMonthlyPerformance: number;
-  worstDrawdownAmount: number;
-  worstDrawdownPercent: number;
-  averageRewardRatio: number;
-}
+import { PassAnalysisLongTermSummaryCell } from './pass-analysis-long-term-summary-cell';
+import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
+import { FormatPipe } from 'src/app/shared/pipes/format.pipe';
 
 @Component({
   selector: 'app-pass-analysis-table',
-  imports: [NgClass, DecimalPipe, PercentPipe, MatTableModule, MatSortModule, ScrollingModule],
+  imports: [
+    NgClass,
+    DecimalPipe,
+    PercentPipe,
+    MatTableModule,
+    MatSortModule,
+    ScrollingModule,
+    PassAnalysisLongTermSummaryCell,
+    FormatPipe,
+  ],
   template: `
     <table
       mat-table
@@ -51,43 +53,11 @@ interface BacktestLongTermSummary {
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="summary">
+      <ng-container matColumnDef="longTermSummary">
         <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-center">Summary</th>
 
         <td mat-cell *matCellDef="let pass" class="text-center">
-          <div class="flex flex-col items-center gap-1 text-sm">
-            <div class="flex items-baseline justify-center gap-2">
-              <span
-                class="text-lg font-bold"
-                [ngClass]="{
-                  'text-green-600': pass.summary.averageMonthlyPerformance > 0,
-                  'text-red-600': pass.summary.averageMonthlyPerformance < 0,
-                }"
-              >
-                {{ pass.summary.averageMonthlyPerformance | percent: '1.2-2' }}
-              </span>
-
-              <span class="text-xs text-gray-500">/month</span>
-
-              <span class="text-sm text-gray-400">
-                {{ pass.summary.averageResult | number: '1.2-2' }} €
-              </span>
-            </div>
-
-            <div class="flex justify-center gap-2 text-xs">
-              <span class="text-red-500">
-                {{ pass.summary.worstDrawdownAmount | number: '1.2-2' }} €
-              </span>
-              <span class="text-red-400">
-                {{ pass.summary.worstDrawdownPercent / 100 | percent: '1.2-2' }}
-              </span>
-            </div>
-
-            <div class="text-xs text-gray-400">
-              {{ pass.summary.averageRewardRatio | number: '1.2-2' }}
-              <span class="ml-1">€ / DD</span>
-            </div>
-          </div>
+          <app-pass-analysis-long-term-summary-cell [longTermSummary]="pass.longTermSummary" />
         </td>
       </ng-container>
 
@@ -103,7 +73,7 @@ interface BacktestLongTermSummary {
             @if (pass.checksMap[thresholdType]; as check) {
               <div [class.text-green-300]="check.ok" [class.text-red-300]="!check.ok">
                 <div>
-                  {{ formatValue(check.worstValue, $any(displayConfig)[thresholdType]?.pipe) }}
+                  {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
                 </div>
 
                 <div class="text-xs opacity-70">
@@ -153,7 +123,7 @@ export class PassAnalysisTable {
       ...pass,
       checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
       parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
-      summary: this.getSummary(pass),
+      longTermSummary: new BacktestLongTermSummary(pass),
     }));
 
     const dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
@@ -162,7 +132,7 @@ export class PassAnalysisTable {
       if (property === 'id') return item.id;
       if (property === 'score') return item.score;
       if (property === 'ok') return item.ok ? 1 : 0;
-      if (property === 'summary') return item.summary.averageMonthlyPerformance;
+      if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;
       if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
       if (item.checksMap?.[property]) {
@@ -187,56 +157,6 @@ export class PassAnalysisTable {
     const firstPass = analysis[0];
     return firstPass.checks.map((c) => c.type);
   });
-  displayedColumns = computed(() => ['id', 'score', 'summary', ...this.checkColumns()]);
+  displayedColumns = computed(() => ['id', 'score', 'longTermSummary', ...this.checkColumns()]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
-
-  formatValue(value: number, pipe: DisplayPipe): string {
-    switch (pipe) {
-      case 'percent':
-        return `${value.toFixed(2)} %`;
-
-      case 'amount':
-        return `${value.toFixed(0)} €`;
-
-      case 'ratio':
-        return value.toFixed(2);
-
-      case 'number':
-      default:
-        return value.toString();
-    }
-  }
-
-  sliceMiddle(str: string, maxLength: number): string {
-    if (str.length <= maxLength) return str;
-
-    const startLength = Math.ceil(maxLength / 2) - 1;
-    const endLength = Math.floor(maxLength / 2) - 1;
-
-    return str.slice(0, startLength) + '…' + str.slice(str.length - endLength);
-  }
-
-  getSummary(pass: BacktestPassAnalysis): BacktestLongTermSummary {
-    if (pass.longTermUnit !== 'year') {
-      throw new Error('Calculation not yet implemented. Only YEAR.');
-    }
-
-    const results = pass.longTermResults;
-    const avg = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
-
-    console.log(
-      results.map((r) => r.drawdownPercent),
-      Math.max(...results.map((r) => r.drawdownPercent)),
-    );
-
-    return {
-      averageResult: avg(results.map((r) => r.result)),
-      averageMonthlyPerformance: avg(
-        results.map((r) => r.result / pass.capital / pass.longTermDuration / 12),
-      ),
-      worstDrawdownAmount: Math.max(...results.map((r) => r.drawdownAmount)),
-      worstDrawdownPercent: Math.max(...results.map((r) => r.drawdownPercent)),
-      averageRewardRatio: avg(results.map((r) => r.result / r.drawdownAmount)),
-    };
-  }
 }
