@@ -54,9 +54,9 @@ import { FormatPipe } from 'src/app/shared/pipes/format.pipe';
       </ng-container>
 
       <ng-container matColumnDef="longTermSummary">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header class="text-center">Summary</th>
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Summary</th>
 
-        <td mat-cell *matCellDef="let pass" class="text-center">
+        <td mat-cell *matCellDef="let pass">
           <app-pass-analysis-long-term-summary-cell [longTermSummary]="pass.longTermSummary" />
         </td>
       </ng-container>
