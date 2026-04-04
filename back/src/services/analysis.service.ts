@@ -79,9 +79,6 @@ export function analyzePasses(
   });
 }
 
-/**
- * compare simple > / <
- */
 function compare(value: number, operator: '>' | '<', threshold: number): boolean {
   return operator === '>' ? value > threshold : value < threshold;
 }
@@ -92,18 +89,22 @@ function compare(value: number, operator: '>' | '<', threshold: number): boolean
  * score = 0 if value is clearly bad
  * score in (0,1) if value is near threshold
  */
-function computeValueScore(value: number, threshold: number, operator: '>' | '<'): number {
-  const margin = operator === '>' ? threshold * 0.2 : threshold * 0.2; // 20% margin
+function computeValueScore(value: number, threshold: BacktestThreshold): number {
+  const { operator, value: thresoldValue } = threshold;
+
+  const margin = thresoldValue * 0.2; // 20% margin
   if (operator === '>') {
-    if (value >= threshold + margin) return 1; // clearly excellent
-    if (value >= threshold) return 0.7 + (0.3 * (value - threshold)) / margin; // slightly above threshold
-    if (value >= threshold - margin) return 0.4 + (0.3 * (value - (threshold - margin))) / margin; // slightly below
+    if (value >= thresoldValue + margin) return 1; // clearly excellent
+    if (value >= thresoldValue) return 0.7 + (0.3 * (value - thresoldValue)) / margin; // slightly above thresoldValue
+    if (value >= thresoldValue - margin)
+      return 0.4 + (0.3 * (value - (thresoldValue - margin))) / margin; // slightly below
     return 0; // clearly below
   } else {
     // '<'
-    if (value <= threshold - margin) return 1; // clearly excellent
-    if (value <= threshold) return 0.7 + (0.3 * (threshold - value)) / margin; // slightly below threshold
-    if (value <= threshold + margin) return 0.4 + (0.3 * (threshold + margin - value)) / margin; // slightly above threshold
+    if (value <= thresoldValue - margin) return 1; // clearly excellent
+    if (value <= thresoldValue) return 0.7 + (0.3 * (thresoldValue - value)) / margin; // slightly below thresoldValue
+    if (value <= thresoldValue + margin)
+      return 0.4 + (0.3 * (thresoldValue + margin - value)) / margin; // slightly above thresoldValue
     return 0; // clearly bad
   }
 }
@@ -117,7 +118,6 @@ function checkThreshold(
   threshold: BacktestThreshold,
   capital: number,
 ): BacktestThresholdCheck {
-  // get all values for this threshold
   const values = BACKTEST_THRESHOLD_PROPERTIES[threshold.type](pass, capital);
 
   if (!values.length) {
@@ -135,7 +135,7 @@ function checkThreshold(
   const rate = (validCount / values.length) * 100;
 
   // compute per-value scores
-  const valueScores = values.map((v) => computeValueScore(v, threshold.value, threshold.operator));
+  const valueScores = values.map((v) => computeValueScore(v, threshold));
 
   // aggregate into threshold score:
   // - average score
@@ -144,11 +144,14 @@ function checkThreshold(
   const minScore = Math.min(...valueScores);
 
   // simple rule: if minScore very low but avgScore high, keep avgScore * 0.8
-  const score = minScore < 0.5 && avgScore > 0.7 ? avgScore * 0.8 : avgScore;
+  // const score = minScore < 0.5 && avgScore > 0.7 ? avgScore * 0.8 : avgScore;
+
+  const ok = rate >= threshold.passRate;
+  const score = ok ? minScore : 0;
 
   return {
     type: threshold.type,
-    ok: rate >= threshold.passRate,
+    ok,
     worstValue: threshold.operator === '>' ? Math.min(...values) : Math.max(...values),
     rate,
     requiredRate: threshold.passRate,

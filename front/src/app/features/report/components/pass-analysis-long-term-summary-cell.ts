@@ -24,13 +24,13 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         <span class="text-xs text-gray-500">/month</span>
 
         <span class="text-sm text-gray-400" matTooltip="Average LT result">
-          {{ summary.averageResult | number: '1.2-2' }} €
+          {{ summary.averageResult | number: '1.0-0' }} €
         </span>
       </div>
 
       <div class="flex justify-center gap-2 text-xs">
         <span class="text-red-500" matTooltip="Worst LT DD amount">
-          {{ summary.worstDrawdownAmount | number: '1.2-2' }} €
+          {{ summary.worstDrawdownAmount | number: '1.0-0' }} €
         </span>
         <span class="text-red-400" matTooltip="Worst LT DD percent">
           {{ summary.worstDrawdownPercent / 100 | percent: '1.2-2' }}
