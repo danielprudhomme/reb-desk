@@ -10,6 +10,7 @@ import { firstValueFrom } from 'rxjs';
 import { PassAnalysisLongTermSummaryCell } from './pass-analysis-long-term-summary-cell';
 import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
 import { FormatPipe } from 'src/app/shared/pipes/format.pipe';
+import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 
 @Component({
   selector: 'app-pass-analysis-table',
@@ -32,9 +33,19 @@ import { FormatPipe } from 'src/app/shared/pipes/format.pipe';
       matSortDirection="desc"
       matSortDisableClear
     >
-      <ng-container matColumnDef="id" [sticky]="true">
-        <th mat-header-cell *matHeaderCellDef mat-sort-header>Number</th>
-        <td mat-cell *matCellDef="let pass">{{ pass.id }}</td>
+      <ng-container matColumnDef="expert" [sticky]="true">
+        <th mat-header-cell *matHeaderCellDef>Expert</th>
+        <td mat-cell *matCellDef="let pass">{{ pass.expertName }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="symbol" [sticky]="true">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>Symbol</th>
+        <td mat-cell *matCellDef="let pass">{{ pass.symbol }}</td>
+      </ng-container>
+
+      <ng-container matColumnDef="timeframe" [sticky]="true">
+        <th mat-header-cell *matHeaderCellDef mat-sort-header>TF</th>
+        <td mat-cell *matCellDef="let pass">{{ pass.timeframe }}</td>
       </ng-container>
 
       <ng-container matColumnDef="score" [sticky]="true">
@@ -121,6 +132,7 @@ export class PassAnalysisTable {
 
     const analysisWithAdditionalMaps = analysis.map((pass) => ({
       ...pass,
+      expertName: EXPERT_NAMES[pass.expert],
       checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
       parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
       longTermSummary: new BacktestLongTermSummary(pass),
@@ -157,6 +169,13 @@ export class PassAnalysisTable {
     const firstPass = analysis[0];
     return firstPass.checks.map((c) => c.type);
   });
-  displayedColumns = computed(() => ['id', 'score', 'longTermSummary', ...this.checkColumns()]);
+  displayedColumns = computed(() => [
+    'expert',
+    'symbol',
+    'timeframe',
+    'score',
+    'longTermSummary',
+    ...this.checkColumns(),
+  ]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
 }
