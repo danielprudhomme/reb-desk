@@ -118,28 +118,44 @@ export function analyzePasses2(
 
       const minMax = minMaxByType[threshold.type];
 
-      // ❌ Si KO → score = 0
-      if (!check.ok || !minMax || minMax.min === minMax.max) {
+      if (!minMax || minMax.min === minMax.max) {
         check.score = 0;
         return check;
       }
 
-      let normalized: number;
+      // ===== CAS 1 : OK =====
+      if (check.ok) {
+        let normalized =
+          threshold.operator === '>'
+            ? (check.worstValue - minMax.min) / (minMax.max - minMax.min)
+            : (minMax.max - check.worstValue) / (minMax.max - minMax.min);
 
-      if (threshold.operator === '>') {
-        // plus grand = meilleur
-        normalized = (check.worstValue - minMax.min) / (minMax.max - minMax.min);
-      } else {
-        // plus petit = meilleur
-        normalized = (minMax.max - check.worstValue) / (minMax.max - minMax.min);
+        normalized = Math.max(0, Math.min(1, normalized));
+
+        check.score = 0.5 + 0.5 * Math.pow(normalized, 2);
+        return check;
       }
 
-      // clamp sécurité
-      normalized = Math.max(0, Math.min(1, normalized));
+      // ===== CAS 2 : MARGE (uniquement pour rate) =====
+      const { usedValue } = BACKTEST_THRESHOLD_PROPERTIES[threshold.type];
+      if (usedValue === 'rate') {
+        const margin = threshold.passRate * 0.1;
+        const minAcceptableRate = threshold.passRate - margin;
 
-      // projection dans [0.5 ; 1]
-      check.score = 0.5 + 0.5 * Math.pow(normalized, 2);
+        if (check.rate >= minAcceptableRate) {
+          // normalisation dans la zone [minAcceptableRate ; passRate]
+          const normalized =
+            (check.rate - minAcceptableRate) / (threshold.passRate - minAcceptableRate);
 
+          // score entre 0 → 0.5
+          check.score = 0.5 * Math.pow(normalized, 2);
+
+          return check;
+        }
+      }
+
+      // ===== CAS 3 : FAIL =====
+      check.score = 0;
       return check;
     });
 

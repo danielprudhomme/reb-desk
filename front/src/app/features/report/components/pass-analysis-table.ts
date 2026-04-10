@@ -35,7 +35,7 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
     >
       <ng-container matColumnDef="expert" [sticky]="true">
         <th mat-header-cell *matHeaderCellDef>Expert</th>
-        <td mat-cell *matCellDef="let pass">{{ pass.expertName }}</td>
+        <td mat-cell *matCellDef="let pass">{{ pass.expertName }} {{ pass.id }} {{ pass.ok }}</td>
       </ng-container>
 
       <ng-container matColumnDef="symbol" [sticky]="true">
@@ -82,7 +82,11 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 
           <td mat-cell *matCellDef="let pass">
             @if (pass.checksMap[thresholdType]; as check) {
-              <div [class.text-green-300]="check.ok" [class.text-red-300]="!check.ok">
+              <div
+                [class.text-green-300]="check.score >= 0.5"
+                [class.text-yellow-300]="check.score > 0 && check.score < 0.5"
+                [class.text-red-300]="check.score === 0"
+              >
                 <div>
                   {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
                 </div>
@@ -90,6 +94,8 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
                 <div class="text-xs opacity-70">
                   {{ check.rate | number: '1.0-0' }}% / {{ check.requiredRate | number: '1.0-0' }}%
                 </div>
+
+                <div>{{ check.score | number: '1.2-2' }}</div>
               </div>
             }
           </td>
