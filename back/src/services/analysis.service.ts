@@ -168,7 +168,7 @@ export function analyzePasses2(
     const hasCriticalFail = checks.some(
       (c) => !c.ok && (thresholds.find((t) => t.type === c.type)?.weight ?? 1) >= 3,
     );
-    const finalScore = hasCriticalFail ? score * 0.7 : score;
+    const finalScore = !ok ? (hasCriticalFail ? score * 0.5 : score * 0.8) : score;
 
     return {
       ...pass,
