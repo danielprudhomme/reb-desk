@@ -2,7 +2,7 @@ import { Component, computed, inject, input, resource, viewChild } from '@angula
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-display.constants';
-import { DecimalPipe, NgClass, PercentPipe } from '@angular/common';
+import { DecimalPipe, NgClass } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ReportFilter } from '@shared/models/report-filter';
 import { RebReportService } from 'src/app/services/reb-report.service';
@@ -17,7 +17,6 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
   imports: [
     NgClass,
     DecimalPipe,
-    PercentPipe,
     MatTableModule,
     MatSortModule,
     ScrollingModule,
@@ -35,7 +34,7 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
     >
       <ng-container matColumnDef="expert" [sticky]="true">
         <th mat-header-cell *matHeaderCellDef>Expert</th>
-        <td mat-cell *matCellDef="let pass">{{ pass.expertName }} {{ pass.id }} {{ pass.ok }}</td>
+        <td mat-cell *matCellDef="let pass">{{ pass.expertName }}</td>
       </ng-container>
 
       <ng-container matColumnDef="symbol" [sticky]="true">
@@ -59,7 +58,7 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
               'bg-red-100 text-red-700': pass.score < 0.4,
             }"
           >
-            {{ pass.score | percent: '1.2-2' }}
+            {{ pass.score * 100 | number: '1.2-2' }}
           </span>
         </td>
       </ng-container>

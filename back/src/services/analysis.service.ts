@@ -56,17 +56,17 @@ export function analyzePasses2(
   passes: BacktestPass[],
   thresholds: BacktestThreshold[],
 ): BacktestPassAnalysis[] {
-  // pour chaque threshold, j'ai besoin de toutes les pires valeurs de chaque passage
-  const worstValidValuesByType: Record<BacktestThresholdType, number[]> = {} as Record<
+  const valuesByType: Record<
     BacktestThresholdType,
-    number[]
-  >;
+    { worstValues: number[]; min: number; max: number }
+  > = {} as Record<BacktestThresholdType, { worstValues: number[]; min: number; max: number }>;
 
   const checkPasses: Record<string, BacktestThresholdCheck[]> = {} as Record<
     string,
     BacktestThresholdCheck[]
   >;
 
+  // premier passage, pour récupérer toutes les valeurs (ensuite on compare les valeurs entre elles)
   passes.forEach((pass) => {
     thresholds.forEach((threshold) => {
       const { compute } = BACKTEST_THRESHOLD_PROPERTIES[threshold.type];
@@ -82,7 +82,18 @@ export function analyzePasses2(
         threshold.operator === '>' ? Math.min(...passValues) : Math.max(...passValues);
 
       if (ok) {
-        (worstValidValuesByType[threshold.type] ??= []).push(worstValue);
+        const values = valuesByType[threshold.type];
+        if (values) {
+          values.worstValues.push(worstValue);
+          values.min = Math.min(values.min, worstValue);
+          values.max = Math.max(values.max, worstValue);
+        } else {
+          valuesByType[threshold.type] = {
+            worstValues: [worstValue],
+            min: worstValue,
+            max: worstValue,
+          };
+        }
       }
 
       const check: BacktestThresholdCheck = {
@@ -98,27 +109,15 @@ export function analyzePasses2(
     });
   });
 
-  const minMaxByType: Record<BacktestThresholdType, { min: number; max: number }> = {} as Record<
-    BacktestThresholdType,
-    { min: number; max: number }
-  >;
-
-  Object.entries(worstValidValuesByType).forEach(([type, values]) => {
-    minMaxByType[type as BacktestThresholdType] = {
-      min: Math.min(...values),
-      max: Math.max(...values),
-    };
-  });
-
   return passes.map((pass) => {
     const checkByType = Object.fromEntries(checkPasses[pass.id].map((c) => [c.type, c]));
 
     const checks = thresholds.map((threshold) => {
       const check = checkByType[threshold.type];
 
-      const minMax = minMaxByType[threshold.type];
+      const { min, max } = valuesByType[threshold.type];
 
-      if (!minMax || minMax.min === minMax.max) {
+      if (!min || min === max) {
         check.score = 0;
         return check;
       }
@@ -127,8 +126,8 @@ export function analyzePasses2(
       if (check.ok) {
         let normalized =
           threshold.operator === '>'
-            ? (check.worstValue - minMax.min) / (minMax.max - minMax.min)
-            : (minMax.max - check.worstValue) / (minMax.max - minMax.min);
+            ? (check.worstValue - min) / (max - min)
+            : (max - check.worstValue) / (max - min);
 
         normalized = Math.max(0, Math.min(1, normalized));
 
@@ -175,6 +174,7 @@ export function analyzePasses2(
       ok,
       checks,
       score: finalScore,
+      reportId: report.id,
       expert: report.expert,
       symbol: report.symbol,
       timeframe: report.timeframe,

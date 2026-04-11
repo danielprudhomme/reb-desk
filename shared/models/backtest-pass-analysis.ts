@@ -7,6 +7,7 @@ export interface BacktestPassAnalysis extends BacktestPass {
   ok: boolean;
   checks: BacktestThresholdCheck[];
   score: number;
+  reportId: string;
   expert: ExpertAdvisor;
   symbol: string;
   timeframe: string;
