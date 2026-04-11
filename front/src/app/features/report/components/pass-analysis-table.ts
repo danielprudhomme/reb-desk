@@ -146,7 +146,6 @@ export class PassAnalysisTable {
     const dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
 
     dataSource.sortingDataAccessor = (item, property) => {
-      if (property === 'id') return item.id;
       if (property === 'score') return item.score;
       if (property === 'ok') return item.ok ? 1 : 0;
       if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;

@@ -1,13 +1,17 @@
 import { BacktestThresholdCheck } from './backtest-threshold-check';
-import { BacktestPass } from './backtest-pass';
 import { TimeUnit } from './time-unit';
 import { ExpertAdvisor } from './expert-advisor';
+import { BacktestPassResult } from './backtest-pass-result';
+import { BacktestPassParameter } from './backtest-pass-parameter';
 
-export interface BacktestPassAnalysis extends BacktestPass {
+export interface BacktestPassAnalysis {
   ok: boolean;
   checks: BacktestThresholdCheck[];
   score: number;
   reportId: string;
+  passId: number;
+  parameters: BacktestPassParameter[];
+  longTermResults: BacktestPassResult[];
   expert: ExpertAdvisor;
   symbol: string;
   timeframe: string;

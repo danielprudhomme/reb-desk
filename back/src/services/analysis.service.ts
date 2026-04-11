@@ -40,7 +40,7 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
     const passes = await parseRebPass(report.path);
 
     analysis.push(
-      ...analyzePasses2(
+      ...analyzePasses(
         report,
         passes, //.filter((x) => x.id == 157),
         thresholds,
@@ -51,7 +51,7 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
   return analysis;
 }
 
-export function analyzePasses2(
+export function analyzePasses(
   report: RebReport,
   passes: BacktestPass[],
   thresholds: BacktestThreshold[],
@@ -153,12 +153,44 @@ export function analyzePasses2(
         }
       }
 
+      // ===== CAS 2 BIS : MARGE pour VALUE =====
+      if (usedValue === 'value' && check.rate > threshold.passRate * 0.5) {
+        const marginPercent = 0.1; // 10%
+        const margin = threshold.value * marginPercent;
+
+        if (threshold.operator === '<') {
+          const maxAcceptable = threshold.value + margin;
+
+          if (check.worstValue <= maxAcceptable) {
+            const normalized =
+              (maxAcceptable - check.worstValue) / (maxAcceptable - threshold.value);
+
+            check.score = 0.5 * Math.pow(Math.max(0, Math.min(1, normalized)), 2);
+
+            return check;
+          }
+        }
+
+        if (threshold.operator === '>') {
+          const minAcceptable = threshold.value - margin;
+
+          if (check.worstValue >= minAcceptable) {
+            const normalized =
+              (check.worstValue - minAcceptable) / (threshold.value - minAcceptable);
+
+            check.score = 0.5 * Math.pow(Math.max(0, Math.min(1, normalized)), 2);
+
+            return check;
+          }
+        }
+      }
+
       // ===== CAS 3 : FAIL =====
       check.score = 0;
       return check;
     });
 
-    const ok = checks.every((c) => c.ok);
+    const ok = checks.every((c) => c.score > 0);
 
     const weightMap = Object.fromEntries(thresholds.map((t) => [t.type, t.weight ?? 1]));
     const totalWeight = checks.reduce((acc, c) => acc + weightMap[c.type], 0);
@@ -167,14 +199,16 @@ export function analyzePasses2(
     const hasCriticalFail = checks.some(
       (c) => !c.ok && (thresholds.find((t) => t.type === c.type)?.weight ?? 1) >= 3,
     );
-    const finalScore = !ok ? (hasCriticalFail ? score * 0.5 : score * 0.8) : score;
+    const finalScore = !ok ? (hasCriticalFail ? score * 0.5 : score * 0.75) : score;
 
     return {
-      ...pass,
       ok,
       checks,
       score: finalScore,
       reportId: report.id,
+      passId: pass.id,
+      parameters: pass.parameters,
+      longTermResults: pass.longTermResults,
       expert: report.expert,
       symbol: report.symbol,
       timeframe: report.timeframe,
@@ -228,7 +262,7 @@ const thresholds: BacktestThreshold[] = [
   {
     type: 'longTermDrawdownAmount',
     operator: '<',
-    value: 550,
+    value: 400,
     passRate: 100,
     weight: 1,
   },
