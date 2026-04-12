@@ -1,14 +1,17 @@
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
+import {
+  BacktestPassAnalysis,
+  GroupedBacktestPassAnalysis,
+} from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from '../../db/collections.ts';
 import { ReportFilter } from '@shared/models/report-filter.ts';
 import { parseRebPass } from '../parser/reb-report.parser.ts';
-import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
 import { runChecks } from './run-check.ts';
 import { computeScore } from './compute-score.ts';
 import { groupPasses } from './group-passes.ts';
+import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 
-export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
+export async function runAnalysis(filter: ReportFilter): Promise<GroupedBacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
   if (filter.reportId) {
@@ -31,32 +34,22 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function analyzeReports(query: any): Promise<BacktestPassAnalysis[]> {
+async function analyzeReports(query: any): Promise<GroupedBacktestPassAnalysis[]> {
   const reports = collections.RebReport().find(query);
 
   if (!reports.length) {
     throw new Error('No reports found for given filters');
   }
   const analyzedPasses: BacktestPassAnalysis[] = [];
-  const valuesByType: Record<
-    BacktestThresholdType,
-    { worstValues: number[]; min: number; max: number }
-  > = {} as Record<BacktestThresholdType, { worstValues: number[]; min: number; max: number }>;
+  const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
 
   for (const report of reports) {
     const passes = await parseRebPass(report.path);
-    analyzedPasses.push(
-      ...runChecks(
-        report,
-        passes, //.filter((x) => x.id === 1215 || x.id === 1197),
-        thresholds,
-        valuesByType,
-      ),
-    );
+    analyzedPasses.push(...runChecks(report, passes, thresholds, valuesByType));
   }
 
-  computeScore(analyzedPasses, thresholds, valuesByType);
   const groupedPasses = groupPasses(analyzedPasses, 0.2);
+  computeScore(groupedPasses, thresholds, valuesByType);
 
   return groupedPasses;
 }

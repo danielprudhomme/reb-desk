@@ -1,4 +1,4 @@
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
 
 export class BacktestLongTermSummary {
   averageResult: number;
@@ -7,7 +7,7 @@ export class BacktestLongTermSummary {
   worstDrawdownPercent: number;
   averageRewardRatio: number;
 
-  constructor(pass: BacktestPassAnalysis) {
+  constructor(pass: GroupedBacktestPassAnalysis) {
     if (pass.longTermUnit !== 'year') {
       throw new Error('Calculation not yet implemented. Only YEAR.');
     }

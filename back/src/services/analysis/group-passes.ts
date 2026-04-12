@@ -1,18 +1,29 @@
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
+import {
+  BacktestPassAnalysis,
+  GroupedBacktestPassAnalysis,
+} from '@shared/models/backtest-pass-analysis.ts';
+import {
+  BacktestPassParameter,
+  GroupedBacktestPassParameter,
+} from '@shared/models/backtest-pass-parameter.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 
 export function groupPasses(
   analyzedPasses: BacktestPassAnalysis[],
-  margin: number = 0.1, // default 10%
-): BacktestPassAnalysis[] {
-  const groups: BacktestPassAnalysis[] = [];
+  margin: number,
+): GroupedBacktestPassAnalysis[] {
+  const groups: GroupedBacktestPassAnalysis[] = [];
 
   for (const pass of analyzedPasses) {
     let foundGroup = false;
 
     for (const group of groups) {
+      if (!areBaseFieldsEqual(pass, group)) continue;
+
       if (arePassesClose(pass, group, margin)) {
-        group.passIds.push(...pass.passIds);
+        // TODO : merge other properties
+        mergeParameters(pass.parameters, group.parameters);
+        group.passes.push({ reportId: pass.reportId, passId: pass.passId });
         foundGroup = true;
         break;
       }
@@ -21,12 +32,31 @@ export function groupPasses(
     if (!foundGroup) {
       groups.push({
         ...pass,
-        passIds: [...pass.passIds],
+        score: 0,
+        passes: [{ reportId: pass.reportId, passId: pass.passId }],
+        parameters: pass.parameters.map((x) => ({ name: x.name, values: [x.value] })),
       });
     }
   }
 
   return groups;
+}
+
+function areBaseFieldsEqual(
+  pass: BacktestPassAnalysis,
+  group: GroupedBacktestPassAnalysis,
+): boolean {
+  return (
+    pass.expert === group.expert &&
+    pass.symbol === group.symbol &&
+    pass.timeframe === group.timeframe &&
+    pass.capital === group.capital &&
+    pass.shortTermCount === group.shortTermCount &&
+    pass.shortTermDuration === group.shortTermDuration &&
+    pass.shortTermUnit === group.shortTermUnit &&
+    pass.longTermDuration === group.longTermDuration &&
+    pass.longTermUnit === group.longTermUnit
+  );
 }
 
 function isClose(a: number, b: number, margin: number): boolean {
@@ -55,19 +85,34 @@ function areChecksClose(
   );
 }
 
-function arePassesClose(a: BacktestPassAnalysis, b: BacktestPassAnalysis, margin: number): boolean {
-  if (a.checks.length !== b.checks.length) return false;
+function arePassesClose(
+  pass: BacktestPassAnalysis,
+  group: GroupedBacktestPassAnalysis,
+  margin: number,
+): boolean {
+  const mapGroup = new Map(group.checks.map((c) => [c.type, c]));
 
-  const mapB = new Map(b.checks.map((c) => [c.type, c]));
+  for (const checkPass of pass.checks) {
+    const checkGroup = mapGroup.get(checkPass.type);
 
-  for (const checkA of a.checks) {
-    const checkB = mapB.get(checkA.type);
-    if (!checkB) return false;
-
-    if (!areChecksClose(checkA, checkB, margin)) {
+    if (!checkGroup || !areChecksClose(checkPass, checkGroup, margin)) {
       return false;
     }
   }
 
   return true;
+}
+
+function mergeParameters(
+  source: BacktestPassParameter[],
+  target: GroupedBacktestPassParameter[],
+): void {
+  for (let i = 0; i < source.length; i++) {
+    const value = source[i].value;
+    const values = target[i].values;
+
+    if (!values.includes(value)) {
+      values.push(value);
+    }
+  }
 }

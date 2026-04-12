@@ -3,14 +3,14 @@ import { RebReport } from '@sec/db/models/reb-report.ts';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
-import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
+import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 
 export function runChecks(
   report: RebReport,
   passes: BacktestPass[],
   thresholds: BacktestThreshold[],
-  valuesByType: Record<BacktestThresholdType, { worstValues: number[]; min: number; max: number }>,
+  valuesByType: ValuesByThresholdType,
 ): BacktestPassAnalysis[] {
   return passes.map((pass) => {
     const checks: BacktestThresholdCheck[] = thresholds.map((threshold) => {
@@ -59,10 +59,10 @@ export function runChecks(
     return {
       ok: false,
       checks,
-      score: 0,
       reportId: report.id,
-      passIds: [pass.id],
-      // parameters: pass.parameters,
+      passId: pass.id,
+      fixedParameters: pass.fixedParameters,
+      parameters: pass.parameters,
       longTermResults: pass.longTermResults,
       expert: report.expert,
       symbol: report.symbol,

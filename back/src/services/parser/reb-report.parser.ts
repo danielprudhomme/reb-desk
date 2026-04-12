@@ -68,17 +68,14 @@ export async function parseRebPass(filePath: string): Promise<BacktestPass[]> {
   const fixedPassParameters = fixedParameters.map((p) => ({
     name: p.name,
     value: p.values[0],
-    fixed: true,
   }));
 
   const passes: BacktestPass[] = passIds.map((passId, index) => {
-    const parameters: BacktestPassParameter[] = [
-      ...fixedPassParameters,
-      ...passParameters[index].map((p) => ({ ...p, fixed: false })),
-    ];
+    const parameters: BacktestPassParameter[] = passParameters[index];
 
     return {
       id: passId,
+      fixedParameters: fixedPassParameters,
       parameters,
       shortTermResults: passShortTermResults[index],
       longTermResults: passLongTermResults[index],

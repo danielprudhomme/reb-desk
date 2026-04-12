@@ -1,19 +1,20 @@
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
+import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import valueTypeConst from '@shared/constants/backtest-threshold-value-type.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
+import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 
 export function computeScore(
-  analyzedPasses: BacktestPassAnalysis[],
+  groupedPasses: GroupedBacktestPassAnalysis[],
   thresholds: BacktestThreshold[],
-  valuesByType: Record<BacktestThresholdType, { worstValues: number[]; min: number; max: number }>,
+  valuesByType: ValuesByThresholdType,
 ) {
   const thresholdsMap: Record<BacktestThresholdType, BacktestThreshold> = Object.fromEntries(
     thresholds.map((t) => [t.type, t]),
   ) as Record<BacktestThresholdType, BacktestThreshold>;
 
-  analyzedPasses.forEach((pass) => {
+  groupedPasses.forEach((pass) => {
     pass.checks.forEach((check) => {
       const { min, max } = valuesByType[check.type];
 
