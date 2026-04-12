@@ -35,7 +35,7 @@ import { PassAnalysisTable } from './pass-analysis-table';
 })
 export class FilterAnalysis {
   model = signal<ReportFilter>({
-    symbols: ['AUDCAD'],
+    symbols: ['AUDUSD'],
     timeframes: ['H1'],
     experts: ['candleSuite'],
   });

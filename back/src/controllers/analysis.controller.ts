@@ -1,6 +1,6 @@
 import { ReportFilter } from '@shared/models/report-filter.ts';
 import { Request, Response } from 'express';
-import { runAnalysis } from '../services/analysis.service.ts';
+import { runAnalysis } from '../services/analysis/analysis.service.ts';
 
 export async function analyze(req: Request, res: Response) {
   try {

@@ -56,9 +56,9 @@ import { MatTooltip } from '@angular/material/tooltip';
           <span
             class="inline-flex items-center gap-1 px-2 py-0.5 text-xs font-semibold rounded-full"
             [ngClass]="{
-              'bg-emerald-100 text-emerald-700': pass.score >= 0.75,
-              'bg-yellow-100 text-yellow-700': pass.score >= 0.4 && pass.score < 0.75,
-              'bg-red-100 text-red-700': pass.score < 0.4,
+              'bg-emerald-100 text-emerald-700': pass.score >= 0.7,
+              'bg-yellow-100 text-yellow-700': pass.score >= 0.5 && pass.score < 0.7,
+              'bg-red-100 text-red-700': pass.score < 0.5,
             }"
           >
             {{ pass.score * 100 | number: '1.2-2' }}
@@ -160,7 +160,7 @@ export class PassAnalysisTable {
       ...pass,
       expertName: EXPERT_NAMES[pass.expert],
       checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
-      parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
+      // parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
       longTermSummary: new BacktestLongTermSummary(pass),
     }));
 
@@ -170,7 +170,7 @@ export class PassAnalysisTable {
       if (property === 'score') return item.score;
       if (property === 'ok') return item.ok ? 1 : 0;
       if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;
-      if (item.parametersMap?.[property]) return item.parametersMap[property].value;
+      // if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
       if (item.checksMap?.[property]) {
         const check = item.checksMap[property];

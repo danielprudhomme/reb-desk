@@ -9,8 +9,8 @@ export interface BacktestPassAnalysis {
   checks: BacktestThresholdCheck[];
   score: number;
   reportId: string;
-  passId: number;
-  parameters: BacktestPassParameter[];
+  passIds: number[];
+  // parameters: BacktestPassParameter[];
   longTermResults: BacktestPassResult[];
   expert: ExpertAdvisor;
   symbol: string;
