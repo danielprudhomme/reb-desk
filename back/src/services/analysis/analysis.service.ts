@@ -6,6 +6,7 @@ import { parseRebPass } from '../parser/reb-report.parser.ts';
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
 import { runChecks } from './run-check.ts';
 import { computeScore } from './compute-score.ts';
+import { groupPasses } from './group-passes.ts';
 
 export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -44,12 +45,20 @@ async function analyzeReports(query: any): Promise<BacktestPassAnalysis[]> {
 
   for (const report of reports) {
     const passes = await parseRebPass(report.path);
-    analyzedPasses.push(...runChecks(report, passes, thresholds, valuesByType));
+    analyzedPasses.push(
+      ...runChecks(
+        report,
+        passes, //.filter((x) => x.id === 1215 || x.id === 1197),
+        thresholds,
+        valuesByType,
+      ),
+    );
   }
 
   computeScore(analyzedPasses, thresholds, valuesByType);
+  const groupedPasses = groupPasses(analyzedPasses, 0.2);
 
-  return analyzedPasses;
+  return groupedPasses;
 }
 
 // A envoyer dans la requête - pas hardcodé
