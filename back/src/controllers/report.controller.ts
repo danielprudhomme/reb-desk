@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { runRebuild, runImport } from 'src/services/import.service.ts';
+import { runRebuild, runImport } from '../services/import.service.ts';
 
 export async function importReports(req: Request, res: Response) {
   const { folderPath } = req.body as { folderPath: string };

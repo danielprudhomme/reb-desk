@@ -1,6 +1,6 @@
 import { randomUUID } from 'node:crypto';
-import type { RebReport } from 'src/db/models/reb-report.ts';
-import { collections } from 'src/db/collections.ts';
+import type { RebReport } from '../../db/models/reb-report.ts';
+import { collections } from '../../db/collections.ts';
 
 export const rebReportResolvers = {
   RebReport: {

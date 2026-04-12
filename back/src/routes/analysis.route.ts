@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { analyze } from 'src/controllers/analysis.controller.ts';
+import { analyze } from '../controllers/analysis.controller.ts';
 
 export const analysisRouter = Router();
 

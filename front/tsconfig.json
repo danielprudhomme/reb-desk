@@ -12,10 +12,10 @@
     "importHelpers": true,
     "target": "ES2022",
     "module": "preserve",
-    "baseUrl": ".",
     "paths": {
       "@shared/*": ["../shared/*"],
-      "@env": ["src/environments/environment"]
+      "@app/*": ["./src/app/*"],
+      "@env": ["./src/environments/environment"]
     }
   },
   "angularCompilerOptions": {

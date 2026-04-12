@@ -4,9 +4,9 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { ReportFilter } from '@shared/models/report-filter';
-import { ExpertSelect } from 'src/app/shared/components/expert-select';
-import { SymbolSelect } from 'src/app/shared/components/symbol-select';
-import { TimeframeSelect } from 'src/app/shared/components/timeframe-select';
+import { ExpertSelect } from '@app/shared/components/expert-select';
+import { SymbolSelect } from '@app/shared/components/symbol-select';
+import { TimeframeSelect } from '@app/shared/components/timeframe-select';
 
 @Component({
   selector: 'app-filter-form',

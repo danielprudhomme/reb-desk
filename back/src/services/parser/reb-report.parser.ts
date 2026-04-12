@@ -3,8 +3,8 @@ import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
-import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
-import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
+import { ParsedRebReport } from '../../models/parsed-reb-report.ts';
+import { ParsedRebParameter } from '../../models/parsed-reb-parameter.ts';
 import {
   extractExpert,
   extractValue,

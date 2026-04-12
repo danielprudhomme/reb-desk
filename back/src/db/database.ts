@@ -1,5 +1,5 @@
 import Loki from 'lokijs';
-import { DB_PATH } from 'src/config.ts';
+import { DB_PATH } from '../config.ts';
 
 export const db = new Loki(DB_PATH, {
   autoload: false,

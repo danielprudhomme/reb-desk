@@ -1,13 +1,14 @@
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
-import { collections } from 'src/db/collections.ts';
+import { collections } from '../db/collections.ts';
 import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { ReportFilter } from '@shared/models/report-filter.ts';
-import { BACKTEST_THRESHOLD_PROPERTIES } from 'src/constants/backtest-threshold.constants.ts';
 import { parseRebPass } from './parser/reb-report.parser.ts';
-import { RebReport } from 'src/db/models/reb-report.ts';
+import { RebReport } from '../db/models/reb-report.ts';
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
+import { BACKTEST_THRESHOLD_COMPUTE } from '../constants/backtest-threshold.constants.ts';
+import valueTypeConst from '@shared/constants/backtest-threshold-value-type.ts';
 
 export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -39,13 +40,7 @@ export async function runAnalysis(filter: ReportFilter): Promise<BacktestPassAna
   for (const report of reports) {
     const passes = await parseRebPass(report.path);
 
-    analysis.push(
-      ...analyzePasses(
-        report,
-        passes, //.filter((x) => x.id == 157),
-        thresholds,
-      ),
-    );
+    analysis.push(...analyzePasses(report, passes, thresholds));
   }
 
   return analysis;
@@ -69,7 +64,7 @@ export function analyzePasses(
   // premier passage, pour récupérer toutes les valeurs (ensuite on compare les valeurs entre elles)
   passes.forEach((pass) => {
     thresholds.forEach((threshold) => {
-      const { compute } = BACKTEST_THRESHOLD_PROPERTIES[threshold.type];
+      const compute = BACKTEST_THRESHOLD_COMPUTE[threshold.type];
       const passValues = compute(pass, report.capital);
 
       const validCount = passValues.filter((value) =>
@@ -136,7 +131,7 @@ export function analyzePasses(
       }
 
       // ===== CAS 2 : MARGE (uniquement pour rate) =====
-      const { usedValue } = BACKTEST_THRESHOLD_PROPERTIES[threshold.type];
+      const usedValue = valueTypeConst.BACKTEST_THRESHOLD_VALUE_TYPE[threshold.type];
       if (usedValue === 'rate') {
         const margin = threshold.passRate * 0.1;
         const minAcceptableRate = threshold.passRate - margin;

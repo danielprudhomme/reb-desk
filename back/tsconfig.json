@@ -9,9 +9,9 @@
 
     "allowImportingTsExtensions": true,
 
-    "baseUrl": ".",
     "paths": {
-      "@shared/*": ["../shared/*"]
+      "@shared/*": ["../shared/*"],
+      "@sec/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules"]

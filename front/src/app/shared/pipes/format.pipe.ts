@@ -1,5 +1,5 @@
 import { Pipe, PipeTransform } from '@angular/core';
-import { DisplayPipe } from 'src/app/core/models/display-pipe';
+import { DisplayPipe } from '@app/core/models/display-pipe';
 
 @Pipe({ name: 'format' })
 export class FormatPipe implements PipeTransform {

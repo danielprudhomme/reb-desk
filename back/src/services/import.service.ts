@@ -2,11 +2,11 @@ import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
 import { constants } from 'node:fs';
 import { join } from 'node:path';
 import crypto from 'node:crypto';
-import { IMPORTS_PATH } from 'src/config.ts';
-import { collections } from 'src/db/collections.ts';
+import { IMPORTS_PATH } from '../config.ts';
+import { collections } from '../db/collections.ts';
 import { createHash } from 'node:crypto';
-import { ParsedRebReport } from 'src/models/parsed-reb-report.ts';
-import { ParsedRebParameter } from 'src/models/parsed-reb-parameter.ts';
+import { ParsedRebReport } from '../models/parsed-reb-report.ts';
+import { ParsedRebParameter } from '../models/parsed-reb-parameter.ts';
 import { parseRebReport } from './parser/reb-report.parser.ts';
 import expertConst from '@shared/constants/expert.constants.ts';
 

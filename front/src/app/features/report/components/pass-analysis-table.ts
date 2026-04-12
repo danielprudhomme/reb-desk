@@ -5,12 +5,14 @@ import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-disp
 import { DecimalPipe, NgClass } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
 import { ReportFilter } from '@shared/models/report-filter';
-import { RebReportService } from 'src/app/services/reb-report.service';
+import { RebReportService } from '@app/services/reb-report.service';
 import { firstValueFrom } from 'rxjs';
 import { PassAnalysisLongTermSummaryCell } from './pass-analysis-long-term-summary-cell';
 import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
-import { FormatPipe } from 'src/app/shared/pipes/format.pipe';
+import { FormatPipe } from '@app/shared/pipes/format.pipe';
 import { EXPERT_NAMES } from '@shared/constants/expert.constants';
+import { BACKTEST_THRESHOLD_VALUE_TYPE } from '@shared/constants/backtest-threshold-value-type';
+import { MatTooltip } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-pass-analysis-table',
@@ -22,6 +24,7 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
     ScrollingModule,
     PassAnalysisLongTermSummaryCell,
     FormatPipe,
+    MatTooltip,
   ],
   template: `
     <table
@@ -86,15 +89,20 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
                 [class.text-yellow-300]="check.score > 0 && check.score < 0.5"
                 [class.text-red-300]="check.score === 0"
               >
-                <div>
-                  {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
-                </div>
+                @if (thresholdValueType[thresholdType] === 'rate') {
+                  <div>
+                    {{ check.rate | number: '1.0-0' }}% /
+                    {{ check.requiredRate | number: '1.0-0' }}%
+                  </div>
 
-                <div class="text-xs opacity-70">
-                  {{ check.rate | number: '1.0-0' }}% / {{ check.requiredRate | number: '1.0-0' }}%
-                </div>
-
-                <div>{{ check.score | number: '1.2-2' }}</div>
+                  <div class="text-xs opacity-70" matTooltip="Worst value">
+                    {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
+                  </div>
+                } @else {
+                  <div>
+                    {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
+                  </div>
+                }
               </div>
             }
           </td>
@@ -182,4 +190,5 @@ export class PassAnalysisTable {
     ...this.checkColumns(),
   ]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
+  thresholdValueType = BACKTEST_THRESHOLD_VALUE_TYPE;
 }
