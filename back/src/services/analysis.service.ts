@@ -82,6 +82,9 @@ export function runChecks(
 
       const worstValue =
         threshold.operator === '>' ? Math.min(...passValues) : Math.max(...passValues);
+      const averageValue = passValues.reduce((acc, v) => acc + v, 0) / passValues.length;
+      const bestValue =
+        threshold.operator === '>' ? Math.max(...passValues) : Math.min(...passValues);
 
       if (ok) {
         const values = valuesByType[threshold.type];
@@ -102,6 +105,8 @@ export function runChecks(
         type: threshold.type,
         ok,
         worstValue,
+        averageValue,
+        bestValue,
         rate,
         requiredRate: threshold.passRate,
         score: 0,

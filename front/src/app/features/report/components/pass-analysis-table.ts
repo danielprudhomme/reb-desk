@@ -76,33 +76,46 @@ import { MatTooltip } from '@angular/material/tooltip';
 
       @for (thresholdType of checkColumns(); track thresholdType) {
         <ng-container [matColumnDef]="thresholdType">
+          @let label = $any(displayConfig)[thresholdType]?.label || thresholdType;
+
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span class="whitespace-nowrap block w-30">
-              {{ $any(displayConfig)[thresholdType]?.label || thresholdType }}
-            </span>
+            <span class="whitespace-nowrap block w-30">{{ label }}</span>
           </th>
 
           <td mat-cell *matCellDef="let pass">
             @if (pass.checksMap[thresholdType]; as check) {
               <div
+                class="flex flex-col gap-1"
                 [class.text-green-300]="check.score >= 0.5"
                 [class.text-yellow-300]="check.score > 0 && check.score < 0.5"
                 [class.text-red-300]="check.score === 0"
               >
+                @let displayPipe = $any(displayConfig)[thresholdType]?.pipe;
+
                 @if (thresholdValueType[thresholdType] === 'rate') {
-                  <div>
+                  <div class="font-medium">
                     {{ check.rate | number: '1.0-0' }}% /
                     {{ check.requiredRate | number: '1.0-0' }}%
                   </div>
-
-                  <div class="text-xs opacity-70" matTooltip="Worst value">
-                    {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
-                  </div>
                 } @else {
-                  <div>
-                    {{ check.worstValue | format: $any(displayConfig)[thresholdType]?.pipe }}
+                  <div class="font-medium">
+                    {{ check.averageValue | format: displayPipe }}
                   </div>
                 }
+
+                <div class="text-xs opacity-70 flex gap-4">
+                  <span class="whitespace-nowrap" [matTooltip]="'Worst ' + label">
+                    {{ check.worstValue | format: displayPipe }}
+                  </span>
+
+                  <span class="whitespace-nowrap" [matTooltip]="'Average ' + label">
+                    {{ check.averageValue | format: displayPipe }}
+                  </span>
+
+                  <span class="whitespace-nowrap" [matTooltip]="'Best ' + label">
+                    {{ check.bestValue | format: displayPipe }}
+                  </span>
+                </div>
               </div>
             }
           </td>

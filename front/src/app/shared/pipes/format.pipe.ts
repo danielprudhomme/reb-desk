@@ -12,9 +12,9 @@ export class FormatPipe implements PipeTransform {
         return `${(+value).toFixed(0)} €`;
 
       case 'ratio':
+      case 'number':
         return (+value).toFixed(2);
 
-      case 'number':
       default:
         return value;
     }

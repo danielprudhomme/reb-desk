@@ -8,8 +8,8 @@ import { MatTooltipModule } from '@angular/material/tooltip';
   imports: [NgClass, DecimalPipe, PercentPipe, MatTooltipModule],
   template: `
     @let summary = longTermSummary();
-    <div class="flex flex-col items-center gap-1 text-sm">
-      <div class="flex items-baseline justify-center gap-2">
+    <div class="flex flex-col gap-1 text-sm">
+      <div class="flex items-baseline gap-2">
         <span
           class="text-lg font-bold"
           [ngClass]="{
@@ -28,18 +28,16 @@ import { MatTooltipModule } from '@angular/material/tooltip';
         </span>
       </div>
 
-      <div class="flex justify-center gap-2 text-xs">
+      <div class="flex gap-2 text-xs">
         <span class="text-red-500" matTooltip="Worst LT DD amount">
           {{ summary.worstDrawdownAmount | number: '1.0-0' }} €
         </span>
         <span class="text-red-400" matTooltip="Worst LT DD percent">
           {{ summary.worstDrawdownPercent / 100 | percent: '1.2-2' }}
         </span>
-      </div>
-
-      <div class="text-xs text-gray-400" matTooltip="Average LT Ratio Gain/Loss">
-        {{ summary.averageRewardRatio | number: '1.2-2' }}
-        <span class="ml-1">€ / DD</span>
+        <span class="text-gray-400" matTooltip="Average LT Ratio Gain/Loss">
+          {{ summary.averageRewardRatio | number: '1.2-2' }}€ / DD
+        </span>
       </div>
     </div>
   `,
