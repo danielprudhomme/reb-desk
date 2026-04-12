@@ -166,10 +166,13 @@ export function computeScore(
 
     const ok = pass.checks.every((c) => c.score > 0);
 
-    const weightMap = Object.fromEntries(thresholds.map((t) => [t.type, t.weight ?? 1]));
-    const totalWeight = pass.checks.reduce((acc, c) => acc + weightMap[c.type], 0);
+    const totalWeight = pass.checks.reduce(
+      (acc, c) => acc + (thresholdsMap[c.type].weight ?? 1),
+      0,
+    );
     const score =
-      pass.checks.reduce((acc, c) => acc + c.score * weightMap[c.type], 0) / totalWeight;
+      pass.checks.reduce((acc, c) => acc + c.score * (thresholdsMap[c.type].weight ?? 1), 0) /
+      totalWeight;
 
     const hasCriticalFail = pass.checks.some(
       (c) => !c.ok && (thresholds.find((t) => t.type === c.type)?.weight ?? 1) >= 3,
