@@ -23,11 +23,9 @@ export function runChecks(
       const rate = (validCount / passValues.length) * 100;
       const ok = rate >= threshold.passRate;
 
-      const worstValue =
-        threshold.operator === '>' ? Math.min(...passValues) : Math.max(...passValues);
-      const averageValue = passValues.reduce((acc, v) => acc + v, 0) / passValues.length;
-      const bestValue =
-        threshold.operator === '>' ? Math.max(...passValues) : Math.min(...passValues);
+      const { min, max, average: averageValue } = getMinMaxAverage(passValues);
+      const worstValue = threshold.operator === '>' ? min : max;
+      const bestValue = threshold.operator === '>' ? max : min;
 
       if (ok) {
         const values = valuesByType[threshold.type];
@@ -75,4 +73,18 @@ export function runChecks(
       longTermUnit: report.longTermUnit,
     };
   });
+}
+
+// Better for performance than Math.min(...values), etc
+function getMinMaxAverage(values: number[]): { min: number; max: number; average: number } {
+  let min = Infinity;
+  let max = -Infinity;
+  let sum = 0;
+
+  for (const v of values) {
+    if (v < min) min = v;
+    if (v > max) max = v;
+    sum += v;
+  }
+  return { min, max, average: sum / values.length };
 }
