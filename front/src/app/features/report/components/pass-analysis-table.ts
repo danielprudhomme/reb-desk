@@ -99,7 +99,7 @@ import { MatTooltip } from '@angular/material/tooltip';
                   </div>
                 } @else {
                   <div class="font-medium">
-                    {{ check.averageValue | format: displayPipe }}
+                    {{ check.worstValue | format: displayPipe }}
                   </div>
                 }
 

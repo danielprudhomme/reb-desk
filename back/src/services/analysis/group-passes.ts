@@ -74,14 +74,11 @@ function areChecksClose(
   margin: number,
 ): boolean {
   return (
-    a.type === b.type &&
     a.ok === b.ok &&
     isClose(a.worstValue, b.worstValue, margin) &&
     isClose(a.averageValue, b.averageValue, margin) &&
     isClose(a.bestValue, b.bestValue, margin) &&
-    isClose(a.rate, b.rate, margin) &&
-    isClose(a.requiredRate, b.requiredRate, margin) &&
-    isClose(a.score, b.score, margin)
+    isClose(a.rate, b.rate, margin)
   );
 }
 
