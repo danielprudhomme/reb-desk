@@ -47,9 +47,12 @@ async function analyzeReports(query: any): Promise<GroupedBacktestPassAnalysis[]
     const passes = await parseRebPass(report.path);
     analyzedPasses.push(...runChecks(report, passes, thresholds, valuesByType));
   }
+  console.log('check run :', analyzedPasses.length, 'passes analyzed');
 
   const groupedPasses = groupPasses(analyzedPasses, 0.2);
+  console.log('grouped run :', groupedPasses.length, 'groups created');
   computeScore(groupedPasses, thresholds, valuesByType);
+  console.log('score computed :', groupedPasses.length, 'groups scored');
 
   return groupedPasses;
 }
@@ -89,6 +92,13 @@ const thresholds: BacktestThreshold[] = [
     operator: '<',
     value: 15,
     passRate: 80,
+    weight: 1,
+  },
+  {
+    type: 'shortTermDrawdownPercent',
+    operator: '<',
+    value: 30,
+    passRate: 100,
     weight: 1,
   },
   {

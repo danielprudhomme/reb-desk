@@ -74,8 +74,9 @@ import { MatTooltip } from '@angular/material/tooltip';
         </td>
       </ng-container>
 
-      @for (thresholdType of checkColumns(); track thresholdType) {
-        <ng-container [matColumnDef]="thresholdType">
+      @for (checkColumn of checkColumns(); let index = $index; track checkColumn.name) {
+        <ng-container [matColumnDef]="checkColumn.name">
+          @let thresholdType = checkColumn.thresholdType;
           @let label = $any(displayConfig)[thresholdType]?.label || thresholdType;
 
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -83,7 +84,7 @@ import { MatTooltip } from '@angular/material/tooltip';
           </th>
 
           <td mat-cell *matCellDef="let pass">
-            @if (pass.checksMap[thresholdType]; as check) {
+            @if (pass.checks[index]; as check) {
               <div
                 class="flex flex-col gap-1"
                 [class.text-green-300]="check.score >= 0.5"
@@ -156,10 +157,11 @@ export class PassAnalysisTable {
     const analysis = this.analysisResource.value();
     if (!analysis) return new MatTableDataSource([]);
 
+    const checkColumns = this.checkColumns();
+
     const analysisWithAdditionalMaps = analysis.map((pass) => ({
       ...pass,
       expertName: EXPERT_NAMES[pass.expert],
-      checksMap: Object.fromEntries(pass.checks.map((c) => [c.type, c])),
       // parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
       longTermSummary: new BacktestLongTermSummary(pass),
     }));
@@ -172,9 +174,10 @@ export class PassAnalysisTable {
       if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;
       // if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
-      if (item.checksMap?.[property]) {
-        const check = item.checksMap[property];
-        return check.type.includes('longTerm')
+      const checkIndex = checkColumns.findIndex((c) => c.name === property);
+      const check = item.checks[checkIndex];
+      if (check) {
+        return checkColumns[checkIndex].valueType === 'value'
           ? check.worstValue
           : check.ok
             ? 1000 + check.rate
@@ -189,10 +192,13 @@ export class PassAnalysisTable {
     return dataSource;
   });
   checkColumns = computed(() => {
-    const analysis = this.analysisResource.value();
-    if (!analysis) return [];
-    const firstPass = analysis[0];
-    return firstPass.checks.map((c) => c.type);
+    const passes = this.analysisResource.value();
+    if (!passes || passes.length === 0) return [];
+    return passes[0].checks.map((check, index) => ({
+      thresholdType: check.type,
+      valueType: BACKTEST_THRESHOLD_VALUE_TYPE[check.type],
+      name: `check-${index}`,
+    }));
   });
   displayedColumns = computed(() => [
     'expert',
@@ -200,7 +206,7 @@ export class PassAnalysisTable {
     'timeframe',
     'score',
     'longTermSummary',
-    ...this.checkColumns(),
+    ...this.checkColumns().map((c => c.name)),
   ]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
   thresholdValueType = BACKTEST_THRESHOLD_VALUE_TYPE;
