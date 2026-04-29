@@ -19,6 +19,7 @@ export function computeScore(
       const { min, max } = valuesByType[check.type];
 
       if (!min || min === max) {
+        check.score = check.ok ? 0.5 : 0;
         return;
       }
 
