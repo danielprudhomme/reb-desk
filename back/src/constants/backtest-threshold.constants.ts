@@ -1,27 +1,33 @@
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
-import { BacktestPass } from '@shared/models/backtest-pass.ts';
+import { BaseBacktestPass } from '@shared/models/backtest-pass.ts';
 
-type ThresholdComputation = (pass: BacktestPass, capital: number) => number[];
+type ThresholdComputation = (pass: BaseBacktestPass) => number[];
 
 export const BACKTEST_THRESHOLD_COMPUTE: Record<BacktestThresholdType, ThresholdComputation> = {
   // ===== RESULT =====
-  shortTermResultPercent: (p, c) => p.shortTermResults.map((r) => (r.result / c) * 100),
+  shortTermResultPercent: (p) => p.shortTermResults.map((r) => (r.result / p.capital) * 100),
 
   shortTermResultAmount: (p) => p.shortTermResults.map((r) => r.result),
 
-  shortTermResultPercentAvg: (p, c) => [avg(p.shortTermResults.map((r) => (r.result / c) * 100))],
+  shortTermResultPercentAvg: (p) => [
+    avg(p.shortTermResults.map((r) => (r.result / p.capital) * 100)),
+  ],
 
   shortTermResultAmountAvg: (p) => [avg(p.shortTermResults.map((r) => r.result))],
 
-  shortTermResultPercentSum: (p, c) => [sum(p.shortTermResults.map((r) => (r.result / c) * 100))],
+  shortTermResultPercentSum: (p) => [
+    sum(p.shortTermResults.map((r) => (r.result / p.capital) * 100)),
+  ],
 
   shortTermResultAmountSum: (p) => [sum(p.shortTermResults.map((r) => r.result))],
 
-  longTermResultPercent: (p, c) => p.longTermResults.map((r) => (r.result / c) * 100),
+  longTermResultPercent: (p) => p.longTermResults.map((r) => (r.result / p.capital) * 100),
 
   longTermResultAmount: (p) => p.longTermResults.map((r) => r.result),
 
-  longTermResultPercentLast: (p, c) => [last(p.longTermResults.map((r) => (r.result / c) * 100))],
+  longTermResultPercentLast: (p) => [
+    last(p.longTermResults.map((r) => (r.result / p.capital) * 100)),
+  ],
 
   longTermResultAmountLast: (p) => [last(p.longTermResults.map((r) => r.result))],
 
@@ -66,7 +72,9 @@ export const BACKTEST_THRESHOLD_COMPUTE: Record<BacktestThresholdType, Threshold
   // ===== META =====
   passCount: (p) => [p.shortTermResults.length],
 
-  passIndex: (p) => [p.id],
+  passIndex: () => {
+    throw new Error('not implemented');
+  },
 };
 
 const avg = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;

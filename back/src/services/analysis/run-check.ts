@@ -1,21 +1,18 @@
 import { BACKTEST_THRESHOLD_COMPUTE } from '@sec/constants/backtest-threshold.constants.ts';
-import { RebReport } from '@sec/db/models/reb-report.ts';
-import { BacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
-import { BacktestPass } from '@shared/models/backtest-pass.ts';
+import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
+import { GroupedBacktestPass } from '@shared/models/backtest-pass.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 
 export function runChecks(
-  report: RebReport,
-  passes: BacktestPass[],
+  passes: GroupedBacktestPass[],
   thresholds: BacktestThreshold[],
   valuesByType: ValuesByThresholdType,
-): BacktestPassAnalysis[] {
+): GroupedBacktestPassAnalysis[] {
   return passes.map((pass) => {
     const checks: BacktestThresholdCheck[] = thresholds.map((threshold) => {
-      const compute = BACKTEST_THRESHOLD_COMPUTE[threshold.type];
-      const passValues = compute(pass, report.capital);
+      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type](pass);
 
       const validCount = passValues.filter((value) =>
         threshold.operator === '>' ? value > threshold.value : value < threshold.value,
@@ -54,24 +51,7 @@ export function runChecks(
       };
     });
 
-    return {
-      ok: false,
-      checks,
-      reportId: report.id,
-      passId: pass.id,
-      fixedParameters: pass.fixedParameters,
-      parameters: pass.parameters,
-      longTermResults: pass.longTermResults,
-      expert: report.expert,
-      symbol: report.symbol,
-      timeframe: report.timeframe,
-      capital: report.capital,
-      shortTermCount: report.shortTermCount,
-      shortTermDuration: report.shortTermDuration,
-      shortTermUnit: report.shortTermUnit,
-      longTermDuration: report.longTermDuration,
-      longTermUnit: report.longTermUnit,
-    };
+    return { ...pass, ok: false, checks, score: 0 };
   });
 }
 

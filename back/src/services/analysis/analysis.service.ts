@@ -1,15 +1,13 @@
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
-import {
-  BacktestPassAnalysis,
-  GroupedBacktestPassAnalysis,
-} from '@shared/models/backtest-pass-analysis.ts';
+import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from '../../db/collections.ts';
 import { ReportFilter } from '@shared/models/report-filter.ts';
 import { parseRebPass } from '../parser/reb-report.parser.ts';
 import { runChecks } from './run-check.ts';
 import { computeScore } from './compute-score.ts';
-import { groupPasses } from './group-passes.ts';
 import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
+import { BacktestPass } from '@shared/models/backtest-pass.ts';
+import { groupPasses } from './group-passes.ts';
 
 export async function runAnalysis(filter: ReportFilter): Promise<GroupedBacktestPassAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -40,21 +38,40 @@ async function analyzeReports(query: any): Promise<GroupedBacktestPassAnalysis[]
   if (!reports.length) {
     throw new Error('No reports found for given filters');
   }
-  const analyzedPasses: BacktestPassAnalysis[] = [];
+
   const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
+  const passes: BacktestPass[] = [];
 
   for (const report of reports) {
-    const passes = await parseRebPass(report.path);
-    analyzedPasses.push(...runChecks(report, passes, thresholds, valuesByType));
+    const parsedPasses = await parseRebPass(report.path);
+    passes.push(
+      ...parsedPasses.map((p) => ({
+        ...p,
+        reportId: report.id,
+        expert: report.expert,
+        symbol: report.symbol,
+        timeframe: report.timeframe,
+        capital: report.capital,
+        startDate: report.startDate,
+        shortTermCount: report.shortTermCount,
+        shortTermDuration: report.shortTermDuration,
+        shortTermUnit: report.shortTermUnit,
+        longTermDuration: report.longTermDuration,
+        longTermUnit: report.longTermUnit,
+      })),
+    );
   }
-  console.log('check run :', analyzedPasses.length, 'passes analyzed');
 
-  const groupedPasses = groupPasses(analyzedPasses, 0.2);
-  console.log('grouped run :', groupedPasses.length, 'groups created');
-  computeScore(groupedPasses, thresholds, valuesByType);
-  console.log('score computed :', groupedPasses.length, 'groups scored');
+  console.log('passes', passes.length);
 
-  return groupedPasses;
+  const groupedPasses = groupPasses(passes, 0.3);
+
+  console.log('grouped passes', groupedPasses.length);
+
+  const analyzedGroupedPasses = runChecks(groupedPasses, thresholds, valuesByType);
+  computeScore(analyzedGroupedPasses, thresholds, valuesByType);
+
+  return analyzedGroupedPasses;
 }
 
 // A envoyer dans la requête - pas hardcodé

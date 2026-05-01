@@ -14,8 +14,8 @@ import {
 } from './parser-helper.ts';
 import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
 import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter.ts';
-import { BacktestPass } from '@shared/models/backtest-pass.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { ParsedRebPass } from '@sec/models/parsed-reb-pass.ts';
 
 export async function parseRebReport(filePath: string): Promise<{
   report: ParsedRebReport;
@@ -58,7 +58,7 @@ export async function parseRebReport(filePath: string): Promise<{
   };
 }
 
-export async function parseRebPass(filePath: string): Promise<BacktestPass[]> {
+export async function parseRebPass(filePath: string): Promise<ParsedRebPass[]> {
   const { content, fixedParameters, passParameters } = await parseRebFile(filePath);
 
   const passIds = getLinesSection(content, 'SENS DES PASSAGES').map((id) => +id);
@@ -70,11 +70,11 @@ export async function parseRebPass(filePath: string): Promise<BacktestPass[]> {
     value: p.values[0],
   }));
 
-  const passes: BacktestPass[] = passIds.map((passId, index) => {
+  const passes: ParsedRebPass[] = passIds.map((passId, index) => {
     const parameters: BacktestPassParameter[] = passParameters[index];
 
     return {
-      id: passId,
+      passId,
       fixedParameters: fixedPassParameters,
       parameters,
       shortTermResults: passShortTermResults[index],
