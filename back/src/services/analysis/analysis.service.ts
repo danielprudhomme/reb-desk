@@ -62,12 +62,7 @@ async function analyzeReports(query: any): Promise<GroupedBacktestPassAnalysis[]
     );
   }
 
-  console.log('passes', passes.length);
-
-  const groupedPasses = groupPasses(passes, 0.3);
-
-  console.log('grouped passes', groupedPasses.length);
-
+  const groupedPasses = groupPasses(passes, 0.1);
   const analyzedGroupedPasses = runChecks(groupedPasses, thresholds, valuesByType);
   computeScore(analyzedGroupedPasses, thresholds, valuesByType);
 
