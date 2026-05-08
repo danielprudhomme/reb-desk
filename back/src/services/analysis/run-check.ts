@@ -7,12 +7,13 @@ import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 
 export function runChecks(
   passes: GroupedBacktestPass[],
+  capital: number,
   thresholds: BacktestThreshold[],
   valuesByType: ValuesByThresholdType,
 ): GroupedBacktestPassAnalysis[] {
   return passes.map((pass) => {
     const checks: BacktestThresholdCheck[] = thresholds.map((threshold) => {
-      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type](pass);
+      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type](pass, capital);
 
       const validCount = passValues.filter((value) =>
         threshold.operator === '>' ? value > threshold.value : value < threshold.value,

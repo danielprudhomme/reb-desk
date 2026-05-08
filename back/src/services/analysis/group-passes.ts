@@ -1,9 +1,5 @@
 import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
-import {
-  BacktestPass,
-  BaseBacktestPass,
-  GroupedBacktestPass,
-} from '@shared/models/backtest-pass.ts';
+import { BacktestPass, GroupedBacktestPass } from '@shared/models/backtest-pass.ts';
 
 type InternalGroup = GroupedBacktestPass & {
   representative: BacktestPass;
@@ -17,7 +13,6 @@ export function groupPasses(passes: BacktestPass[], margin: number): GroupedBack
 
     for (const group of groups) {
       if (
-        sameContext(pass, group.representative) &&
         areResultsClose(pass.shortTermResults, group.shortTermResults, margin) &&
         areResultsClose(pass.longTermResults, group.longTermResults, margin)
       ) {
@@ -29,16 +24,6 @@ export function groupPasses(passes: BacktestPass[], margin: number): GroupedBack
     if (!foundGroup) {
       groups.push({
         // BaseBacktestPass fields
-        expert: pass.expert,
-        symbol: pass.symbol,
-        timeframe: pass.timeframe,
-        capital: pass.capital,
-        startDate: pass.startDate,
-        shortTermCount: pass.shortTermCount,
-        shortTermDuration: pass.shortTermDuration,
-        shortTermUnit: pass.shortTermUnit,
-        longTermDuration: pass.longTermDuration,
-        longTermUnit: pass.longTermUnit,
         shortTermResults: pass.shortTermResults,
         longTermResults: pass.longTermResults,
 
@@ -74,21 +59,6 @@ export function groupPasses(passes: BacktestPass[], margin: number): GroupedBack
   }
 
   return groups;
-}
-
-function sameContext(a: BaseBacktestPass, b: BaseBacktestPass) {
-  return (
-    a.expert === b.expert &&
-    a.symbol === b.symbol &&
-    a.timeframe === b.timeframe &&
-    a.capital === b.capital &&
-    a.startDate === b.startDate &&
-    a.shortTermCount === b.shortTermCount &&
-    a.shortTermDuration === b.shortTermDuration &&
-    a.shortTermUnit === b.shortTermUnit &&
-    a.longTermDuration === b.longTermDuration &&
-    a.longTermUnit === b.longTermUnit
-  );
 }
 
 function areResultsClose(a: BacktestPassResult[], b: BacktestPassResult[], margin: number) {

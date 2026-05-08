@@ -13,6 +13,24 @@ import { FormatPipe } from '@app/shared/pipes/format.pipe';
 import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 import { BACKTEST_THRESHOLD_VALUE_TYPE } from '@shared/constants/backtest-threshold-value-type';
 import { MatTooltip } from '@angular/material/tooltip';
+import { ExpertAdvisor } from '@shared/models/expert-advisor';
+import { TimeUnit } from '@shared/models/time-unit';
+import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+
+interface TableItem extends GroupedBacktestPassAnalysis {
+  expert: ExpertAdvisor;
+  expertName: string;
+  symbol: string;
+  timeframe: string;
+  capital: number;
+  startDate: string;
+  shortTermCount: number;
+  shortTermDuration: number;
+  shortTermUnit: TimeUnit;
+  longTermDuration: number;
+  longTermUnit: TimeUnit;
+  longTermSummary: BacktestLongTermSummary;
+}
 
 @Component({
   selector: 'app-pass-analysis-table',
@@ -37,7 +55,7 @@ import { MatTooltip } from '@angular/material/tooltip';
     >
       <ng-container matColumnDef="expert" [sticky]="true">
         <th mat-header-cell *matHeaderCellDef>Expert</th>
-        <td mat-cell *matCellDef="let pass">{{ pass.expertName }}</td>
+        <td mat-cell *matCellDef="let pass">{{ pass.expertName }} {{ pass.passes.length }}</td>
       </ng-container>
 
       <ng-container matColumnDef="symbol" [sticky]="true">
@@ -154,17 +172,24 @@ export class PassAnalysisTable {
     loader: async () => firstValueFrom(this.rebReportService.analyze(this.filter())),
   });
   dataSource = computed(() => {
-    const analysis = this.analysisResource.value();
-    if (!analysis) return new MatTableDataSource([]);
+    const groupedReports = this.analysisResource.value();
+    if (!groupedReports) return new MatTableDataSource([]);
 
     const checkColumns = this.checkColumns();
 
-    const analysisWithAdditionalMaps = analysis.map((pass) => ({
-      ...pass,
-      expertName: EXPERT_NAMES[pass.expert],
-      // parametersMap: Object.fromEntries(pass.parameters.map((p) => [p.name, p])),
-      longTermSummary: new BacktestLongTermSummary(pass),
-    }));
+    const analysisWithAdditionalMaps: TableItem[] = groupedReports.flatMap((group) =>
+      group.passes.map((pass) => ({
+        ...group,
+        ...pass,
+        expertName: EXPERT_NAMES[group.expert],
+        longTermSummary: new BacktestLongTermSummary(
+          pass.longTermResults,
+          group.capital,
+          group.longTermUnit,
+          group.longTermDuration,
+        ),
+      })),
+    );
 
     const dataSource = new MatTableDataSource(analysisWithAdditionalMaps);
 
@@ -172,7 +197,6 @@ export class PassAnalysisTable {
       if (property === 'score') return item.score;
       if (property === 'ok') return item.ok ? 1 : 0;
       if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;
-      // if (item.parametersMap?.[property]) return item.parametersMap[property].value;
 
       const checkIndex = checkColumns.findIndex((c) => c.name === property);
       const check = item.checks[checkIndex];
@@ -192,7 +216,7 @@ export class PassAnalysisTable {
     return dataSource;
   });
   checkColumns = computed(() => {
-    const passes = this.analysisResource.value();
+    const passes = this.analysisResource.value()?.[0].passes;
     if (!passes || passes.length === 0) return [];
     return passes[0].checks.map((check, index) => ({
       thresholdType: check.type,
@@ -206,7 +230,7 @@ export class PassAnalysisTable {
     'timeframe',
     'score',
     'longTermSummary',
-    ...this.checkColumns().map((c => c.name)),
+    ...this.checkColumns().map((c) => c.name),
   ]);
   displayConfig = BACKTEST_THRESHOLD_DISPLAY;
   thresholdValueType = BACKTEST_THRESHOLD_VALUE_TYPE;

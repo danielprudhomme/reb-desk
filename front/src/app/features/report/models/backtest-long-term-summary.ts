@@ -1,4 +1,5 @@
-import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+import { BacktestPassResult } from '@shared/models/backtest-pass-result';
+import { TimeUnit } from '@shared/models/time-unit';
 
 export class BacktestLongTermSummary {
   averageResult: number;
@@ -7,20 +8,24 @@ export class BacktestLongTermSummary {
   worstDrawdownPercent: number;
   averageRewardRatio: number;
 
-  constructor(pass: GroupedBacktestPassAnalysis) {
-    if (pass.longTermUnit !== 'year') {
+  constructor(
+    longTermResults: BacktestPassResult[],
+    capital: number,
+    longTermUnit: TimeUnit,
+    longTermDuration: number,
+  ) {
+    if (longTermUnit !== 'year') {
       throw new Error('Calculation not yet implemented. Only YEAR.');
     }
 
-    const results = pass.longTermResults;
     const avg = (v: number[]) => v.reduce((a, b) => a + b, 0) / v.length;
 
-    this.averageResult = avg(results.map((r) => r.result));
+    this.averageResult = avg(longTermResults.map((r) => r.result));
     this.averageMonthlyPerformance = avg(
-      results.map((r) => r.result / pass.capital / pass.longTermDuration / 12),
+      longTermResults.map((r) => r.result / capital / longTermDuration / 12),
     );
-    this.worstDrawdownAmount = Math.max(...results.map((r) => r.drawdownAmount));
-    this.worstDrawdownPercent = Math.max(...results.map((r) => r.drawdownPercent));
-    this.averageRewardRatio = avg(results.map((r) => r.result / r.drawdownAmount));
+    this.worstDrawdownAmount = Math.max(...longTermResults.map((r) => r.drawdownAmount));
+    this.worstDrawdownPercent = Math.max(...longTermResults.map((r) => r.drawdownPercent));
+    this.averageRewardRatio = avg(longTermResults.map((r) => r.result / r.drawdownAmount));
   }
 }
