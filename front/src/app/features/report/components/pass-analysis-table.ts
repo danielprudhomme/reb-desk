@@ -4,7 +4,7 @@ import { MatSort, MatSortModule } from '@angular/material/sort';
 import { BACKTEST_THRESHOLD_DISPLAY } from '../constants/backtest-threshold-display.constants';
 import { DecimalPipe, NgClass } from '@angular/common';
 import { ScrollingModule } from '@angular/cdk/scrolling';
-import { ReportFilter } from '@shared/models/report-filter';
+import { AnalysisRequest } from '@shared/models/analysis-request';
 import { RebReportService } from '@app/services/reb-report.service';
 import { firstValueFrom } from 'rxjs';
 import { PassAnalysisLongTermSummaryCell } from './pass-analysis-long-term-summary-cell';
@@ -12,7 +12,7 @@ import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
 import { FormatPipe } from '@app/shared/pipes/format.pipe';
 import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 import { BACKTEST_THRESHOLD_VALUE_TYPE } from '@shared/constants/backtest-threshold-value-type';
-import { MatTooltip } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { TimeUnit } from '@shared/models/time-unit';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
@@ -39,10 +39,10 @@ interface TableItem extends GroupedBacktestPassAnalysis {
     DecimalPipe,
     MatTableModule,
     MatSortModule,
+    MatTooltipModule,
     ScrollingModule,
     PassAnalysisLongTermSummaryCell,
     FormatPipe,
-    MatTooltip,
   ],
   template: `
     <table
@@ -92,9 +92,9 @@ interface TableItem extends GroupedBacktestPassAnalysis {
         </td>
       </ng-container>
 
-      @for (checkColumn of checkColumns(); let index = $index; track checkColumn.name) {
-        <ng-container [matColumnDef]="checkColumn.name">
-          @let thresholdType = checkColumn.thresholdType;
+      @for (threshold of thresholds(); let index = $index; track threshold.columnName) {
+        <ng-container [matColumnDef]="threshold.columnName">
+          @let thresholdType = threshold.type;
           @let label = $any(displayConfig)[thresholdType]?.label || thresholdType;
 
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
@@ -165,17 +165,32 @@ interface TableItem extends GroupedBacktestPassAnalysis {
   `,
 })
 export class PassAnalysisTable {
-  filter = input.required<ReportFilter>();
+  request = input.required<AnalysisRequest>();
   private rebReportService = inject(RebReportService);
   private sort = viewChild.required(MatSort);
+  displayConfig = BACKTEST_THRESHOLD_DISPLAY;
+  thresholdValueType = BACKTEST_THRESHOLD_VALUE_TYPE;
   analysisResource = resource({
-    loader: async () => firstValueFrom(this.rebReportService.analyze(this.filter())),
+    loader: async () => firstValueFrom(this.rebReportService.analyze(this.request())),
   });
+  thresholds = computed(() =>
+    this.request().thresholds.map((threshold, index) => ({
+      ...threshold,
+      columnName: `check-${index}`,
+      valueType: BACKTEST_THRESHOLD_VALUE_TYPE[threshold.type],
+    })),
+  );
+  displayedColumns = computed(() => [
+    'expert',
+    'symbol',
+    'timeframe',
+    'score',
+    'longTermSummary',
+    ...this.thresholds().map((t) => t.columnName),
+  ]);
   dataSource = computed(() => {
     const groupedReports = this.analysisResource.value();
     if (!groupedReports) return new MatTableDataSource([]);
-
-    const checkColumns = this.checkColumns();
 
     const analysisWithAdditionalMaps: TableItem[] = groupedReports.flatMap((group) =>
       group.passes.map((pass) => ({
@@ -198,10 +213,10 @@ export class PassAnalysisTable {
       if (property === 'ok') return item.ok ? 1 : 0;
       if (property === 'longTermSummary') return item.longTermSummary.averageMonthlyPerformance;
 
-      const checkIndex = checkColumns.findIndex((c) => c.name === property);
+      const checkIndex = this.thresholds().findIndex((t) => t.columnName === property);
       const check = item.checks[checkIndex];
       if (check) {
-        return checkColumns[checkIndex].valueType === 'value'
+        return this.thresholds()[checkIndex].valueType === 'value'
           ? check.worstValue
           : check.ok
             ? 1000 + check.rate
@@ -215,23 +230,4 @@ export class PassAnalysisTable {
 
     return dataSource;
   });
-  checkColumns = computed(() => {
-    const passes = this.analysisResource.value()?.[0].passes;
-    if (!passes || passes.length === 0) return [];
-    return passes[0].checks.map((check, index) => ({
-      thresholdType: check.type,
-      valueType: BACKTEST_THRESHOLD_VALUE_TYPE[check.type],
-      name: `check-${index}`,
-    }));
-  });
-  displayedColumns = computed(() => [
-    'expert',
-    'symbol',
-    'timeframe',
-    'score',
-    'longTermSummary',
-    ...this.checkColumns().map((c) => c.name),
-  ]);
-  displayConfig = BACKTEST_THRESHOLD_DISPLAY;
-  thresholdValueType = BACKTEST_THRESHOLD_VALUE_TYPE;
 }

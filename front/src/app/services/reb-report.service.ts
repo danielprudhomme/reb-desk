@@ -7,7 +7,7 @@ import { toSignal } from '@angular/core/rxjs-interop';
 import { environment } from '@env';
 import { RebReport } from '../core/models/reb-report';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis';
-import { ReportFilter } from '@shared/models/report-filter';
+import { AnalysisRequest } from '@shared/models/analysis-request';
 
 @Injectable({ providedIn: 'root' })
 export class RebReportService extends GraphQlService {
@@ -23,7 +23,7 @@ export class RebReportService extends GraphQlService {
     return this.httpClient.post(`${environment.apiUrl}/report/rebuild`, {});
   }
 
-  analyze(filter: ReportFilter): Observable<GroupedReportAnalysis[]> {
-    return this.httpClient.post<GroupedReportAnalysis[]>(`${environment.apiUrl}/analysis`, filter);
+  analyze(request: AnalysisRequest): Observable<GroupedReportAnalysis[]> {
+    return this.httpClient.post<GroupedReportAnalysis[]>(`${environment.apiUrl}/analysis`, request);
   }
 }

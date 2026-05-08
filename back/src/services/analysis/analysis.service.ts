@@ -1,7 +1,6 @@
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from '../../db/collections.ts';
-import { ReportFilter } from '@shared/models/report-filter.ts';
 import { parseRebPass } from '../parser/reb-report.parser.ts';
 import { runChecks } from './run-check.ts';
 import { computeScore } from './compute-score.ts';
@@ -12,6 +11,7 @@ import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { TimeUnit } from '@shared/models/time-unit.ts';
 import { RebReport } from '@sec/db/models/reb-report.ts';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
+import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 
 interface GroupedReport {
   context: {
@@ -31,30 +31,33 @@ interface GroupedReport {
   groupedPasses: GroupedBacktestPassAnalysis[];
 }
 
-export async function runAnalysis(filter: ReportFilter): Promise<GroupedReportAnalysis[]> {
+export async function runAnalysis(request: AnalysisRequest): Promise<GroupedReportAnalysis[]> {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const query: any = {};
-  if (filter.reportId) {
-    query.id = filter.reportId;
+  if (request.reportId) {
+    query.id = request.reportId;
   } else {
-    if (filter.experts?.length) {
-      query.expert = { $in: filter.experts };
+    if (request.experts?.length) {
+      query.expert = { $in: request.experts };
     }
 
-    if (filter.symbols?.length) {
-      query.symbol = { $in: filter.symbols };
+    if (request.symbols?.length) {
+      query.symbol = { $in: request.symbols };
     }
 
-    if (filter.timeframes?.length) {
-      query.timeframe = { $in: filter.timeframes };
+    if (request.timeframes?.length) {
+      query.timeframe = { $in: request.timeframes };
     }
   }
 
-  return await analyzeReports(query);
+  return await analyzeReports(query, request.thresholds);
 }
 
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-async function analyzeReports(query: any): Promise<GroupedReportAnalysis[]> {
+async function analyzeReports(
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query: any,
+  thresholds: BacktestThreshold[],
+): Promise<GroupedReportAnalysis[]> {
   const reports = collections.RebReport().find(query);
 
   if (!reports.length) {
@@ -127,56 +130,3 @@ function buildContextKey(report: RebReport): string {
     report.longTermUnit,
   ].join('|');
 }
-
-// A envoyer dans la requête - pas hardcodé
-const thresholds: BacktestThreshold[] = [
-  {
-    type: 'longTermResultPercent',
-    operator: '>',
-    value: 0,
-    passRate: 100,
-    weight: 3,
-  },
-  {
-    type: 'shortTermResultPercent',
-    operator: '>',
-    value: 0,
-    passRate: 80,
-    weight: 1,
-  },
-  {
-    type: 'longTermGainLossRatio',
-    operator: '>',
-    value: 1,
-    passRate: 100,
-    weight: 3,
-  },
-  {
-    type: 'shortTermTrades',
-    operator: '>',
-    value: 1,
-    passRate: 100,
-    weight: 0.5,
-  },
-  {
-    type: 'shortTermDrawdownPercent',
-    operator: '<',
-    value: 15,
-    passRate: 80,
-    weight: 1,
-  },
-  {
-    type: 'shortTermDrawdownPercent',
-    operator: '<',
-    value: 30,
-    passRate: 100,
-    weight: 1,
-  },
-  {
-    type: 'longTermDrawdownAmount',
-    operator: '<',
-    value: 400,
-    passRate: 100,
-    weight: 1,
-  },
-];
