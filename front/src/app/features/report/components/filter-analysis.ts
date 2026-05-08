@@ -38,6 +38,7 @@ export class FilterAnalysis {
     symbols: ['AUDUSD'],
     timeframes: ['H1'],
     experts: ['candleSuite'],
+    capital: 1000,
     thresholds: [
       {
         type: 'longTermResultPercent',

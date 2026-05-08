@@ -12,13 +12,14 @@ import { TimeUnit } from '@shared/models/time-unit.ts';
 import { RebReport } from '@sec/db/models/reb-report.ts';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
 import { AnalysisRequest } from '@shared/models/analysis-request.ts';
+import { Capital } from '@shared/models/capital.ts';
 
 interface GroupedReport {
   context: {
     expert: ExpertAdvisor;
     symbol: string;
     timeframe: string;
-    capital: number;
+    capital: Capital;
     startDate: string;
     shortTermCount: number;
     shortTermDuration: number;
@@ -47,6 +48,10 @@ export async function runAnalysis(request: AnalysisRequest): Promise<GroupedRepo
 
     if (request.timeframes?.length) {
       query.timeframe = { $in: request.timeframes };
+    }
+
+    if (request.capital) {
+      query.capital = { $eq: request.capital };
     }
   }
 

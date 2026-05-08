@@ -19,6 +19,7 @@ export class ReportAnalysis {
     symbols: [],
     timeframes: [],
     experts: [],
+    capital: 0,
     thresholds: [
       {
         type: 'longTermResultPercent',

@@ -33,6 +33,11 @@ import { ReportFilter } from '@shared/models/report-filter';
           <td mat-cell *matCellDef="let report">{{ report.timeframe }}</td>
         </ng-container>
 
+        <ng-container matColumnDef="capital">
+          <th mat-header-cell *matHeaderCellDef mat-sort-header>Capital</th>
+          <td mat-cell *matCellDef="let report">{{ report.capital }}</td>
+        </ng-container>
+
         <ng-container matColumnDef="startDate">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Start Date</th>
           <td mat-cell *matCellDef="let report">{{ report.startDate }}</td>
@@ -69,18 +74,19 @@ export class RebReportList {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
   expertNames = EXPERT_NAMES;
-  filterModel = signal<ReportFilter>({ symbols: [], timeframes: [], experts: [] });
+  filterModel = signal<ReportFilter>({ symbols: [], timeframes: [], experts: [], capital: null });
   filterForm = form(this.filterModel);
 
   dataSource = computed(() => {
-    const { symbols, timeframes, experts } = this.filterModel();
+    const { symbols, timeframes, experts, capital } = this.filterModel();
     const reports = this.rebReportService
       .reports()
       ?.filter(
         (report) =>
           (symbols.length === 0 || symbols.includes(report.symbol)) &&
           (timeframes.length === 0 || timeframes.includes(report.timeframe)) &&
-          (experts.length === 0 || experts.includes(report.expert)),
+          (experts.length === 0 || experts.includes(report.expert)) &&
+          (capital === null || report.capital === capital),
       );
 
     const dataSource = new MatTableDataSource<RebReport>(reports);
@@ -92,6 +98,7 @@ export class RebReportList {
     'expert',
     'symbol',
     'timeframe',
+    'capital',
     'startDate',
     'shortTerm',
     'longTerm',

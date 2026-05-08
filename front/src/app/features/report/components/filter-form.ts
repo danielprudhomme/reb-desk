@@ -7,6 +7,7 @@ import { ReportFilter } from '@shared/models/report-filter';
 import { ExpertSelect } from '@app/shared/components/expert-select';
 import { SymbolSelect } from '@app/shared/components/symbol-select';
 import { TimeframeSelect } from '@app/shared/components/timeframe-select';
+import { CapitalSelect } from '@app/shared/components/capital-select';
 
 @Component({
   selector: 'app-filter-form',
@@ -18,12 +19,14 @@ import { TimeframeSelect } from '@app/shared/components/timeframe-select';
     SymbolSelect,
     TimeframeSelect,
     ExpertSelect,
+    CapitalSelect,
   ],
   template: `
     <div class="flex items-center gap-4">
       <app-symbol-select [formField]="form.symbols" />
       <app-timeframe-select [formField]="form.timeframes" />
       <app-expert-select [formField]="form.experts" />
+      <app-capital-select [formField]="form.capital" />
     </div>
   `,
 })

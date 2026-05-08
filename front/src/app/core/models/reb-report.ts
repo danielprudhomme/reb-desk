@@ -5,6 +5,7 @@ import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
 import { ImportStatus } from '@shared/models/import-status';
 import { RebParameter } from './reb-parameter';
+import { Capital } from '@shared/models/capital';
 
 export interface RebReport {
   id: string;
@@ -15,7 +16,7 @@ export interface RebReport {
   symbol: Symbol;
   timeframe: Timeframe;
   leverage: number;
-  capital: number;
+  capital: Capital;
   model: OptimizationModel;
   startDate: string;
   lastValidatedDate?: string;
