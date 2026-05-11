@@ -4,6 +4,7 @@ import { Layout } from './layout/layout';
 import { Actions } from './features/admin/actions';
 import { FilterAnalysis } from './features/report/components/filter-analysis';
 import { ReportAnalysis } from './features/report/components/report-analysis';
+import { Diversification } from './features/account/components/diversification';
 
 export const routes: Routes = [
   {
@@ -25,6 +26,10 @@ export const routes: Routes = [
       {
         path: 'analysis',
         component: FilterAnalysis,
+      },
+      {
+        path: 'diversification',
+        component: Diversification,
       },
       { path: '', redirectTo: 'report', pathMatch: 'full' },
     ],
