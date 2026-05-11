@@ -7,17 +7,23 @@ import { DiversificationTable } from './diversification-table';
 @Component({
   selector: 'app-diversification',
   imports: [DiversificationTable],
-  template: ` <app-diversification-table [robots]="robots()" /> `,
+  template: `
+    <div>Robots : {{ robots().length }}</div>
+
+    <div class="h-full overflow-auto">
+      <app-diversification-table [robots]="robots()" />
+    </div>
+  `,
 })
 export class Diversification {
   robots = signal<Robot[]>([]);
 
   constructor() {
-    const selectedSymbols = symbols.filter((s) => !s.includes('JPY'));
+    const selectedSymbols = symbols.filter((s) => !s.includes('XAU'));
 
     const robots = diversifyRobots({
-      experts: ['candleSuite', 'emaBb', 'rsiBreak', 'autoBot', 'strategyCreator'],
-      timeframes: ['M12', 'M15', 'M20', 'M30', 'H1'],
+      experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
+      timeframes: ['M15', 'M20', 'M30', 'H1'],
       symbols: selectedSymbols,
       maxRobots: 99,
     });

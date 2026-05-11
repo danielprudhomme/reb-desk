@@ -1,72 +1,64 @@
 import { Component, computed, input } from '@angular/core';
+import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Robot } from '@shared/models/robot';
 import { symbols, Symbol } from '@shared/models/symbol';
 import { timeframes, Timeframe } from '@shared/models/timeframe';
+import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 
 @Component({
   selector: 'app-diversification-table',
+  imports: [MatTableModule],
   template: `
-    <div class="h-full w-full overflow-auto bg-neutral-950 text-neutral-100 p-4">
-      <table class="border-collapse text-sm min-w-max shadow-2xl rounded-xl overflow-hidden">
-        <thead>
-          <tr>
-            <th
-              class="sticky top-0 left-0 z-20 bg-neutral-900 border border-neutral-700 p-3 font-semibold text-neutral-300"
-            >
-              Symbol \\ TF
-            </th>
+    <table mat-table [dataSource]="dataSource()">
+      <ng-container matColumnDef="symbol" [sticky]="true">
+        <th mat-header-cell *matHeaderCellDef>Symbol</th>
+        <td mat-cell *matCellDef="let row">{{ row.symbol }}</td>
+      </ng-container>
 
-            @for (tf of displayedTimeframes(); track tf) {
-              <th
-                class="sticky top-0 z-10 bg-neutral-900 border border-neutral-700 p-3 min-w-[120px] font-semibold text-cyan-300"
-              >
-                {{ tf }}
-              </th>
-            }
-          </tr>
-        </thead>
+      @for (timeframe of displayedTimeframes(); let index = $index; track timeframe) {
+        <ng-container [matColumnDef]="timeframe">
+          <th mat-header-cell *matHeaderCellDef>{{ timeframe }}</th>
 
-        <tbody>
-          @for (symbol of displayedSymbols(); track symbol) {
-            <tr class="hover:bg-neutral-900/40 transition-colors">
-              <td
-                class="sticky left-0 z-10 bg-neutral-900 border border-neutral-700 p-3 font-bold text-neutral-200"
-              >
-                {{ symbol }}
-              </td>
+          <td mat-cell *matCellDef="let row">
+            {{ $any(expertNames)[row[timeframe.toLowerCase()]] }}
+          </td>
+        </ng-container>
+      }
 
-              @for (tf of displayedTimeframes(); track tf) {
-                <td class="border border-neutral-800 p-2 text-center">
-                  @if (getExpert(tf, symbol); as expert) {
-                    <div
-                      class="rounded-lg px-2 py-1 text-xs font-medium"
-                      [class]="getExpertClass(expert)"
-                    >
-                      {{ expert }}
-                    </div>
-                  } @else {
-                    <span class="text-neutral-600">-</span>
-                  }
-                </td>
-              }
-            </tr>
-          }
-        </tbody>
-      </table>
-    </div>
+      <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
+      <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+    </table>
   `,
 })
 export class DiversificationTable {
   robots = input.required<Robot[]>();
-
   displayedSymbols = computed(() => {
     const usedSymbols = new Set(this.robots().map((r) => r.symbol));
     return symbols.filter((s) => usedSymbols.has(s));
   });
-
   displayedTimeframes = computed(() => {
     const usedTimeframes = new Set(this.robots().map((r) => r.timeframe));
     return timeframes.filter((tf) => usedTimeframes.has(tf));
+  });
+  displayedColumns = computed(() => ['symbol', ...this.displayedTimeframes()]);
+  expertNames = EXPERT_NAMES;
+  dataSource = computed(() => {
+    const robots = this.robots();
+
+    if (!robots || robots.length === 0) return new MatTableDataSource([]);
+
+    const rows = this.displayedSymbols().map((symbol) => {
+      const row: Record<string, unknown> = { symbol };
+
+      for (const timeframe of this.displayedTimeframes()) {
+        const robot = robots.find((r) => r.symbol === symbol && r.timeframe === timeframe);
+        row[timeframe.toLowerCase()] = robot?.expert ?? null;
+      }
+
+      return row;
+    });
+
+    return new MatTableDataSource(rows);
   });
 
   getExpert(timeframe: Timeframe, symbol: Symbol): string | null {
