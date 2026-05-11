@@ -10,16 +10,15 @@ import { firstValueFrom } from 'rxjs';
 import { PassAnalysisLongTermSummaryCell } from './pass-analysis-long-term-summary-cell';
 import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
 import { FormatPipe } from '@app/shared/pipes/format.pipe';
-import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 import { BACKTEST_THRESHOLD_VALUE_TYPE } from '@shared/constants/backtest-threshold-value-type';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { TimeUnit } from '@shared/models/time-unit';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
+import { ExpertBadge } from '@app/shared/components/expert-badge';
 
 interface TableItem extends GroupedBacktestPassAnalysis {
   expert: ExpertAdvisor;
-  expertName: string;
   symbol: string;
   timeframe: string;
   capital: number;
@@ -43,6 +42,7 @@ interface TableItem extends GroupedBacktestPassAnalysis {
     ScrollingModule,
     PassAnalysisLongTermSummaryCell,
     FormatPipe,
+    ExpertBadge,
   ],
   template: `
     <table
@@ -55,7 +55,9 @@ interface TableItem extends GroupedBacktestPassAnalysis {
     >
       <ng-container matColumnDef="expert" [sticky]="true">
         <th mat-header-cell *matHeaderCellDef>Expert</th>
-        <td mat-cell *matCellDef="let pass">{{ pass.expertName }} {{ pass.passes.length }}</td>
+        <td mat-cell *matCellDef="let pass">
+          <app-expert-badge [expert]="pass.expert" />
+        </td>
       </ng-container>
 
       <ng-container matColumnDef="symbol" [sticky]="true">
@@ -196,7 +198,6 @@ export class PassAnalysisTable {
       group.passes.map((pass) => ({
         ...group,
         ...pass,
-        expertName: EXPERT_NAMES[group.expert],
         longTermSummary: new BacktestLongTermSummary(
           pass.longTermResults,
           group.capital,

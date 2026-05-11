@@ -1,19 +1,39 @@
 import { Component, model } from '@angular/core';
-import { FormValueControl } from '@angular/forms/signals';
-import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
-import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
-import { EXPERT_NAMES } from '@shared/constants/expert.constants';
+import { MatSelectModule } from '@angular/material/select';
+import { expertAdvisors, ExpertAdvisor } from '@shared/models/expert-advisor';
+import { ExpertBadge } from './expert-badge';
+import { FormValueControl } from '@angular/forms/signals';
 
 @Component({
   selector: 'app-expert-select',
-  imports: [MatFormFieldModule, MatSelectModule],
+  standalone: true,
+
+  imports: [MatFormFieldModule, MatSelectModule, ExpertBadge],
+
   template: `
     <mat-form-field>
-      <mat-label>Expert</mat-label>
+      <mat-label>Experts</mat-label>
+
       <mat-select [value]="value()" (selectionChange)="value.set($event.value)" multiple>
-        @for (expertAdvisor of expertAdvisors; track expertAdvisor) {
-          <mat-option [value]="expertAdvisor">{{ $any(expertNames)[expertAdvisor] }}</mat-option>
+        <mat-select-trigger>
+          @if (value().length > 0) {
+            <div class="flex items-center gap-2">
+              <app-expert-badge [expert]="value()[0]" />
+
+              @if (value().length > 1) {
+                <span class="text-xs text-neutral-400 font-medium">
+                  +{{ value().length - 1 }}
+                </span>
+              }
+            </div>
+          }
+        </mat-select-trigger>
+
+        @for (expert of expertAdvisors; track expert) {
+          <mat-option [value]="expert">
+            <app-expert-badge [expert]="expert" />
+          </mat-option>
         }
       </mat-select>
     </mat-form-field>
@@ -22,5 +42,4 @@ import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 export class ExpertSelect implements FormValueControl<ExpertAdvisor[]> {
   value = model.required<ExpertAdvisor[]>();
   expertAdvisors = expertAdvisors;
-  expertNames = EXPERT_NAMES;
 }

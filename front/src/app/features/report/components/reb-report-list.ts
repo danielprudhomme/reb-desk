@@ -5,14 +5,22 @@ import { MatButtonModule } from '@angular/material/button';
 import { RouterLink } from '@angular/router';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { RebReport } from '../../../core/models/reb-report';
-import { EXPERT_NAMES } from '@shared/constants/expert.constants';
 import { FilterForm } from './filter-form';
 import { form, FormField } from '@angular/forms/signals';
 import { ReportFilter } from '@shared/models/report-filter';
+import { ExpertBadge } from '@app/shared/components/expert-badge';
 
 @Component({
   selector: 'app-reb-report-list',
-  imports: [RouterLink, MatButtonModule, MatTableModule, MatSortModule, FilterForm, FormField],
+  imports: [
+    RouterLink,
+    MatButtonModule,
+    MatTableModule,
+    MatSortModule,
+    FilterForm,
+    FormField,
+    ExpertBadge,
+  ],
   template: `
     <app-filter-form [formField]="filterForm" />
 
@@ -20,7 +28,9 @@ import { ReportFilter } from '@shared/models/report-filter';
       <table mat-table [dataSource]="dataSource()" matSort>
         <ng-container matColumnDef="expert">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Expert</th>
-          <td mat-cell *matCellDef="let report">{{ $any(expertNames)[report.expert] }}</td>
+          <td mat-cell *matCellDef="let report">
+            <app-expert-badge [expert]="report.expert" />
+          </td>
         </ng-container>
 
         <ng-container matColumnDef="symbol">
@@ -73,7 +83,6 @@ import { ReportFilter } from '@shared/models/report-filter';
 export class RebReportList {
   private sort = viewChild.required(MatSort);
   private rebReportService = inject(RebReportService);
-  expertNames = EXPERT_NAMES;
   filterModel = signal<ReportFilter>({ symbols: [], timeframes: [], experts: [], capital: null });
   filterForm = form(this.filterModel);
 
