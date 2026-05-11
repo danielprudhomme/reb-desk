@@ -1,5 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { Robot } from '@shared/models/robot';
+import { symbols, Symbol } from '@shared/models/symbol';
+import { timeframes, Timeframe } from '@shared/models/timeframe';
 
 @Component({
   selector: 'app-diversification-table',
@@ -58,17 +60,16 @@ export class DiversificationTable {
   robots = input.required<Robot[]>();
 
   displayedSymbols = computed(() => {
-    const set = new Set(this.robots().map((r) => r.symbol));
-    return [...set];
+    const usedSymbols = new Set(this.robots().map((r) => r.symbol));
+    return symbols.filter((s) => usedSymbols.has(s));
   });
 
   displayedTimeframes = computed(() => {
-    const set = new Set(this.robots().map((r) => r.timeframe));
-
-    return [...set];
+    const usedTimeframes = new Set(this.robots().map((r) => r.timeframe));
+    return timeframes.filter((tf) => usedTimeframes.has(tf));
   });
 
-  getExpert(timeframe: string, symbol: string): string | null {
+  getExpert(timeframe: Timeframe, symbol: Symbol): string | null {
     const robot = this.robots().find((r) => r.timeframe === timeframe && r.symbol === symbol);
 
     return robot?.expert ?? null;
