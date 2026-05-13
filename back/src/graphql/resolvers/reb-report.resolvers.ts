@@ -1,4 +1,3 @@
-import { randomUUID } from 'node:crypto';
 import type { RebReport } from '../../db/models/reb-report.ts';
 import { collections } from '../../db/collections.ts';
 
@@ -11,23 +10,5 @@ export const rebReportResolvers = {
 
   Query: {
     rebReports: () => collections.RebReport().find(),
-    rebReport: (_: unknown, { id }: { id: string }) => collections.RebReport().findOne({ id }),
-  },
-
-  Mutation: {
-    createRebReport: (_: unknown, { input }: { input: Omit<RebReport, 'id'> }) => {
-      const report: RebReport = { ...input, id: randomUUID() };
-      return collections.RebReport().insert(report);
-    },
-
-    deleteRebReport: (_: unknown, { id }: { id: string }) => {
-      const col = collections.RebReport();
-      const report = col.findOne({ id });
-
-      if (!report) return false;
-
-      col.remove(report);
-      return true;
-    },
   },
 };

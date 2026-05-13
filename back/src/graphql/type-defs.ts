@@ -70,11 +70,5 @@ export const typeDefs = /* GraphQL */ `
 
   type Query {
     rebReports(filter: RebReportFilter): [RebReport!]!
-    rebReport(id: ID!): RebReport
-  }
-
-  type Mutation {
-    createRebReport: RebReport!
-    deleteRebReport(id: ID!): Boolean!
   }
 `;
