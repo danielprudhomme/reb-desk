@@ -1,19 +1,23 @@
 import enums from './enums.ts';
-
-import rebReportTypes from './reb-report/reb-report.types.ts';
-import rebReportQuery from './reb-report/reb-report.query.ts';
-
-import accountTypes from './account/account.types.ts';
-import accountQuery from './account/account.query.ts';
+import common from './common.ts';
+import rebReportQuery from './reb-report.query.ts';
+import accountQuery from './account.query.ts';
+import accountMutation from './account.mutation.ts';
+import robotQuery from './robot.query.ts';
+import robotMutation from './robot.mutation.ts';
 
 export const typeDefs = /* GraphQL */ `
   type Query
+  type Mutation
 
   ${enums}
+  ${common}
 
-  ${rebReportTypes}
   ${rebReportQuery}
 
-  ${accountTypes}
+  ${robotQuery}
+  ${robotMutation}
+
   ${accountQuery}
+  ${accountMutation}
 `;

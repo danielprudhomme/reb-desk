@@ -33,7 +33,7 @@ export const collections = {
       'expert',
       'symbol',
       'timeframe',
-      'signature',
+      'strategySignature',
     ]),
 
   CreateAll: () => {

@@ -1,5 +1,6 @@
 import symbol from '@shared/models/symbol.ts';
 import timeframe from '@shared/models/timeframe.ts';
+import robotStatus from '@shared/models/robot-status.ts';
 
 export default /* GraphQL */ `
   enum TimeUnit {
@@ -26,6 +27,10 @@ export default /* GraphQL */ `
     new
     ongoing
     completed
+  }
+
+  enum RobotStatus {
+    ${robotStatus.robotStatuses.join('\n')}
   }
 
    enum Symbol {

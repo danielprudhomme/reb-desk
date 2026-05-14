@@ -1,129 +1,142 @@
-export const COMMON_PARAMETERS = [
-  'Inversion',
-  'ATR_Period',
-  'TP_Distance',
-  'Distance_Between_Orders',
-  'Distance_Between_Orders_Factor',
-  'Ini_Lot_Size_For_10k',
-  'Grid_Recovery_Factor',
-  'Grid_Recovery_Factor_Modifier',
-  'Max_Lot_Size_For_10k',
-  'Min_Hours_Between_Trade',
+export type ParameterDefinition = {
+  name: string;
+  important: boolean;
+};
+
+export function getImportantParameters(expert: string): string[] {
+  return EXPERT_PARAMETER_DEFINITIONS[expert]?.filter((p) => p.important).map((p) => p.name) ?? [];
+}
+
+export function getParameters(expert: string): string[] {
+  return EXPERT_PARAMETER_DEFINITIONS[expert]?.map((p) => p.name) ?? [];
+}
+
+export const COMMON_PARAMETERS: ParameterDefinition[] = [
+  { name: 'Inversion', important: true },
+  { name: 'ATR_Period', important: false },
+  { name: 'TP_Distance', important: true },
+
+  { name: 'Distance_Between_Orders', important: true },
+  { name: 'Distance_Between_Orders_Factor', important: false },
+
+  { name: 'Ini_Lot_Size_For_10k', important: true },
+  { name: 'Grid_Recovery_Factor', important: false },
+  { name: 'Grid_Recovery_Factor_Modifier', important: false },
+
+  { name: 'Max_Lot_Size_For_10k', important: false },
+  { name: 'Min_Hours_Between_Trade', important: false },
 ];
 
-export const CANDLE_SUITE_PARAMETERS = ['Suite', 'Extreme_Research'];
+export const EXPERT_PARAMETER_DEFINITIONS: Record<string, ParameterDefinition[]> = {
+  candleSuite: [
+    { name: 'Suite', important: true },
+    { name: 'Extreme_Research', important: true },
+    ...COMMON_PARAMETERS,
+  ],
 
-export const RSI_BREAK_PARAMETERS = [
-  'Extreme_Research',
-  'RSI_Period',
-  'RSI_Start',
-  'Delta_RSI_Buy',
-];
+  rsiBreak: [
+    { name: 'Extreme_Research', important: true },
+    { name: 'RSI_Period', important: true },
+    { name: 'RSI_Start', important: true },
+    { name: 'Delta_RSI_Buy', important: true },
+    ...COMMON_PARAMETERS,
+  ],
 
-export const EMA_BB_PARAMETERS = ['EMA_Slow_Period', 'BB_Period', 'BB_Deviation', 'BB_Way'];
+  emaBb: [
+    { name: 'EMA_Slow_Period', important: true },
+    { name: 'BB_Period', important: true },
+    { name: 'BB_Deviation', important: true },
+    { name: 'BB_Way', important: true },
+    ...COMMON_PARAMETERS,
+  ],
 
-export const ICHIMOKU_PARAMETERS = ['Tenkan_Sen', 'Kijun_Sen', 'Senkou_Span_B', 'Sup_Trend'];
+  ichimoku: [
+    { name: 'Tenkan_Sen', important: true },
+    { name: 'Kijun_Sen', important: true },
+    { name: 'Senkou_Span_B', important: true },
+    { name: 'Sup_Trend', important: true },
+    ...COMMON_PARAMETERS,
+  ],
 
-export const STRATEGY_CREATOR_PARAMETERS = [
-  'MA_Slow_Period',
-  'MA_Fast_Period',
-  'MA_Method',
-  'MA_TF',
-  'MA_Score',
-  'MA_Change_Score',
-  'MA_Trend_Period',
-  'MA_Trend_Method',
-  'MA_Trend_TF',
-  'MA_Trend_Score',
-  'MA_Trend_Change_Score',
-  'RSI_Period',
-  'RSI_TF',
-  'RSI_Min_Level',
-  'RSI_Min_Score',
-  'RSI_Min_Change_Score',
-  'RSI_Max_Level',
-  'RSI_Max_Score',
-  'RSI_Max_Change_Score',
-  'Tenkan_Sen',
-  'Kijun_Sen',
-  'Senkou_Span_B',
-  'Ichi_TF',
-  'Ichi_Cloud_Pos_Score',
-  'Ichi_Cloud_Pos_Change_Score',
-  'Ichi_Cloud_Way_Score',
-  'Ichi_Cloud_Way_Change_Score',
-  'Ichi_Tenkan_vs_Kijun_Score',
-  'Ichi_Tenkan_vs_Kijun_Change_Score',
-  'Ichi_Kijun_vs_Cloud_Score',
-  'Ichi_Chiku_vs_All_Score',
-  'Engulfing_Candle_Score',
-  'BB_Period',
-  'BB_Deviation',
-  'BB_TF',
-  'Under_Lower_BB_Score',
-  'Under_Lower_BB_Change_Score',
-  'Above_Upper_BB_Score',
-  'Above_Upper_BB_Change_Score',
-  'Under_Upper_BB_Score',
-  'Under_Upper_BB_Change_Score',
-  'Above_Lower_BB_Score',
-  'Above_Lower_BB_Change_Score',
-  'SAR_Step',
-  'SAR_Max',
-  'SAR_TF',
-  'SAR_Score',
-  'SAR_Change_Score',
-  'Stoch_K_Period',
-  'Stoch_D_Period',
-  'Stoch_Slowing',
-  'Stoch_Average_Methode',
-  'Stoch_TF',
-  'Stoch_Way_Score',
-  'Stoch_Way_Change_Score',
-  'Stoch_Min_Level',
-  'Stoch_Min_Level_Score',
-  'Stoch_Max_Level',
-  'Stoch_Max_Level_Score',
-  'MACD_TF',
-  'MACD_Fast',
-  'MACD_Slow',
-  'MACD_Signal',
-  'MACD_Way_Score',
-  'MACD_Way_Change_Score',
-  'MACD_Min_Level',
-  'MACD_Min_Level_Score',
-  'MACD_Max_Level',
-  'MACD_Max_Level_Score',
-  'Aleatory_Score',
-  'Aleatory_Frequency_In_Percent',
-  'Aleatory_TP_Variation_In_Percent',
-  'Aleatory_SL_Variation_In_Percent',
-  'Aleatory_Ini_Lot_For_10k_Variation_In_Percent',
-  'Aleatory_Max_Daily_Profit_In_Percent_Variation_In_Percent',
-  'Aleatory_Trade_Max_Profit_In_Percent_Variation_In_Percent',
-  'Min_Buy_Score',
-  'Close_Score',
-];
+  strategyCreator: [
+    { name: 'MA_Slow_Period', important: true },
+    { name: 'MA_Fast_Period', important: true },
+    { name: 'MA_Method', important: true },
+    { name: 'MA_TF', important: true },
+    { name: 'MA_Score', important: true },
+    { name: 'MA_Change_Score', important: true },
+    { name: 'MA_Trend_Period', important: true },
+    { name: 'MA_Trend_Method', important: true },
+    { name: 'MA_Trend_TF', important: true },
+    { name: 'MA_Trend_Score', important: true },
+    { name: 'MA_Trend_Change_Score', important: true },
 
-export const AUTOBOT_PARAMETERS = [
-  'Ini_Lot_Size_For_1k',
-  'Adapt_Lot_Size_To_Capital',
-  'Trade_Direction',
-  'Entry_Agressivity',
-  'Win_Level',
-  'Win_Factor',
-  'Recovery_Level',
-  'Recovery_Factor',
-  'Max_Lot_Size_Vs_Ini',
-  'Min_Distance_Between_Entries',
-  'Max_Amount_Of_First_Entries',
-];
+    { name: 'RSI_Period', important: true },
+    { name: 'RSI_TF', important: true },
+    { name: 'RSI_Min_Level', important: true },
+    { name: 'RSI_Min_Score', important: true },
+    { name: 'RSI_Min_Change_Score', important: true },
+    { name: 'RSI_Max_Level', important: true },
+    { name: 'RSI_Max_Score', important: true },
+    { name: 'RSI_Max_Change_Score', important: true },
 
-export const EXPERT_PARAMETERS: Record<string, string[]> = {
-  rsiBreak: [...RSI_BREAK_PARAMETERS, ...COMMON_PARAMETERS],
-  candleSuite: [...CANDLE_SUITE_PARAMETERS, ...COMMON_PARAMETERS],
-  emaBb: [...EMA_BB_PARAMETERS, ...COMMON_PARAMETERS],
-  ichimoku: [...ICHIMOKU_PARAMETERS, ...COMMON_PARAMETERS],
-  strategyCreator: [...STRATEGY_CREATOR_PARAMETERS, ...COMMON_PARAMETERS],
-  autoBot: AUTOBOT_PARAMETERS,
+    { name: 'Tenkan_Sen', important: true },
+    { name: 'Kijun_Sen', important: true },
+    { name: 'Senkou_Span_B', important: true },
+    { name: 'Ichi_TF', important: true },
+    { name: 'Ichi_Cloud_Pos_Score', important: true },
+    { name: 'Ichi_Cloud_Pos_Change_Score', important: true },
+    { name: 'Ichi_Cloud_Way_Score', important: true },
+    { name: 'Ichi_Cloud_Way_Change_Score', important: true },
+    { name: 'Ichi_Tenkan_vs_Kijun_Score', important: true },
+    { name: 'Ichi_Tenkan_vs_Kijun_Change_Score', important: true },
+    { name: 'Ichi_Kijun_vs_Cloud_Score', important: true },
+    { name: 'Ichi_Chiku_vs_All_Score', important: true },
+
+    { name: 'Engulfing_Candle_Score', important: true },
+
+    { name: 'BB_Period', important: true },
+    { name: 'BB_Deviation', important: true },
+    { name: 'BB_TF', important: true },
+    { name: 'Under_Lower_BB_Score', important: true },
+    { name: 'Above_Upper_BB_Score', important: true },
+
+    { name: 'SAR_Step', important: true },
+    { name: 'SAR_Max', important: true },
+    { name: 'SAR_TF', important: true },
+    { name: 'SAR_Score', important: true },
+
+    { name: 'Stoch_K_Period', important: true },
+    { name: 'Stoch_D_Period', important: true },
+    { name: 'Stoch_Slowing', important: true },
+    { name: 'Stoch_TF', important: true },
+    { name: 'Stoch_Way_Score', important: true },
+
+    { name: 'MACD_TF', important: true },
+    { name: 'MACD_Fast', important: true },
+    { name: 'MACD_Slow', important: true },
+    { name: 'MACD_Signal', important: true },
+    { name: 'MACD_Way_Score', important: true },
+
+    { name: 'Aleatory_Score', important: true },
+
+    { name: 'Min_Buy_Score', important: true },
+    { name: 'Close_Score', important: true },
+
+    ...COMMON_PARAMETERS,
+  ],
+
+  autoBot: [
+    { name: 'Ini_Lot_Size_For_1k', important: true },
+    { name: 'Adapt_Lot_Size_To_Capital', important: true },
+    { name: 'Trade_Direction', important: true },
+    { name: 'Entry_Agressivity', important: true },
+    { name: 'Win_Level', important: true },
+    { name: 'Win_Factor', important: true },
+    { name: 'Recovery_Level', important: true },
+    { name: 'Recovery_Factor', important: true },
+    { name: 'Max_Lot_Size_Vs_Ini', important: true },
+    { name: 'Min_Distance_Between_Entries', important: true },
+    { name: 'Max_Amount_Of_First_Entries', important: true },
+  ],
 };

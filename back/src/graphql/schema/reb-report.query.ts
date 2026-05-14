@@ -41,4 +41,8 @@ export default /* GraphQL */ `
   input RebReportFilter {
     parameters: [ParameterFilter!]
   }
+
+  extend type Query {
+    rebReports(filter: RebReportFilter): [RebReport!]!
+  }
 `;

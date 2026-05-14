@@ -95,7 +95,7 @@ async function parseRebFile(filePath: string): Promise<{
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
   const expert = extractExpert(lines);
-  const allowedParameters = rebParamsDefinitions.EXPERT_PARAMETERS[expert] ?? [];
+  const allowedParameters = rebParamsDefinitions.getParameters(expert);
 
   const fixedParameters = parseFixedParameters(content, allowedParameters);
   const passParameters = parsePassParameters(content);

@@ -1,20 +1,30 @@
+import { collections } from '@sec/db/collections.ts';
 import { Account } from '@sec/db/models/account.ts';
-import { collections } from '../../db/collections.ts';
+import { AccountInput } from '@sec/models/account.input.ts';
+import { accountService } from '@sec/services/account.service.ts';
+
 export const accountResolvers = {
-  Account: {
-    robots: (account: Account) => {
-      return collections.Robot().find({ accountId: account.id });
+  Mutation: {
+    upsertAccount: (_: unknown, { input }: { input: AccountInput }) => {
+      return accountService.upsert(input);
     },
   },
 
   Query: {
     accounts: () => {
-      return collections.Account().find();
+      return accountService.getAll();
     },
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    account: (_: any, { id }: { id: string }) => {
-      return collections.Account().findOne({ id });
+    account: (_: unknown, { id }: { id: string }) => {
+      return accountService.getById(id);
+    },
+  },
+
+  Account: {
+    robots: (account: Account) => {
+      return collections.Robot().find({
+        accountId: account.id,
+      });
     },
   },
 };
