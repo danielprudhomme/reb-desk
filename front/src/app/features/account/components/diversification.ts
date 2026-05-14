@@ -1,8 +1,8 @@
 import { Component, signal } from '@angular/core';
 import { symbols } from '@shared/models/symbol';
-import { Robot } from '@shared/models/robot';
 import { diversifyRobots } from '../helpers/diversify-robots';
 import { DiversificationTable } from './diversification-table';
+import { Robot } from '@app/core/models/robot';
 
 @Component({
   selector: 'app-diversification',

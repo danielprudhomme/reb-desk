@@ -1,7 +1,7 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { Timeframe } from '@shared/models/timeframe';
-import { Robot } from '@shared/models/robot';
 import { Symbol } from '@shared/models/symbol';
+import { Robot } from '@app/core/models/robot';
 
 interface DiversificationInput {
   experts: ExpertAdvisor[];

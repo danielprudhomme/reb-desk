@@ -1,9 +1,6 @@
-import {
-  BacktestPassParameter,
-  FixedParameter,
-  GroupedBacktestPassParameter,
-} from './backtest-pass-parameter';
+import { GroupedBacktestPassParameter } from './backtest-pass-parameter';
 import { BacktestPassResult } from './backtest-pass-result';
+import { Parameter } from './parameter';
 
 export interface BaseBacktestPass {
   shortTermResults: BacktestPassResult[];
@@ -13,8 +10,7 @@ export interface BaseBacktestPass {
 export interface BacktestPass extends BaseBacktestPass {
   passId: number;
   reportId: string;
-  fixedParameters: FixedParameter[];
-  parameters: BacktestPassParameter[];
+  parameters: Parameter[];
 }
 
 export interface GroupedBacktestPass extends BaseBacktestPass {

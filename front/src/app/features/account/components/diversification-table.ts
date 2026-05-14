@@ -1,9 +1,9 @@
 import { Component, computed, input } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Robot } from '@shared/models/robot';
 import { symbols } from '@shared/models/symbol';
 import { timeframes } from '@shared/models/timeframe';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
+import { Robot } from '@app/core/models/robot';
 
 @Component({
   selector: 'app-diversification-table',

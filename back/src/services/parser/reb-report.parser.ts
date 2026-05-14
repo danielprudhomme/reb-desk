@@ -13,7 +13,7 @@ import {
   requiredValue,
 } from './parser-helper.ts';
 import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
-import { BacktestPassParameter } from '@shared/models/backtest-pass-parameter.ts';
+import { Parameter } from '@shared/models/parameter.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ParsedRebPass } from '@sec/models/parsed-reb-pass.ts';
 
@@ -71,7 +71,7 @@ export async function parseRebPass(filePath: string): Promise<ParsedRebPass[]> {
   }));
 
   const passes: ParsedRebPass[] = passIds.map((passId, index) => {
-    const parameters: BacktestPassParameter[] = passParameters[index];
+    const parameters = passParameters[index];
 
     return {
       passId,
@@ -90,10 +90,7 @@ async function parseRebFile(filePath: string): Promise<{
   lines: string[];
   expert: ExpertAdvisor;
   fixedParameters: ParsedRebParameter[];
-  passParameters: {
-    name: string;
-    value: number;
-  }[][];
+  passParameters: Parameter[][];
 }> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);

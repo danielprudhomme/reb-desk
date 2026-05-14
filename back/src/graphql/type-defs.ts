@@ -1,3 +1,6 @@
+import symbol from '@shared/models/symbol.ts';
+import timeframe from '@shared/models/timeframe.ts';
+
 export const typeDefs = /* GraphQL */ `
   enum TimeUnit {
     year
@@ -57,6 +60,32 @@ export const typeDefs = /* GraphQL */ `
     parameters: [RebParameter!]!
   }
 
+  type RobotParameter {
+    name: String!
+    value: Float!
+  }
+
+  enum Timeframe {
+    ${timeframe.timeframes.join('\n')}
+  }
+
+  enum Symbol {
+    ${symbol.symbols.join('\n')}
+  }
+
+  type Robot {
+    expert: ExpertAdvisor!
+    timeframe: Timeframe!
+    symbol: Symbol!
+    parameters: [RobotParameter!]!
+  }
+
+  type Account {
+    id: ID!
+    name: String!
+    robots: [Robot!]!
+  }
+
   input ParameterFilter {
     name: String!
     value: Float
@@ -70,5 +99,8 @@ export const typeDefs = /* GraphQL */ `
 
   type Query {
     rebReports(filter: RebReportFilter): [RebReport!]!
+
+    accounts: [Account!]!
+    account(id: ID!): Account
   }
 `;
