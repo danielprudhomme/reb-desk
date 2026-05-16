@@ -8,5 +8,6 @@ export default /* GraphQL */ `
 
   extend type Mutation {
     upsertAccount(input: AccountInput!): Account!
+    deleteAccount(id: ID!): Boolean!
   }
 `;

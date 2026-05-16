@@ -1,10 +1,11 @@
 import { inject, Injectable } from '@angular/core';
 import { Account } from '@app/core/models/account';
-import { GET_ACCOUNTS, UPSERT_ACCOUNT } from './account.graphql';
+import { DELETE_ACCOUNT, GET_ACCOUNTS, UPSERT_ACCOUNT } from './account.graphql';
 import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { map } from 'rxjs';
 import { AccountInput } from '@app/core/models/account.input';
+import { ApolloCache } from '@apollo/client/cache';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -22,50 +23,49 @@ export class AccountService {
     },
   );
 
+  deleteAccount(id: string) {
+    return this.apollo.mutate<{ deleteAccount: boolean }>({
+      mutation: DELETE_ACCOUNT,
+      variables: { id },
+
+      update: (cache, { data }) => {
+        if (!data?.deleteAccount) return;
+        this.updateCachedAccounts(cache, (accounts) =>
+          accounts.filter((account) => account.id !== id),
+        );
+      },
+    });
+  }
+
   upsertAccount(input: AccountInput) {
     return this.apollo.mutate<{ upsertAccount: Account }>({
       mutation: UPSERT_ACCOUNT,
       variables: { input },
 
       update: (cache, { data }) => {
-        console.log('Mutation result:', data);
-        if (!data?.upsertAccount) return;
-
-        const newAccount = data.upsertAccount;
-
-        // 1. Lire les accounts existants dans le cache
-        const existing = cache.readQuery<{ accounts: Account[] }>({
-          query: GET_ACCOUNTS,
-        });
-
-        if (!existing) return;
-
-        const accounts = existing.accounts;
-
-        // 2. Upsert logique (replace si existe, sinon add)
-        const updatedAccounts = upsert(accounts, newAccount);
-
-        // 3. Réécrire le cache
-        cache.writeQuery({
-          query: GET_ACCOUNTS,
-          data: {
-            accounts: updatedAccounts,
-          },
+        const newAccount = data?.upsertAccount;
+        if (!newAccount) return;
+        this.updateCachedAccounts(cache, (accounts) => {
+          const index = accounts.findIndex((a) => a.id === newAccount.id);
+          if (index === -1) {
+            return [...accounts, newAccount];
+          }
+          const copy = [...accounts];
+          copy[index] = newAccount;
+          return copy;
         });
       },
     });
   }
-}
 
-function upsert(list: Account[], item: Account): Account[] {
-  const index = list.findIndex((a) => a.id === item.id);
-
-  if (index === -1) {
-    return [...list, item];
+  private updateCachedAccounts(
+    cache: ApolloCache,
+    updateFn: (accounts: Account[]) => Account[],
+  ): void {
+    const existing = cache.readQuery<{ accounts: Account[] }>({ query: GET_ACCOUNTS });
+    cache.writeQuery({
+      query: GET_ACCOUNTS,
+      data: { accounts: updateFn(existing?.accounts ?? []) },
+    });
   }
-
-  const copy = [...list];
-  copy[index] = item;
-
-  return copy;
 }

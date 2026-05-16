@@ -1,14 +1,32 @@
 import crypto from 'node:crypto';
-import { robotService } from './robot.service.ts';
 import { Account } from '@sec/db/models/account.ts';
 import { AccountInput } from '@sec/models/account.input.ts';
 import { collections } from '@sec/db/collections.ts';
 import { Robot } from '@sec/db/models/robot.ts';
 
 export const accountService = {
+  getAll() {
+    return collections.Account().find();
+  },
+
+  getById(id: string) {
+    return collections.Account().findOne({ id });
+  },
+
+  delete(id: string): boolean {
+    const account = this.getById(id);
+
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    collections.Account().remove(account);
+    return true;
+  },
+
   upsert(input: AccountInput): Account & { robots: Robot[] } {
     const accounts = collections.Account();
-    const robots = collections.Robot();
+    // const robots = collections.Robot();
 
     const id = input.id ?? crypto.randomUUID();
 
@@ -42,13 +60,5 @@ export const accountService = {
     // const savedRobots = input.robots.map((robot) => robotService.upsert(id, robot));
 
     return { ...account, robots: [] };
-  },
-
-  getAll() {
-    return collections.Account().find();
-  },
-
-  getById(id: string) {
-    return collections.Account().findOne({ id });
   },
 };

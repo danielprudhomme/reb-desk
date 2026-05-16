@@ -6,6 +6,7 @@ import { accountService } from '@sec/services/account.service.ts';
 export const accountResolvers = {
   Mutation: {
     upsertAccount: (_: unknown, { input }: { input: AccountInput }) => accountService.upsert(input),
+    deleteAccount: async (_: unknown, { id }: { id: string }) => accountService.delete(id),
   },
 
   Query: {
