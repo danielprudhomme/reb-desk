@@ -5,26 +5,15 @@ import { accountService } from '@sec/services/account.service.ts';
 
 export const accountResolvers = {
   Mutation: {
-    upsertAccount: (_: unknown, { input }: { input: AccountInput }) => {
-      return accountService.upsert(input);
-    },
+    upsertAccount: (_: unknown, { input }: { input: AccountInput }) => accountService.upsert(input),
   },
 
   Query: {
-    accounts: () => {
-      return accountService.getAll();
-    },
-
-    account: (_: unknown, { id }: { id: string }) => {
-      return accountService.getById(id);
-    },
+    accounts: () => accountService.getAll(),
+    account: (_: unknown, { id }: { id: string }) => accountService.getById(id),
   },
 
   Account: {
-    robots: (account: Account) => {
-      return collections.Robot().find({
-        accountId: account.id,
-      });
-    },
+    robots: (account: Account) => collections.Robot().find({ accountId: account.id }),
   },
 };

@@ -1,11 +1,9 @@
 export default /* GraphQL */ `
   input AccountInput {
     id: ID
-
     name: String!
     capital: Float!
-
-    robots: [RobotInput!]!
+    leverage: Float!
   }
 
   extend type Mutation {

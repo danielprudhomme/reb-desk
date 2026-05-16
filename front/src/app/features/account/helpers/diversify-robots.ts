@@ -35,6 +35,7 @@ export function diversifyRobots({
     for (const timeframe of timeframes) {
       for (const symbol of symbols) {
         allCandidates.push({
+          status: 'new',
           expert,
           timeframe,
           symbol,

@@ -4,14 +4,12 @@ import { RobotInput } from '@sec/models/robot.input.ts';
 
 export const robotResolvers = {
   Mutation: {
-    upsertRobot: (_: unknown, { accountId, input }: { accountId: string; input: RobotInput }) => {
-      return robotService.upsert(accountId, input);
-    },
+    upsertRobot: (_: unknown, { accountId, input }: { accountId: string; input: RobotInput }) =>
+      robotService.upsert(accountId, input),
   },
 
   Query: {
-    robotsByAccount: (_: unknown, { accountId }: { accountId: string }) => {
-      return collections.Robot().find({ accountId });
-    },
+    robotsByAccount: (_: unknown, { accountId }: { accountId: string }) =>
+      collections.Robot().find({ accountId }),
   },
 };

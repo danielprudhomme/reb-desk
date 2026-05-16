@@ -3,6 +3,7 @@ export default /* GraphQL */ `
     id: ID!
     name: String!
     capital: Float!
+    leverage: Float!
     robots: [Robot!]!
   }
 

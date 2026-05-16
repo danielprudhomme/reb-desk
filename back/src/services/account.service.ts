@@ -14,10 +14,9 @@ export const accountService = {
 
     const account: Account = {
       id,
-
       name: input.name,
-
       capital: input.capital,
+      leverage: input.leverage,
     };
 
     const existing = accounts.findOne({ id });
@@ -31,28 +30,18 @@ export const accountService = {
       accounts.insert(account);
     }
 
-    // robots existants du compte
-    const existingRobots = robots.find({
-      accountId: id,
-    });
+    // const existingRobots = robots.find({ accountId: id });
+    // const incomingRobotIds = input.robots.filter((r) => r.id).map((r) => r.id);
 
-    // ids reçus du frontend
-    const incomingRobotIds = input.robots.filter((r) => r.id).map((r) => r.id);
+    // for (const robot of existingRobots) {
+    //   if (!incomingRobotIds.includes(robot.id)) {
+    //     robots.remove(robot);
+    //   }
+    // }
 
-    // suppression robots supprimés
-    for (const robot of existingRobots) {
-      if (!incomingRobotIds.includes(robot.id)) {
-        robots.remove(robot);
-      }
-    }
+    // const savedRobots = input.robots.map((robot) => robotService.upsert(id, robot));
 
-    // upsert robots
-    const savedRobots = input.robots.map((robot) => robotService.upsert(id, robot));
-
-    return {
-      ...account,
-      robots: savedRobots,
-    };
+    return { ...account, robots: [] };
   },
 
   getAll() {

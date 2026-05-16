@@ -8,7 +8,7 @@ import { RouterLink } from '@angular/router';
       <a [routerLink]="['']">REB Reports</a>
       <a [routerLink]="['actions']">Actions</a>
       <a [routerLink]="['analysis']">Analysis</a>
-      <a [routerLink]="['diversification']">Diversification</a>
+      <a [routerLink]="['account']">Accounts</a>
     </div>
   `,
   imports: [RouterLink],
