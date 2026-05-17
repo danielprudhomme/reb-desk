@@ -2,7 +2,7 @@ import crypto from 'node:crypto';
 import { Account } from '@sec/db/models/account.ts';
 import { AccountInput } from '@sec/models/account.input.ts';
 import { collections } from '@sec/db/collections.ts';
-import { Robot } from '@sec/db/models/robot.ts';
+import { robotService } from './robot.service.ts';
 
 export const accountService = {
   getAll() {
@@ -24,41 +24,42 @@ export const accountService = {
     return true;
   },
 
-  upsert(input: AccountInput): Account & { robots: Robot[] } {
+  upsert(input: AccountInput) {
     const accounts = collections.Account();
-    // const robots = collections.Robot();
 
-    const id = input.id ?? crypto.randomUUID();
+    // CREATE
+    if (!input.id) {
+      const newAccount = {
+        id: crypto.randomUUID(),
+        name: input.name,
+        capital: input.capital,
+        leverage: input.leverage,
+      };
 
-    const account: Account = {
-      id,
-      name: input.name,
-      capital: input.capital,
-      leverage: input.leverage,
-    };
+      accounts.insert(newAccount);
 
-    const existing = accounts.findOne({ id });
+      if (input.robots?.length) {
+        input.robots.forEach((robotInput) => robotService.upsert(newAccount.id, robotInput));
+      }
 
-    if (existing) {
-      accounts.update({
-        ...existing,
-        ...account,
-      });
-    } else {
-      accounts.insert(account);
+      return newAccount;
     }
 
-    // const existingRobots = robots.find({ accountId: id });
-    // const incomingRobotIds = input.robots.filter((r) => r.id).map((r) => r.id);
+    // UPDATE
+    const existing = accounts.findOne({ id: input.id });
 
-    // for (const robot of existingRobots) {
-    //   if (!incomingRobotIds.includes(robot.id)) {
-    //     robots.remove(robot);
-    //   }
-    // }
+    if (!existing) {
+      throw new Error('Account not found');
+    }
 
-    // const savedRobots = input.robots.map((robot) => robotService.upsert(id, robot));
+    const updated = { ...existing, ...input } as Account;
+    accounts.update(updated);
 
-    return { ...account, robots: [] };
+    // OPTIONAL robot bulk update
+    if (input.robots) {
+      // robotService.replaceForAccount(existing.id, input.robots);
+    }
+
+    return updated;
   },
 };
