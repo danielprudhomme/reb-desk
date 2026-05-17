@@ -39,15 +39,15 @@ export class AccountService {
     );
   }
 
-  async upsertAccount(input: AccountInput) {
-    await firstValueFrom(
+  async upsertAccount(input: AccountInput): Promise<string | undefined> {
+    const result = await firstValueFrom(
       this.apollo.mutate<{ upsertAccount: Account }>({
         mutation: UPSERT_ACCOUNT,
         variables: { input },
-
         update: (cache, { data }) => {
           const newAccount = data?.upsertAccount;
           if (!newAccount) return;
+
           this.updateCachedAccounts(cache, (accounts) => {
             const index = accounts.findIndex((a) => a.id === newAccount.id);
             if (index === -1) {
@@ -60,6 +60,8 @@ export class AccountService {
         },
       }),
     );
+
+    return result.data?.upsertAccount.id;
   }
 
   private updateCachedAccounts(

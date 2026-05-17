@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { symbols } from '@shared/models/symbol';
 import { diversifyRobots } from '../helpers/diversify-robots';
 import { DiversificationTable } from './diversification-table';
@@ -9,10 +9,12 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Account } from '@app/core/models/account';
-import { form, FormField } from '@angular/forms/signals';
+import { form, FormField, required } from '@angular/forms/signals';
 import { MatIcon } from '@angular/material/icon';
 import { AccountForm } from './account-form';
+import { AccountInput } from '@app/core/models/account.input';
+import { debounceTime, skip } from 'rxjs';
+import { toObservable } from '@angular/core/rxjs-interop';
 
 @Component({
   selector: 'app-account-details',
@@ -37,13 +39,6 @@ import { AccountForm } from './account-form';
         <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
           <mat-icon>settings</mat-icon>
         </button>
-
-        <mat-menu #settingsMenu="matMenu">
-          <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-            <mat-icon>delete</mat-icon>
-            <span>Delete Account</span>
-          </button>
-        </mat-menu>
       </div>
 
       <app-account-form [formField]="accountForm" />
@@ -52,14 +47,26 @@ import { AccountForm } from './account-form';
         <app-diversification-table [robots]="robots()" />
       </div>
     </div>
+
+    <mat-menu #settingsMenu="matMenu">
+      <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
+        <mat-icon>delete</mat-icon>
+        <span>Delete Account</span>
+      </button>
+    </mat-menu>
   `,
 })
 export class AccountDetails {
   private accountService = inject(AccountService);
   private route = inject(ActivatedRoute);
   robots = signal<Robot[]>([]);
-  account = signal<Account>({ id: '', name: '', capital: 1000, leverage: 500, robots: [] });
-  accountForm = form(this.account);
+  account = signal<AccountInput>({ name: '', capital: 1000, leverage: 500 });
+  isCreation = computed(() => !this.account().id);
+  accountForm = form(this.account, (path) => {
+    required(path.name);
+    required(path.capital);
+    required(path.leverage);
+  });
 
   constructor() {
     effect(() => {
@@ -68,6 +75,20 @@ export class AccountDetails {
       if (!account) return;
       this.account.set(account);
     });
+
+    toObservable(this.account)
+      .pipe(debounceTime(500), skip(1))
+      .subscribe((account) => {
+        if (this.isCreation() || !this.accountForm().dirty() || !this.accountForm().valid()) return;
+
+        this.accountService.upsertAccount({
+          id: account.id,
+          name: account.name,
+          capital: account.capital,
+          leverage: account.leverage,
+        });
+        this.accountForm().reset();
+      });
 
     const selectedSymbols = symbols.filter((s) => !s.includes('XAU'));
 
@@ -82,6 +103,6 @@ export class AccountDetails {
   }
 
   deleteAccount() {
-    this.accountService.deleteAccount(this.account().id);
+    this.accountService.deleteAccount(this.account().id!);
   }
 }

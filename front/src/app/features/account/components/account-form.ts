@@ -1,8 +1,8 @@
 import { Component, model } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { Account } from '@app/core/models/account';
 import { form, FormField, FormValueControl } from '@angular/forms/signals';
+import { AccountInput } from '@app/core/models/account.input';
 
 @Component({
   selector: 'app-account-form',
@@ -28,7 +28,7 @@ import { form, FormField, FormValueControl } from '@angular/forms/signals';
     </form>
   `,
 })
-export class AccountForm implements FormValueControl<Account> {
-  value = model.required<Account>();
+export class AccountForm implements FormValueControl<AccountInput> {
+  value = model.required<AccountInput>();
   accountForm = form(this.value);
 }

@@ -1,5 +1,5 @@
 import { Component, computed, inject, viewChild } from '@angular/core';
-import { RouterLink } from '@angular/router';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
@@ -40,7 +40,7 @@ import { Account } from '../../../core/models/account';
 
         <ng-container matColumnDef="actions">
           <th mat-header-cell *matHeaderCellDef>
-            <button matButton="filled" routerLink="create">New</button>
+            <button matButton="filled" (click)="createNewAccount()">New</button>
           </th>
 
           <td mat-cell *matCellDef="let account">
@@ -58,10 +58,17 @@ import { Account } from '../../../core/models/account';
 export class AccountList {
   private sort = viewChild.required(MatSort);
   private accountService = inject(AccountService);
+  private router = inject(Router);
+
   dataSource = computed(() => {
     const dataSource = new MatTableDataSource<Account>(this.accountService.accounts());
     dataSource.sort = this.sort();
     return dataSource;
   });
   displayedColumns: string[] = ['name', 'capital', 'leverage', 'actions'];
+
+  async createNewAccount() {
+    const id = await this.accountService.upsertAccount({ name: '', capital: 1000, leverage: 500 })!;
+    this.router.navigate(['account', id]);
+  }
 }
