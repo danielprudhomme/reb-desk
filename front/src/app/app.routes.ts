@@ -6,7 +6,6 @@ import { FilterAnalysis } from './features/report/components/filter-analysis';
 import { ReportAnalysis } from './features/report/components/report-analysis';
 import { AccountList } from './features/account/components/account-list';
 import { AccountDetails } from './features/account/components/account-details';
-import { AccountPage } from './features/account/components/account-page';
 
 export const routes: Routes = [
   {
@@ -31,21 +30,15 @@ export const routes: Routes = [
       },
       {
         path: 'account',
-        component: AccountPage,
-        children: [
-          {
-            path: '',
-            component: AccountList,
-          },
-          {
-            path: 'create',
-            component: AccountDetails,
-          },
-          {
-            path: ':id',
-            component: AccountDetails,
-          },
-        ],
+        component: AccountList,
+      },
+      {
+        path: 'account/create',
+        component: AccountDetails,
+      },
+      {
+        path: 'account/:id',
+        component: AccountDetails,
       },
       { path: '', redirectTo: 'report', pathMatch: 'full' },
     ],
