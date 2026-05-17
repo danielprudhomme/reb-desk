@@ -3,7 +3,7 @@ import { Account } from '@app/core/models/account';
 import { DELETE_ACCOUNT, GET_ACCOUNTS, UPSERT_ACCOUNT } from './account.graphql';
 import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { map } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import { AccountInput } from '@app/core/models/account.input';
 import { ApolloCache } from '@apollo/client/cache';
 
@@ -23,39 +23,43 @@ export class AccountService {
     },
   );
 
-  deleteAccount(id: string) {
-    return this.apollo.mutate<{ deleteAccount: boolean }>({
-      mutation: DELETE_ACCOUNT,
-      variables: { id },
+  async deleteAccount(id: string) {
+    await firstValueFrom(
+      this.apollo.mutate<{ deleteAccount: boolean }>({
+        mutation: DELETE_ACCOUNT,
+        variables: { id },
 
-      update: (cache, { data }) => {
-        if (!data?.deleteAccount) return;
-        this.updateCachedAccounts(cache, (accounts) =>
-          accounts.filter((account) => account.id !== id),
-        );
-      },
-    });
+        update: (cache, { data }) => {
+          if (!data?.deleteAccount) return;
+          this.updateCachedAccounts(cache, (accounts) =>
+            accounts.filter((account) => account.id !== id),
+          );
+        },
+      }),
+    );
   }
 
-  upsertAccount(input: AccountInput) {
-    return this.apollo.mutate<{ upsertAccount: Account }>({
-      mutation: UPSERT_ACCOUNT,
-      variables: { input },
+  async upsertAccount(input: AccountInput) {
+    await firstValueFrom(
+      this.apollo.mutate<{ upsertAccount: Account }>({
+        mutation: UPSERT_ACCOUNT,
+        variables: { input },
 
-      update: (cache, { data }) => {
-        const newAccount = data?.upsertAccount;
-        if (!newAccount) return;
-        this.updateCachedAccounts(cache, (accounts) => {
-          const index = accounts.findIndex((a) => a.id === newAccount.id);
-          if (index === -1) {
-            return [...accounts, newAccount];
-          }
-          const copy = [...accounts];
-          copy[index] = newAccount;
-          return copy;
-        });
-      },
-    });
+        update: (cache, { data }) => {
+          const newAccount = data?.upsertAccount;
+          if (!newAccount) return;
+          this.updateCachedAccounts(cache, (accounts) => {
+            const index = accounts.findIndex((a) => a.id === newAccount.id);
+            if (index === -1) {
+              return [...accounts, newAccount];
+            }
+            const copy = [...accounts];
+            copy[index] = newAccount;
+            return copy;
+          });
+        },
+      }),
+    );
   }
 
   private updateCachedAccounts(

@@ -1,19 +1,18 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
-import { Header } from './header';
 
 @Component({
   selector: 'app-layout',
   template: `
     <div class="h-full flex flex-col overflow-hidden">
-      <app-header />
+      <!-- <app-header /> -->
 
       <div class="flex-1 min-h-0 flex flex-col">
         <router-outlet />
       </div>
     </div>
   `,
-  imports: [RouterOutlet, Header],
+  imports: [RouterOutlet],
   styles: `
     :host {
       display: block;

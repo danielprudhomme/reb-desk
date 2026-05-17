@@ -11,7 +11,7 @@ import { Robot } from '@app/core/models/robot';
   template: `
     <table mat-table [dataSource]="dataSource()">
       <ng-container matColumnDef="symbol" [sticky]="true">
-        <th mat-header-cell *matHeaderCellDef>Symbol</th>
+        <th mat-header-cell *matHeaderCellDef>{{ robots().length }} robots</th>
         <td mat-cell *matCellDef="let row">{{ row.symbol }}</td>
       </ng-container>
 
