@@ -80,6 +80,7 @@ import { MatButtonModule } from '@angular/material/button';
   `,
 })
 export class RobotTable {
+  accountId = input.required<string>();
   robots = input.required<Robot[]>();
   timeframes = input<Timeframe[]>(['M15', 'M20', 'M30', 'H1']);
   symbols = input<Symbol[]>(symbols.filter((s) => !s.includes('XAU')));
@@ -106,7 +107,14 @@ export class RobotTable {
   // modifyRobot(robot: Robot) {}
 
   createRobot(timeframe: Timeframe, symbol: Symbol, expert: ExpertAdvisor) {
-    console.log('create', timeframe, symbol, expert);
+    this.robotService.upsertRobot({
+      accountId: this.accountId(),
+      expert,
+      symbol,
+      timeframe,
+      status: 'inProgress',
+      parameters: [],
+    });
   }
 
   async deleteRobot(robot: Robot) {

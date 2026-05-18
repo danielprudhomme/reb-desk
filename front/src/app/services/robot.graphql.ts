@@ -4,6 +4,7 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
   query RobotsByAccount($accountId: ID!) {
     robotsByAccount(accountId: $accountId) {
       id
+      accountId
 
       expert
       timeframe
@@ -23,6 +24,7 @@ export const UPSERT_ROBOT = gql`
   mutation UpsertRobot($input: RobotInput!) {
     upsertRobot(input: $input) {
       id
+      accountId
 
       expert
       timeframe

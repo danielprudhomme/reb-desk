@@ -1,30 +1,30 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { inject, Injectable, signal, Signal } from '@angular/core';
 import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { Robot, RobotInput } from '@app/core/models/robot';
 import { DELETE_ROBOT, GET_ROBOTS_BY_ACCOUNT, UPSERT_ROBOT } from './robot.graphql';
-import { ApolloCache } from '@apollo/client';
+import { Reference } from '@apollo/client';
+import { ModifierDetails } from '@apollo/client/cache';
 
 @Injectable({ providedIn: 'root' })
 export class RobotService {
   private apollo = inject(Apollo);
+  robotsByAccount: Signal<Robot[]> = signal([]);
 
-  robotsByAccount(accountId: string | undefined): Signal<Robot[]> {
-    if (!accountId) return signal([]);
+  setAccountId(accountId: string) {
+    const robots$ = this.apollo
+      .watchQuery<{ robotsByAccount: Robot[] }>({
+        query: GET_ROBOTS_BY_ACCOUNT,
+        variables: { accountId },
+        fetchPolicy: 'cache-and-network',
+        nextFetchPolicy: 'cache-first',
+        notifyOnNetworkStatusChange: true,
+      })
+      .valueChanges.pipe(map((result) => (result.data?.robotsByAccount ?? []) as Robot[]));
 
-    return toSignal(
-      this.apollo
-        .watchQuery<{ robotsByAccount: Robot[] }>({
-          query: GET_ROBOTS_BY_ACCOUNT,
-          variables: { accountId },
-          fetchPolicy: 'cache-and-network',
-        })
-        .valueChanges.pipe(map((result) => result.data?.robotsByAccount ?? [])),
-      {
-        initialValue: [],
-      },
-    ) as Signal<Robot[]>;
+    this.robotsByAccount = toSignal(robots$, { initialValue: [] });
   }
 
   async deleteRobot(robot: Robot) {
@@ -32,19 +32,22 @@ export class RobotService {
       this.apollo.mutate<{ deleteRobot: string }>({
         mutation: DELETE_ROBOT,
         variables: { id: robot.id },
-
         update: (cache, { data }) => {
-          const deletedId = data?.deleteRobot;
-          if (!deletedId) return;
-          this.updateCachedRobots(cache, robot.accountId, (robots) =>
-            robots.filter((robot) => robot.id !== deletedId),
-          );
+          if (!data?.deleteRobot) return;
+
+          cache.modify({
+            fields: {
+              robotsByAccount(existingRefs: readonly any[] = [], { readField }) {
+                return existingRefs.filter((ref) => readField('id', ref) !== robot.id);
+              },
+            },
+          });
         },
       }),
     );
   }
 
-  async upsertRobot(accountId: string, input: RobotInput) {
+  async upsertRobot(input: RobotInput) {
     await firstValueFrom(
       this.apollo.mutate<{ upsertRobot: Robot }>({
         mutation: UPSERT_ROBOT,
@@ -53,31 +56,33 @@ export class RobotService {
         update: (cache, { data }) => {
           const robot = data?.upsertRobot;
           if (!robot) return;
-          this.updateCachedRobots(cache, accountId, (robots) => {
-            const index = robots.findIndex((x) => x.id === robot.id);
-            if (index === -1) return [...robots, robot];
-            const copy = [...robots];
-            copy[index] = robot;
-            return copy;
+
+          cache.modify({
+            fields: {
+              robotsByAccount(
+                existingRefs: readonly Reference[] = [],
+                { readField, toReference }: ModifierDetails,
+              ) {
+                const newRef = toReference({
+                  __typename: 'Robot',
+                  id: robot.id,
+                });
+                if (!newRef) return existingRefs;
+
+                const exists = existingRefs.some((ref) => readField('id', ref) === robot.id);
+
+                if (exists) {
+                  return existingRefs.map((ref) =>
+                    readField('id', ref) === robot.id ? newRef : ref,
+                  );
+                }
+
+                return [...existingRefs, newRef];
+              },
+            },
           });
         },
       }),
     );
-  }
-
-  private updateCachedRobots(
-    cache: ApolloCache,
-    accountId: string,
-    updateFn: (robots: Robot[]) => Robot[],
-  ): void {
-    const existing = cache.readQuery<{ robotsByAccount: Robot[] }>({
-      query: GET_ROBOTS_BY_ACCOUNT,
-      variables: { accountId },
-    });
-    cache.writeQuery({
-      query: GET_ROBOTS_BY_ACCOUNT,
-      variables: { accountId },
-      data: { robotsByAccount: updateFn(existing?.robotsByAccount ?? []) },
-    });
   }
 }

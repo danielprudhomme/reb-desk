@@ -14,7 +14,26 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(),
     provideApollo(() => ({
       link: inject(HttpLink).create({ uri: `${environment.apiUrl}/graphql` }),
-      cache: new InMemoryCache(),
+      cache: new InMemoryCache({
+        typePolicies: {
+          Robot: {
+            keyFields: ['id'],
+          },
+
+          Query: {
+            fields: {
+              robotsByAccount: {
+                keyArgs: ['accountId'],
+
+                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+                merge(existing = [], incoming) {
+                  return incoming;
+                },
+              },
+            },
+          },
+        },
+      }),
     })),
   ],
 };

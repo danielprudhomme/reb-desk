@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,6 +13,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountInput } from '@app/core/models/account';
 import { RobotService } from '@app/services/robot.service';
 import { RobotTable } from './robot-table';
+import { Robot } from '@app/core/models/robot';
 
 @Component({
   selector: 'app-account-details',
@@ -28,32 +29,34 @@ import { RobotTable } from './robot-table';
     AccountForm,
   ],
   template: `
-    <div class="relative flex flex-col p-4 h-full gap-2">
-      <div class="flex justify-between items-center">
-        <button mat-icon-button [routerLink]="['..']" aria-label="Back to accounts">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
+    @if (accountId && robots) {
+      <div class="relative flex flex-col p-4 h-full gap-2">
+        <div class="flex justify-between items-center">
+          <button mat-icon-button [routerLink]="['..']" aria-label="Back to accounts">
+            <mat-icon>arrow_back</mat-icon>
+          </button>
 
-        <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
-          <mat-icon>settings</mat-icon>
-        </button>
+          <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
+            <mat-icon>settings</mat-icon>
+          </button>
+        </div>
+
+        <app-account-form [formField]="accountForm" />
+
+        <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
+
+        <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
+          <app-robot-table [accountId]="accountId" [robots]="robots()" />
+        </div>
       </div>
 
-      <app-account-form [formField]="accountForm" />
-
-      <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
-
-      <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-        <app-robot-table [robots]="robots()" />
-      </div>
-    </div>
-
-    <mat-menu #settingsMenu="matMenu">
-      <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-        <mat-icon>delete</mat-icon>
-        <span>Delete Account</span>
-      </button>
-    </mat-menu>
+      <mat-menu #settingsMenu="matMenu">
+        <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
+          <mat-icon>delete</mat-icon>
+          <span>Delete Account</span>
+        </button>
+      </mat-menu>
+    }
   `,
 })
 export class AccountDetails {
@@ -68,14 +71,12 @@ export class AccountDetails {
     required(path.leverage);
   });
   isCreation = computed(() => !this.account().id);
-  robots = this.robotService.robotsByAccount(this.accountId ?? undefined);
+  robots?: Signal<Robot[]>;
 
   constructor() {
-    effect(() => {
-      if (this.robots) {
-        console.log('robots', this.robots());
-      }
-    });
+    if (!this.accountId) return;
+    this.robotService.setAccountId(this.accountId);
+    this.robots = this.robotService.robotsByAccount;
 
     effect(() => {
       const account = this.accountService.accounts().find((a) => a.id === this.accountId);
