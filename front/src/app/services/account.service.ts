@@ -1,10 +1,9 @@
 import { inject, Injectable } from '@angular/core';
-import { Account } from '@app/core/models/account';
+import { Account, AccountInput } from '@app/core/models/account';
 import { DELETE_ACCOUNT, GET_ACCOUNTS, UPSERT_ACCOUNT } from './account.graphql';
 import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
-import { AccountInput } from '@app/core/models/account.input';
 import { ApolloCache } from '@apollo/client/cache';
 
 @Injectable({ providedIn: 'root' })

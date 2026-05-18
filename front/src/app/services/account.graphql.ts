@@ -7,7 +7,6 @@ export const GET_ACCOUNTS = gql`
       name
       capital
       leverage
-      __typename
     }
   }
 `;
@@ -25,7 +24,6 @@ export const UPSERT_ACCOUNT = gql`
       name
       capital
       leverage
-      __typename
     }
   }
 `;

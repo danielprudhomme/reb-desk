@@ -7,3 +7,7 @@ export interface Account {
   leverage: number;
   robots: Robot[];
 }
+
+export type AccountInput = Omit<Account, 'robots' | 'id'> & {
+  id?: string;
+};

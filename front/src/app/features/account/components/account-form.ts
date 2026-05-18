@@ -2,7 +2,7 @@ import { Component, model } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { form, FormField, FormValueControl } from '@angular/forms/signals';
-import { AccountInput } from '@app/core/models/account.input';
+import { AccountInput } from '@app/core/models/account';
 
 @Component({
   selector: 'app-account-form',

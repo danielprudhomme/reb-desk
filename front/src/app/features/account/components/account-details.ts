@@ -1,8 +1,4 @@
 import { Component, computed, effect, inject, signal } from '@angular/core';
-import { symbols } from '@shared/models/symbol';
-import { diversifyRobots } from '../helpers/diversify-robots';
-import { DiversificationTable } from './diversification-table';
-import { Robot } from '@app/core/models/robot';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,15 +8,16 @@ import { MatInputModule } from '@angular/material/input';
 import { form, FormField, required } from '@angular/forms/signals';
 import { MatIcon } from '@angular/material/icon';
 import { AccountForm } from './account-form';
-import { AccountInput } from '@app/core/models/account.input';
 import { debounceTime, skip } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
+import { AccountInput } from '@app/core/models/account';
+import { RobotService } from '@app/services/robot.service';
 
 @Component({
   selector: 'app-account-details',
   imports: [
     FormField,
-    DiversificationTable,
+    // DiversificationTable,
     MatButtonModule,
     MatMenuModule,
     MatFormFieldModule,
@@ -44,7 +41,7 @@ import { toObservable } from '@angular/core/rxjs-interop';
       <app-account-form [formField]="accountForm" />
 
       <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-        <app-diversification-table [robots]="robots()" />
+        <!-- <app-diversification-table [robots]="robots()" /> -->
       </div>
     </div>
 
@@ -59,16 +56,20 @@ import { toObservable } from '@angular/core/rxjs-interop';
 export class AccountDetails {
   private accountService = inject(AccountService);
   private route = inject(ActivatedRoute);
-  robots = signal<Robot[]>([]);
   account = signal<AccountInput>({ name: '', capital: 1000, leverage: 500 });
-  isCreation = computed(() => !this.account().id);
   accountForm = form(this.account, (path) => {
     required(path.name);
     required(path.capital);
     required(path.leverage);
   });
+  isCreation = computed(() => !this.account().id);
+  robots = inject(RobotService).robotsByAccount(this.account().id);
 
   constructor() {
+    effect(() => {
+      console.log('robots', this.robots());
+    });
+
     effect(() => {
       const accountId = this.route.snapshot.paramMap.get('id');
       const account = this.accountService.accounts().find((a) => a.id === accountId);
@@ -90,16 +91,16 @@ export class AccountDetails {
         this.accountForm().reset();
       });
 
-    const selectedSymbols = symbols.filter((s) => !s.includes('XAU'));
+    // const selectedSymbols = symbols.filter((s) => !s.includes('XAU'));
 
-    const robots = diversifyRobots({
-      experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
-      timeframes: ['M15', 'M20', 'M30', 'H1'],
-      symbols: selectedSymbols,
-      maxRobots: 99,
-    });
+    // const robots = diversifyRobots({
+    //   experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
+    //   timeframes: ['M15', 'M20', 'M30', 'H1'],
+    //   symbols: selectedSymbols,
+    //   maxRobots: 99,
+    // });
 
-    this.robots.set(robots);
+    // this.robots.set(robots);
   }
 
   deleteAccount() {
