@@ -6,6 +6,7 @@ import { Parameter } from '@shared/models/parameter';
 
 export interface Robot {
   id: string;
+  accountId: string;
   status: RobotStatus;
   expert: ExpertAdvisor;
   symbol: Symbol;

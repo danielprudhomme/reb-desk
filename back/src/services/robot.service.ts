@@ -4,7 +4,7 @@ import { RobotInput } from '@sec/models/robot.input.ts';
 import crypto from 'node:crypto';
 
 export const robotService = {
-  upsert(accountId: string, input: RobotInput): Robot {
+  upsert(input: RobotInput): Robot {
     const robots = collections.Robot();
 
     const id = input.id ?? crypto.randomUUID();
@@ -13,17 +13,12 @@ export const robotService = {
 
     const robot: Robot = {
       id,
-
-      accountId,
-
+      accountId: input.accountId,
       expert: input.expert,
       timeframe: input.timeframe,
       symbol: input.symbol,
-
       status: input.status,
-
       parameters: input.parameters,
-
       strategySignature,
     };
 
@@ -49,6 +44,17 @@ export const robotService = {
     robots.insert(robot);
 
     return robot;
+  },
+
+  delete(id: string): boolean {
+    const robot = collections.Robot().findOne({ id });
+
+    if (!robot) {
+      throw new Error('Robot not found');
+    }
+
+    collections.Robot().remove(robot);
+    return true;
   },
 
   createStrategySignature(input: RobotInput): string {

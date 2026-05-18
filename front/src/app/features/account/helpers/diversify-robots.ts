@@ -4,6 +4,7 @@ import { Symbol } from '@shared/models/symbol';
 import { Robot } from '@app/core/models/robot';
 
 interface DiversificationInput {
+  accountId: string;
   experts: ExpertAdvisor[];
   timeframes: Timeframe[];
   symbols: Symbol[];
@@ -23,6 +24,7 @@ function get<K>(map: Map<K, number>, key: K): number {
 }
 
 export function diversifyRobots({
+  accountId,
   experts,
   timeframes,
   symbols,
@@ -36,6 +38,7 @@ export function diversifyRobots({
       for (const symbol of symbols) {
         allCandidates.push({
           id: '',
+          accountId,
           status: 'inProgress',
           expert,
           timeframe,

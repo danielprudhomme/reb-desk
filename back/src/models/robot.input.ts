@@ -6,6 +6,7 @@ import { Parameter } from '@shared/models/parameter.ts';
 
 export interface RobotInput {
   id?: string;
+  accountId: string;
   expert: ExpertAdvisor;
   timeframe: Timeframe;
   symbol: Symbol;

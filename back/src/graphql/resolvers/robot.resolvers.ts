@@ -4,8 +4,8 @@ import { RobotInput } from '@sec/models/robot.input.ts';
 
 export const robotResolvers = {
   Mutation: {
-    upsertRobot: (_: unknown, { accountId, input }: { accountId: string; input: RobotInput }) =>
-      robotService.upsert(accountId, input),
+    upsertRobot: (_: unknown, { input }: { input: RobotInput }) => robotService.upsert(input),
+    deleteRobot: async (_: unknown, { id }: { id: string }) => robotService.delete(id),
   },
 
   Query: {

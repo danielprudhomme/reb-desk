@@ -1,6 +1,7 @@
 export default /* GraphQL */ `
   type Robot {
     id: ID!
+    accountId: ID!
 
     expert: ExpertAdvisor!
     timeframe: Timeframe!

@@ -1,6 +1,7 @@
 export default /* GraphQL */ `
   input RobotInput {
     id: ID
+    accountId: ID!
 
     expert: ExpertAdvisor!
     timeframe: Timeframe!
@@ -13,5 +14,6 @@ export default /* GraphQL */ `
 
   extend type Mutation {
     upsertRobot(input: RobotInput!): Robot!
+    deleteRobot(id: ID!): Boolean!
   }
 `;

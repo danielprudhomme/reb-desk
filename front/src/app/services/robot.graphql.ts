@@ -12,7 +12,7 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
       status
 
       parameters {
-        key
+        name
         value
       }
     }
@@ -33,7 +33,7 @@ export const UPSERT_ROBOT = gql`
       strategySignature
 
       parameters {
-        key
+        name
         value
       }
     }

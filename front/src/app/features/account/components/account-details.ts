@@ -12,12 +12,13 @@ import { debounceTime, skip } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountInput } from '@app/core/models/account';
 import { RobotService } from '@app/services/robot.service';
+import { RobotTable } from './robot-table';
 
 @Component({
   selector: 'app-account-details',
   imports: [
     FormField,
-    // DiversificationTable,
+    RobotTable,
     MatButtonModule,
     MatMenuModule,
     MatFormFieldModule,
@@ -40,8 +41,10 @@ import { RobotService } from '@app/services/robot.service';
 
       <app-account-form [formField]="accountForm" />
 
+      <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
+
       <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-        <!-- <app-diversification-table [robots]="robots()" /> -->
+        <app-robot-table [robots]="robots()" />
       </div>
     </div>
 
@@ -55,7 +58,9 @@ import { RobotService } from '@app/services/robot.service';
 })
 export class AccountDetails {
   private accountService = inject(AccountService);
+  private robotService = inject(RobotService);
   private route = inject(ActivatedRoute);
+  accountId = this.route.snapshot.paramMap.get('id');
   account = signal<AccountInput>({ name: '', capital: 1000, leverage: 500 });
   accountForm = form(this.account, (path) => {
     required(path.name);
@@ -63,16 +68,17 @@ export class AccountDetails {
     required(path.leverage);
   });
   isCreation = computed(() => !this.account().id);
-  robots = inject(RobotService).robotsByAccount(this.account().id);
+  robots = this.robotService.robotsByAccount(this.accountId ?? undefined);
 
   constructor() {
     effect(() => {
-      console.log('robots', this.robots());
+      if (this.robots) {
+        console.log('robots', this.robots());
+      }
     });
 
     effect(() => {
-      const accountId = this.route.snapshot.paramMap.get('id');
-      const account = this.accountService.accounts().find((a) => a.id === accountId);
+      const account = this.accountService.accounts().find((a) => a.id === this.accountId);
       if (!account) return;
       this.account.set(account);
     });

@@ -39,7 +39,10 @@ export const accountService = {
       accounts.insert(newAccount);
 
       if (input.robots?.length) {
-        input.robots.forEach((robotInput) => robotService.upsert(newAccount.id, robotInput));
+        input.robots.forEach((robotInput) => {
+          robotInput.accountId = newAccount.id;
+          robotService.upsert(robotInput);
+        });
       }
 
       return newAccount;
