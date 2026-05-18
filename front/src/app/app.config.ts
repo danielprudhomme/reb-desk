@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideApollo } from 'apollo-angular';
@@ -16,6 +17,10 @@ export const appConfig: ApplicationConfig = {
       link: inject(HttpLink).create({ uri: `${environment.apiUrl}/graphql` }),
       cache: new InMemoryCache({
         typePolicies: {
+          Account: {
+            keyFields: ['id'],
+          },
+
           Robot: {
             keyFields: ['id'],
           },
@@ -24,8 +29,12 @@ export const appConfig: ApplicationConfig = {
             fields: {
               robotsByAccount: {
                 keyArgs: ['accountId'],
+                merge(existing = [], incoming) {
+                  return incoming;
+                },
+              },
 
-                // eslint-disable-next-line @typescript-eslint/no-unused-vars
+              accounts: {
                 merge(existing = [], incoming) {
                   return incoming;
                 },

@@ -42,6 +42,15 @@ export class RobotService {
               },
             },
           });
+
+          cache.evict({
+            id: cache.identify({
+              __typename: 'Robots',
+              id: robot.id,
+            }),
+          });
+
+          cache.gc();
         },
       }),
     );

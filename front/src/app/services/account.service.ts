@@ -4,7 +4,8 @@ import { DELETE_ACCOUNT, GET_ACCOUNTS, UPSERT_ACCOUNT } from './account.graphql'
 import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
-import { ApolloCache } from '@apollo/client/cache';
+import { Reference } from '@apollo/client';
+import { ModifierDetails } from '@apollo/client/cache';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
@@ -13,6 +14,8 @@ export class AccountService {
   accounts$ = this.apollo.watchQuery<{ accounts: Account[] }>({
     query: GET_ACCOUNTS,
     fetchPolicy: 'cache-and-network',
+    nextFetchPolicy: 'cache-first',
+    notifyOnNetworkStatusChange: true,
   }).valueChanges;
 
   accounts = toSignal(
@@ -30,9 +33,23 @@ export class AccountService {
 
         update: (cache, { data }) => {
           if (!data?.deleteAccount) return;
-          this.updateCachedAccounts(cache, (accounts) =>
-            accounts.filter((account) => account.id !== id),
-          );
+
+          cache.modify({
+            fields: {
+              accounts(existingRefs: readonly Reference[] = [], { readField }: ModifierDetails) {
+                return existingRefs.filter((ref) => readField('id', ref) !== id);
+              },
+            },
+          });
+
+          cache.evict({
+            id: cache.identify({
+              __typename: 'Account',
+              id,
+            }),
+          });
+
+          cache.gc();
         },
       }),
     );
@@ -43,34 +60,39 @@ export class AccountService {
       this.apollo.mutate<{ upsertAccount: Account }>({
         mutation: UPSERT_ACCOUNT,
         variables: { input },
-        update: (cache, { data }) => {
-          const newAccount = data?.upsertAccount;
-          if (!newAccount) return;
 
-          this.updateCachedAccounts(cache, (accounts) => {
-            const index = accounts.findIndex((a) => a.id === newAccount.id);
-            if (index === -1) {
-              return [...accounts, newAccount];
-            }
-            const copy = [...accounts];
-            copy[index] = newAccount;
-            return copy;
+        update: (cache, { data }) => {
+          const account = data?.upsertAccount;
+
+          if (!account) return;
+
+          cache.modify({
+            fields: {
+              accounts(
+                existingRefs: readonly Reference[] = [],
+                { readField, toReference }: ModifierDetails,
+              ) {
+                const newRef = toReference({
+                  __typename: 'Account',
+                  id: account.id,
+                });
+
+                if (!newRef) return existingRefs;
+
+                const exists = existingRefs.some((ref) => readField('id', ref) === account.id);
+
+                if (exists) {
+                  return existingRefs;
+                }
+
+                return [...existingRefs, newRef];
+              },
+            },
           });
         },
       }),
     );
 
     return result.data?.upsertAccount.id;
-  }
-
-  private updateCachedAccounts(
-    cache: ApolloCache,
-    updateFn: (accounts: Account[]) => Account[],
-  ): void {
-    const existing = cache.readQuery<{ accounts: Account[] }>({ query: GET_ACCOUNTS });
-    cache.writeQuery({
-      query: GET_ACCOUNTS,
-      data: { accounts: updateFn(existing?.accounts ?? []) },
-    });
   }
 }
