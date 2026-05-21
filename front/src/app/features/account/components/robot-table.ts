@@ -9,6 +9,7 @@ import { MatIcon } from '@angular/material/icon';
 import { RobotService } from '@app/services/robot.service';
 import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
 import { MatButtonModule } from '@angular/material/button';
+import { ConfirmationService } from '@app/core/services/confirmation.service';
 
 @Component({
   selector: 'app-robot-table',
@@ -85,6 +86,7 @@ export class RobotTable {
   timeframes = input<Timeframe[]>(['M15', 'M20', 'M30', 'H1']);
   symbols = input<Symbol[]>(symbols.filter((s) => !s.includes('XAU')));
   private robotService = inject(RobotService);
+  private confirmationService = inject(ConfirmationService);
   displayedColumns = computed(() => ['symbol', ...this.timeframes()]);
   experts = expertAdvisors;
   dataSource = computed(() => {
@@ -117,7 +119,13 @@ export class RobotTable {
     });
   }
 
-  async deleteRobot(robot: Robot) {
-    await this.robotService.deleteRobot(robot);
+  deleteRobot(robot: Robot) {
+    this.confirmationService
+      .confirm({ message: 'Are you sure to delete this robot ?', title: 'Delete Robot' })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.robotService.deleteRobot(robot);
+        }
+      });
   }
 }

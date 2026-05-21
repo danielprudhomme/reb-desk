@@ -14,6 +14,7 @@ import { AccountInput } from '@app/core/models/account';
 import { RobotService } from '@app/services/robot.service';
 import { RobotTable } from './robot-table';
 import { Robot } from '@app/core/models/robot';
+import { ConfirmationService } from '@app/core/services/confirmation.service';
 
 @Component({
   selector: 'app-account-details',
@@ -32,7 +33,7 @@ import { Robot } from '@app/core/models/robot';
     @if (accountId && robots) {
       <div class="relative flex flex-col p-4 h-full gap-2">
         <div class="flex justify-between items-center">
-          <button mat-icon-button [routerLink]="['..']" aria-label="Back to accounts">
+          <button mat-icon-button aria-label="Back to accounts">
             <mat-icon>arrow_back</mat-icon>
           </button>
 
@@ -62,6 +63,7 @@ import { Robot } from '@app/core/models/robot';
 export class AccountDetails {
   private accountService = inject(AccountService);
   private robotService = inject(RobotService);
+  private confirmationService = inject(ConfirmationService);
   private route = inject(ActivatedRoute);
   accountId = this.route.snapshot.paramMap.get('id');
   account = signal<AccountInput>({ name: '', capital: 1000, leverage: 500 });
@@ -111,6 +113,12 @@ export class AccountDetails {
   }
 
   deleteAccount() {
-    this.accountService.deleteAccount(this.account().id!);
+    this.confirmationService
+      .confirm({ message: 'Are you sure to delete this account ?', title: 'Delete Account' })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.accountService.deleteAccount(this.account().id!);
+        }
+      });
   }
 }
