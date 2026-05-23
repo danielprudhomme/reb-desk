@@ -2,15 +2,16 @@ import { Component, computed, inject, input } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
-import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { Robot } from '@app/core/models/robot';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatIcon } from '@angular/material/icon';
 import { RobotService } from '@app/services/robot.service';
-import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
+import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmationService } from '@app/core/services/confirmation.service';
-import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
+import { MatTooltipModule } from '@angular/material/tooltip';
+import { RobotTile } from './robot-tile';
+import { RobotCreateTile } from './robot-create-tile';
 
 @Component({
   selector: 'app-robot-table',
@@ -20,8 +21,8 @@ import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
     MatMenuModule,
     MatButtonModule,
     MatTooltipModule,
-    ExpertBadge,
-    MatTooltip,
+    RobotTile,
+    RobotCreateTile,
   ],
   template: `
     <table mat-table [dataSource]="dataSource()">
@@ -38,27 +39,18 @@ import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
             {{ timeframe }}
           </th>
 
-          <td mat-cell *matCellDef="let row" class="group">
+          <td mat-cell *matCellDef="let row" class="group !py-3">
             @if (row[timeframe.toLowerCase()]; as robot) {
-              <app-expert-badge
-                [expert]="robot.expert"
-                class="cursor-pointer"
-                [matMenuTriggerFor]="robotOptionsMenu"
-                [matMenuTriggerData]="{ robot: robot }"
-              />
+              <div [matMenuTriggerFor]="robotOptionsMenu" [matMenuTriggerData]="{ robot: robot }">
+                <app-robot-tile [robot]="robot" />
+              </div>
             } @else {
-              <div
-                class="opacity-0 group-hover:opacity-100 transition-opacity"
-                [class.opacity-100]="menuTrigger.menuOpen"
-              >
-                <button
-                  matButton
-                  #menuTrigger="matMenuTrigger"
-                  [matMenuTriggerFor]="createRobotMenu"
-                  [matMenuTriggerData]="{ timeframe: timeframe, symbol: row.symbol }"
-                >
-                  + New Robot
-                </button>
+              <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                <app-robot-create-tile
+                  [timeframe]="timeframe"
+                  [symbol]="row.symbol"
+                  (created)="createRobot(timeframe, row.symbol, $event)"
+                />
               </div>
             }
           </td>
@@ -81,16 +73,6 @@ import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
         </button>
       </ng-template>
     </mat-menu>
-
-    <mat-menu #createRobotMenu="matMenu">
-      <ng-template matMenuContent let-timeframe="timeframe" let-symbol="symbol">
-        @for (expert of experts; track expert) {
-          <button mat-menu-item (click)="createRobot(timeframe, symbol, expert)">
-            <app-expert-badge [expert]="expert" />
-          </button>
-        }
-      </ng-template>
-    </mat-menu>
   `,
 })
 export class RobotTable {
@@ -101,7 +83,6 @@ export class RobotTable {
   private robotService = inject(RobotService);
   private confirmationService = inject(ConfirmationService);
   displayedColumns = computed(() => ['symbol', ...this.timeframes()]);
-  experts = expertAdvisors;
   dataSource = computed(() => {
     const robots = this.robots();
 
