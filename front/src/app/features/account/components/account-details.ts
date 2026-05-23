@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -20,6 +20,7 @@ import { Timeframe } from '@shared/models/timeframe';
 import { Symbol, symbols } from '@shared/models/symbol';
 import { diversifyRobots } from '../helpers/diversify-robots';
 import { Robot } from '@app/core/models/robot';
+import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 
 @Component({
   selector: 'app-account-details',
@@ -33,43 +34,72 @@ import { Robot } from '@app/core/models/robot';
     MatIcon,
     RouterLink,
     AccountForm,
+    MatSidenavModule,
   ],
   template: `
-    <div class="relative flex flex-col p-4 h-full gap-2">
-      <div class="flex justify-between items-center">
-        <button mat-icon-button aria-label="Back to accounts" [routerLink]="['..']">
-          <mat-icon>arrow_back</mat-icon>
-        </button>
+    <mat-sidenav-container class="h-full">
+      <!-- MAIN CONTENT -->
+      <mat-sidenav-content>
+        <div class="relative flex flex-col p-4 h-full gap-2">
+          <div class="flex justify-between items-center">
+            <button mat-icon-button aria-label="Back to accounts" [routerLink]="['..']">
+              <mat-icon>arrow_back</mat-icon>
+            </button>
 
-        <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
-          <mat-icon>settings</mat-icon>
-        </button>
-      </div>
+            <button
+              mat-icon-button
+              [matMenuTriggerFor]="settingsMenu"
+              aria-label="Account settings"
+            >
+              <mat-icon>settings</mat-icon>
+            </button>
+          </div>
 
-      <app-account-form [formField]="accountForm" />
+          <app-account-form [formField]="accountForm" />
 
-      <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
+          <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
 
-      <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-        <app-robot-table
-          [accountId]="accountId!"
-          [robots]="robots()"
-          [timeframes]="timeframes"
-          [symbols]="symbols"
-        />
-      </div>
-    </div>
+          <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
+            <app-robot-table
+              [accountId]="accountId!"
+              [robots]="robots()"
+              [timeframes]="timeframes"
+              [symbols]="symbols"
+              (robotClicked)="onRobotClicked($event)"
+            />
+          </div>
+        </div>
 
-    <mat-menu #settingsMenu="matMenu">
-      <button mat-menu-item (click)="generateRobots()">
-        <mat-icon>smart_toy</mat-icon>
-        <span>Generate Robots</span>
-      </button>
-      <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-        <mat-icon>delete</mat-icon>
-        <span>Delete Account</span>
-      </button>
-    </mat-menu>
+        <mat-menu #settingsMenu="matMenu">
+          <button mat-menu-item (click)="generateRobots()">
+            <mat-icon>smart_toy</mat-icon>
+            <span>Generate Robots</span>
+          </button>
+          <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
+            <mat-icon>delete</mat-icon>
+            <span>Delete Account</span>
+          </button>
+        </mat-menu>
+      </mat-sidenav-content>
+
+      <!-- RIGHT DRAWER -->
+      <mat-sidenav #drawer position="end" mode="over" class="w-[420px] p-4">
+        <div class="relative h-full">
+          <!-- Close button -->
+          <button
+            mat-icon-button
+            class="absolute top-0 right-0"
+            (click)="drawer.close()"
+            aria-label="Close drawer"
+          >
+            <mat-icon>close</mat-icon>
+          </button>
+
+          <!-- Drawer content -->
+          <div class="pt-10">salut coucou</div>
+        </div>
+      </mat-sidenav>
+    </mat-sidenav-container>
   `,
 })
 export class AccountDetails {
@@ -89,6 +119,8 @@ export class AccountDetails {
   robots = computed<Robot[]>(() => this.robotService.robotsByAccount());
   timeframes: Timeframe[] = ['M15', 'M20', 'M30', 'H1'];
   symbols: Symbol[] = symbols.filter((s) => !s.includes('XAU'));
+  drawer = viewChild.required(MatSidenav);
+  selectedRobot = signal<Robot | null>(null);
 
   constructor() {
     this.robotService.setAccountId(this.accountId!);
@@ -138,5 +170,10 @@ export class AccountDetails {
           this.accountService.deleteAccount(this.account().id!);
         }
       });
+  }
+
+  onRobotClicked(robot: Robot) {
+    this.selectedRobot.set(robot);
+    this.drawer().open();
   }
 }

@@ -1,4 +1,4 @@
-import { Component, computed, inject, input } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
@@ -44,7 +44,7 @@ import { RobotCreateTile } from './robot-create-tile';
 
             <div class="flex gap-1 flex-col">
               @for (robot of robots; track $index) {
-                <div [matMenuTriggerFor]="robotOptionsMenu" [matMenuTriggerData]="{ robot: robot }">
+                <div class="cursor-pointer" (click)="robotClicked.emit(robot)">
                   <app-robot-tile [robot]="robot" />
                 </div>
               } @empty {
@@ -84,6 +84,7 @@ export class RobotTable {
   robots = input.required<Robot[]>();
   timeframes = input.required<Timeframe[]>();
   symbols = input.required<Symbol[]>();
+  robotClicked = output<Robot>();
   private robotService = inject(RobotService);
   private confirmationService = inject(ConfirmationService);
   displayedColumns = computed(() => ['symbol', ...this.timeframes()]);
