@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, Signal, signal } from '@angular/core';
+import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -15,6 +15,11 @@ import { RobotService } from '@app/services/robot.service';
 import { RobotTable } from './robot-table';
 import { Robot } from '@app/core/models/robot';
 import { ConfirmationService } from '@app/core/services/confirmation.service';
+import { MatDialog } from '@angular/material/dialog';
+import { GenerateRobotsDialog } from './generate-robots-dialog';
+import { Timeframe } from '@shared/models/timeframe';
+import { Symbol, symbols } from '@shared/models/symbol';
+import { diversifyRobots } from '../helpers/diversify-robots';
 
 @Component({
   selector: 'app-account-details',
@@ -30,40 +35,48 @@ import { ConfirmationService } from '@app/core/services/confirmation.service';
     AccountForm,
   ],
   template: `
-    @if (accountId && robots) {
-      <div class="relative flex flex-col p-4 h-full gap-2">
-        <div class="flex justify-between items-center">
-          <button mat-icon-button aria-label="Back to accounts">
-            <mat-icon>arrow_back</mat-icon>
-          </button>
+    <div class="relative flex flex-col p-4 h-full gap-2">
+      <div class="flex justify-between items-center">
+        <button mat-icon-button aria-label="Back to accounts">
+          <mat-icon>arrow_back</mat-icon>
+        </button>
 
-          <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
-            <mat-icon>settings</mat-icon>
-          </button>
-        </div>
-
-        <app-account-form [formField]="accountForm" />
-
-        <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
-
-        <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-          <app-robot-table [accountId]="accountId" [robots]="robots()" />
-        </div>
+        <button mat-icon-button [matMenuTriggerFor]="settingsMenu" aria-label="Account settings">
+          <mat-icon>settings</mat-icon>
+        </button>
       </div>
 
-      <mat-menu #settingsMenu="matMenu">
-        <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-          <mat-icon>delete</mat-icon>
-          <span>Delete Account</span>
-        </button>
-      </mat-menu>
-    }
+      <app-account-form [formField]="accountForm" />
+
+      <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
+
+      <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
+        <app-robot-table
+          [accountId]="accountId!"
+          [robots]="robots()"
+          [timeframes]="timeframes"
+          [symbols]="symbols"
+        />
+      </div>
+    </div>
+
+    <mat-menu #settingsMenu="matMenu">
+      <button mat-menu-item (click)="generateRobots()">
+        <mat-icon>smart_toy</mat-icon>
+        <span>Generate Robots</span>
+      </button>
+      <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
+        <mat-icon>delete</mat-icon>
+        <span>Delete Account</span>
+      </button>
+    </mat-menu>
   `,
 })
 export class AccountDetails {
   private accountService = inject(AccountService);
   private robotService = inject(RobotService);
   private confirmationService = inject(ConfirmationService);
+  private dialog = inject(MatDialog);
   private route = inject(ActivatedRoute);
   accountId = this.route.snapshot.paramMap.get('id');
   account = signal<AccountInput>({ name: '', capital: 1000, leverage: 500 });
@@ -73,12 +86,13 @@ export class AccountDetails {
     required(path.leverage);
   });
   isCreation = computed(() => !this.account().id);
-  robots?: Signal<Robot[]>;
+  robots = linkedSignal<Robot[]>(() => this.robotService.robotsByAccount());
+  timeframes: Timeframe[] = ['M15', 'M20', 'M30', 'H1'];
+  symbols: Symbol[] = symbols.filter((s) => !s.includes('XAU'));
 
   constructor() {
-    if (!this.accountId) return;
-    this.robotService.setAccountId(this.accountId);
-    this.robots = this.robotService.robotsByAccount;
+    this.robotService.setAccountId(this.accountId!);
+    // this.robots = this.robotService.robotsByAccount;
 
     effect(() => {
       const account = this.accountService.accounts().find((a) => a.id === this.accountId);
@@ -99,17 +113,31 @@ export class AccountDetails {
         });
         this.accountForm().reset();
       });
+  }
 
-    // const selectedSymbols = symbols.filter((s) => !s.includes('XAU'));
+  generateRobots() {
+    this.dialog
+      .open(GenerateRobotsDialog, { disableClose: true })
+      .afterClosed()
+      .subscribe(({ maxRobots, experts }) => {
+        const robots = diversifyRobots(
+          this.robots(),
+          experts,
+          this.timeframes,
+          this.symbols,
+          maxRobots,
+        );
 
-    // const robots = diversifyRobots({
-    //   experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
-    //   timeframes: ['M15', 'M20', 'M30', 'H1'],
-    //   symbols: selectedSymbols,
-    //   maxRobots: 99,
-    // });
-
-    // this.robots.set(robots);
+        this.robots.set(
+          robots.map((config) => ({
+            ...config,
+            id: '',
+            accountId: this.accountId!,
+            status: 'inProgress',
+            parameters: [],
+          })),
+        );
+      });
   }
 
   deleteAccount() {

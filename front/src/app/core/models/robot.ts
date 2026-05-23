@@ -4,14 +4,17 @@ import { Symbol } from '@shared/models/symbol';
 import { RobotStatus } from '@shared/models/robot-status';
 import { Parameter } from '@shared/models/parameter';
 
-export interface Robot {
+export interface Robot extends RobotConfiguration {
   id: string;
   accountId: string;
   status: RobotStatus;
+  parameters: Parameter[];
+}
+
+export interface RobotConfiguration {
+  timeframe: Timeframe;
   expert: ExpertAdvisor;
   symbol: Symbol;
-  timeframe: Timeframe;
-  parameters: Parameter[];
 }
 
 export type RobotInput = Omit<Robot, 'id'> & {

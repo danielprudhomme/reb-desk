@@ -1,6 +1,6 @@
 import { Component, computed, inject, input } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
-import { Symbol, symbols } from '@shared/models/symbol';
+import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { Robot } from '@app/core/models/robot';
@@ -83,8 +83,8 @@ import { ConfirmationService } from '@app/core/services/confirmation.service';
 export class RobotTable {
   accountId = input.required<string>();
   robots = input.required<Robot[]>();
-  timeframes = input<Timeframe[]>(['M15', 'M20', 'M30', 'H1']);
-  symbols = input<Symbol[]>(symbols.filter((s) => !s.includes('XAU')));
+  timeframes = input.required<Timeframe[]>();
+  symbols = input.required<Symbol[]>();
   private robotService = inject(RobotService);
   private confirmationService = inject(ConfirmationService);
   displayedColumns = computed(() => ['symbol', ...this.timeframes()]);
