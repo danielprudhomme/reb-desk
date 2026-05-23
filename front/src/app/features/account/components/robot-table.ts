@@ -10,10 +10,19 @@ import { RobotService } from '@app/services/robot.service';
 import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
 import { MatButtonModule } from '@angular/material/button';
 import { ConfirmationService } from '@app/core/services/confirmation.service';
+import { MatTooltip, MatTooltipModule } from '@angular/material/tooltip';
 
 @Component({
   selector: 'app-robot-table',
-  imports: [MatIcon, MatTableModule, MatMenuModule, MatButtonModule, ExpertBadge],
+  imports: [
+    MatIcon,
+    MatTableModule,
+    MatMenuModule,
+    MatButtonModule,
+    MatTooltipModule,
+    ExpertBadge,
+    MatTooltip,
+  ],
   template: `
     <table mat-table [dataSource]="dataSource()">
       <ng-container matColumnDef="symbol" [sticky]="true">
@@ -23,7 +32,11 @@ import { ConfirmationService } from '@app/core/services/confirmation.service';
 
       @for (timeframe of timeframes(); let index = $index; track timeframe) {
         <ng-container [matColumnDef]="timeframe">
-          <th mat-header-cell *matHeaderCellDef>{{ timeframe }}</th>
+          @let count = robots().filter((r) => r.timeframe === timeframe).length;
+
+          <th mat-header-cell *matHeaderCellDef [matTooltip]="count + ' robots'">
+            {{ timeframe }}
+          </th>
 
           <td mat-cell *matCellDef="let row" class="group">
             @if (row[timeframe.toLowerCase()]; as robot) {
