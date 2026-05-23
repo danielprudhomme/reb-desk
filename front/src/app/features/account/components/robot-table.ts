@@ -40,19 +40,23 @@ import { RobotCreateTile } from './robot-create-tile';
           </th>
 
           <td mat-cell *matCellDef="let row" class="group !py-3">
-            @if (row[timeframe.toLowerCase()]; as robot) {
-              <div [matMenuTriggerFor]="robotOptionsMenu" [matMenuTriggerData]="{ robot: robot }">
-                <app-robot-tile [robot]="robot" />
-              </div>
-            } @else {
-              <div class="opacity-0 group-hover:opacity-100 transition-opacity">
-                <app-robot-create-tile
-                  [timeframe]="timeframe"
-                  [symbol]="row.symbol"
-                  (created)="createRobot(timeframe, row.symbol, $event)"
-                />
-              </div>
-            }
+            @let robots = row[timeframe.toLowerCase()];
+
+            <div class="flex gap-1 flex-col">
+              @for (robot of robots; track $index) {
+                <div [matMenuTriggerFor]="robotOptionsMenu" [matMenuTriggerData]="{ robot: robot }">
+                  <app-robot-tile [robot]="robot" />
+                </div>
+              } @empty {
+                <div class="opacity-0 group-hover:opacity-100 transition-opacity">
+                  <app-robot-create-tile
+                    [timeframe]="timeframe"
+                    [symbol]="row.symbol"
+                    (created)="createRobot(timeframe, row.symbol, $event)"
+                  />
+                </div>
+              }
+            </div>
           </td>
         </ng-container>
       }
@@ -87,11 +91,13 @@ export class RobotTable {
     const robots = this.robots();
 
     const rows = this.symbols().map((symbol) => {
-      const row: Record<string, unknown> = { symbol };
+      const row: Record<string, Robot[] | string> = { symbol };
 
       for (const timeframe of this.timeframes()) {
-        const robot = robots.find((r) => r.symbol === symbol && r.timeframe === timeframe);
-        row[timeframe.toLowerCase()] = robot;
+        const robotsOnTimeframe = robots.filter(
+          (r) => r.symbol === symbol && r.timeframe === timeframe,
+        );
+        row[timeframe.toLowerCase()] = robotsOnTimeframe;
       }
 
       return row;
