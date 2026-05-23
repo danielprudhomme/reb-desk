@@ -2,7 +2,6 @@ import crypto from 'node:crypto';
 import { Account } from '@sec/db/models/account.ts';
 import { AccountInput } from '@sec/models/account.input.ts';
 import { collections } from '@sec/db/collections.ts';
-import { robotService } from './robot.service.ts';
 
 export const accountService = {
   getAll() {
@@ -38,13 +37,6 @@ export const accountService = {
 
       accounts.insert(newAccount);
 
-      if (input.robots?.length) {
-        input.robots.forEach((robotInput) => {
-          robotInput.accountId = newAccount.id;
-          robotService.upsert(robotInput);
-        });
-      }
-
       return newAccount;
     }
 
@@ -57,11 +49,6 @@ export const accountService = {
 
     const updated = { ...existing, ...input } as Account;
     accounts.update(updated);
-
-    // OPTIONAL robot bulk update
-    if (input.robots) {
-      // robotService.replaceForAccount(existing.id, input.robots);
-    }
 
     return updated;
   },

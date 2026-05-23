@@ -4,7 +4,6 @@ export default /* GraphQL */ `
     name: String!
     capital: Float!
     leverage: Float!
-    robots: [RobotInput!]
   }
 
   extend type Mutation {
