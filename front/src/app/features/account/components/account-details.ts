@@ -92,15 +92,6 @@ export class AccountDetails {
 
   constructor() {
     this.robotService.setAccountId(this.accountId!);
-    // this.robots = this.robotService.robotsByAccount;
-
-    effect(() => {
-      console.log('robots', this.robots());
-    });
-
-    effect(() => {
-      console.log('from service', this.robotService.robotsByAccount());
-    });
 
     effect(() => {
       const account = this.accountService.accounts().find((a) => a.id === this.accountId);
@@ -135,8 +126,6 @@ export class AccountDetails {
           this.symbols,
           maxRobots,
         );
-
-        console.log('div rbotos', robots);
 
         this.robotService.createDraftRobots(this.accountId!, robots);
 
