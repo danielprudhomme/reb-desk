@@ -9,6 +9,4 @@ export interface Robot extends RobotConfiguration {
   parameters: Parameter[];
 }
 
-export type RobotInput = Omit<Robot, 'id'> & {
-  id?: string;
-};
+export type RobotInput = Omit<Robot, 'id'> & { id?: string };
