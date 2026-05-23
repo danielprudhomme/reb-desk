@@ -39,7 +39,7 @@ import { RobotDrawer } from './robot-drawer';
     MatSidenavModule,
   ],
   template: `
-    <mat-sidenav-container class="h-full">
+    <mat-sidenav-container class="h-full" (backdropClick)="closeDrawer()">
       <!-- MAIN CONTENT -->
       <mat-sidenav-content>
         <div class="relative flex flex-col p-4 h-full gap-2">
@@ -87,7 +87,11 @@ import { RobotDrawer } from './robot-drawer';
       <!-- RIGHT DRAWER -->
       <mat-sidenav #drawer position="end" mode="over" class="!w-[90vw]">
         @if (selectedRobot()) {
-          <app-robot-drawer [robot]="selectedRobot()!" (close)="drawer.close()" />
+          <app-robot-drawer
+            [capital]="account().capital"
+            [robot]="selectedRobot()!"
+            (close)="closeDrawer()"
+          />
         }
       </mat-sidenav>
     </mat-sidenav-container>
@@ -166,5 +170,10 @@ export class AccountDetails {
   onRobotClicked(robot: Robot) {
     this.selectedRobot.set(robot);
     this.drawer().open();
+  }
+
+  closeDrawer() {
+    this.selectedRobot.set(null);
+    this.drawer().close();
   }
 }

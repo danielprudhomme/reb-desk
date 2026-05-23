@@ -163,6 +163,14 @@ interface TableItem extends GroupedBacktestPassAnalysis {
 
       <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
+      <tr class="mat-row" *matNoDataRow>
+        <td
+          class="mat-cell text-center py-10 opacity-60"
+          [attr.colspan]="displayedColumns().length"
+        >
+          No report found
+        </td>
+      </tr>
     </table>
   `,
 })

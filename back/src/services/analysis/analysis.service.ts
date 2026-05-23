@@ -66,7 +66,7 @@ async function analyzeReports(
   const reports = collections.RebReport().find(query);
 
   if (!reports.length) {
-    throw new Error('No reports found for given filters');
+    return [];
   }
 
   const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;

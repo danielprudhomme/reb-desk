@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, computed, input, output } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -6,6 +6,8 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Robot } from '@app/core/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
+import { PassAnalysisTable } from '@app/features/report/components/pass-analysis-table';
+import { AnalysisRequest } from '@shared/models/analysis-request';
 
 @Component({
   selector: 'app-robot-drawer',
@@ -16,6 +18,7 @@ import { RobotStatusBadge } from './robot-status-badge';
     MatTabsModule,
     ExpertBadge,
     RobotStatusBadge,
+    PassAnalysisTable,
   ],
   template: `
     <div class="h-full flex flex-col p-4">
@@ -41,7 +44,9 @@ import { RobotStatusBadge } from './robot-status-badge';
       <!-- CONTENT SLOT -->
       <div class="flex-1 overflow-auto pt-4">
         <mat-tab-group>
-          <mat-tab label="Choose pass"> choose pass</mat-tab>
+          <mat-tab label="Choose pass">
+            <app-pass-analysis-table [request]="analysisRequest()" />
+          </mat-tab>
           <mat-tab label="Parameters"> Content 2 </mat-tab>
           <mat-tab label="History"> Content 3 </mat-tab>
         </mat-tab-group>
@@ -58,7 +63,65 @@ import { RobotStatusBadge } from './robot-status-badge';
   `,
 })
 export class RobotDrawer {
+  capital = input.required<number>();
   robot = input.required<Robot>();
   close = output<void>();
   delete = output<Robot>();
+  analysisRequest = computed<AnalysisRequest>(() => ({
+    symbols: [this.robot().symbol],
+    timeframes: [this.robot().timeframe],
+    experts: [this.robot().expert],
+    capital: this.capital(),
+    thresholds: [
+      {
+        type: 'longTermResultPercent',
+        operator: '>',
+        value: 0,
+        passRate: 100,
+        weight: 3,
+      },
+      {
+        type: 'shortTermResultPercent',
+        operator: '>',
+        value: 0,
+        passRate: 80,
+        weight: 1,
+      },
+      {
+        type: 'longTermGainLossRatio',
+        operator: '>',
+        value: 1,
+        passRate: 100,
+        weight: 3,
+      },
+      {
+        type: 'shortTermTrades',
+        operator: '>',
+        value: 1,
+        passRate: 100,
+        weight: 0.5,
+      },
+      {
+        type: 'shortTermDrawdownPercent',
+        operator: '<',
+        value: 15,
+        passRate: 80,
+        weight: 1,
+      },
+      {
+        type: 'shortTermDrawdownPercent',
+        operator: '<',
+        value: 30,
+        passRate: 100,
+        weight: 1,
+      },
+      {
+        type: 'longTermDrawdownAmount',
+        operator: '<',
+        value: 400,
+        passRate: 100,
+        weight: 1,
+      },
+    ],
+  }));
 }
