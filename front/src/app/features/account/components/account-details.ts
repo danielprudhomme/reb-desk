@@ -1,4 +1,4 @@
-import { Component, computed, effect, inject, linkedSignal, signal } from '@angular/core';
+import { Component, computed, effect, inject, signal } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -13,13 +13,13 @@ import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountInput } from '@app/core/models/account';
 import { RobotService } from '@app/services/robot.service';
 import { RobotTable } from './robot-table';
-import { Robot } from '@app/core/models/robot';
 import { ConfirmationService } from '@app/core/services/confirmation.service';
 import { MatDialog } from '@angular/material/dialog';
 import { GenerateRobotsDialog } from './generate-robots-dialog';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol, symbols } from '@shared/models/symbol';
 import { diversifyRobots } from '../helpers/diversify-robots';
+import { Robot } from '@app/core/models/robot';
 
 @Component({
   selector: 'app-account-details',
@@ -37,7 +37,7 @@ import { diversifyRobots } from '../helpers/diversify-robots';
   template: `
     <div class="relative flex flex-col p-4 h-full gap-2">
       <div class="flex justify-between items-center">
-        <button mat-icon-button aria-label="Back to accounts">
+        <button mat-icon-button aria-label="Back to accounts" [routerLink]="['..']">
           <mat-icon>arrow_back</mat-icon>
         </button>
 
@@ -86,13 +86,21 @@ export class AccountDetails {
     required(path.leverage);
   });
   isCreation = computed(() => !this.account().id);
-  robots = linkedSignal<Robot[]>(() => this.robotService.robotsByAccount());
+  robots = computed<Robot[]>(() => this.robotService.robotsByAccount());
   timeframes: Timeframe[] = ['M15', 'M20', 'M30', 'H1'];
   symbols: Symbol[] = symbols.filter((s) => !s.includes('XAU'));
 
   constructor() {
     this.robotService.setAccountId(this.accountId!);
     // this.robots = this.robotService.robotsByAccount;
+
+    effect(() => {
+      console.log('robots', this.robots());
+    });
+
+    effect(() => {
+      console.log('from service', this.robotService.robotsByAccount());
+    });
 
     effect(() => {
       const account = this.accountService.accounts().find((a) => a.id === this.accountId);

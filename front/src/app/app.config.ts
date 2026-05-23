@@ -1,4 +1,3 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
 import { ApplicationConfig } from '@angular/core';
 import { provideRouter } from '@angular/router';
 import { provideApollo } from 'apollo-angular';
@@ -29,15 +28,10 @@ export const appConfig: ApplicationConfig = {
             fields: {
               robotsByAccount: {
                 keyArgs: ['accountId'],
-                merge(existing = [], incoming) {
-                  return incoming;
-                },
               },
 
               accounts: {
-                merge(existing = [], incoming) {
-                  return incoming;
-                },
+                keyArgs: false,
               },
             },
           },
