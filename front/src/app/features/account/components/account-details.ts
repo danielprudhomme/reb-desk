@@ -21,12 +21,14 @@ import { Symbol, symbols } from '@shared/models/symbol';
 import { diversifyRobots } from '../helpers/diversify-robots';
 import { Robot } from '@app/core/models/robot';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
+import { RobotDrawer } from './robot-drawer';
 
 @Component({
   selector: 'app-account-details',
   imports: [
     FormField,
     RobotTable,
+    RobotDrawer,
     MatButtonModule,
     MatMenuModule,
     MatFormFieldModule,
@@ -83,21 +85,10 @@ import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
       </mat-sidenav-content>
 
       <!-- RIGHT DRAWER -->
-      <mat-sidenav #drawer position="end" mode="over" class="w-[420px] p-4">
-        <div class="relative h-full">
-          <!-- Close button -->
-          <button
-            mat-icon-button
-            class="absolute top-0 right-0"
-            (click)="drawer.close()"
-            aria-label="Close drawer"
-          >
-            <mat-icon>close</mat-icon>
-          </button>
-
-          <!-- Drawer content -->
-          <div class="pt-10">salut coucou</div>
-        </div>
+      <mat-sidenav #drawer position="end" mode="over" class="!w-[90vw]">
+        @if (selectedRobot()) {
+          <app-robot-drawer [robot]="selectedRobot()!" (close)="drawer.close()" />
+        }
       </mat-sidenav>
     </mat-sidenav-container>
   `,

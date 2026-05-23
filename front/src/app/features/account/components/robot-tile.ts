@@ -1,12 +1,12 @@
-import { Component, computed, input } from '@angular/core';
-import { NgClass } from '@angular/common';
+import { Component, input } from '@angular/core';
 import { Robot } from '@app/core/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
+import { RobotStatusBadge } from './robot-status-badge';
 
 @Component({
   selector: 'app-robot-tile',
   standalone: true,
-  imports: [NgClass, ExpertBadge],
+  imports: [ExpertBadge, RobotStatusBadge],
   template: `
     <div
       class="relative rounded-xl border border-white/10 bg-white/5
@@ -14,13 +14,7 @@ import { ExpertBadge } from '@app/shared/components/expert-badge';
              flex flex-col justify-between"
     >
       <!-- Status -->
-      <div
-        class="absolute top-2 right-2 flex items-center gap-1 text-[10px] font-medium"
-        [ngClass]="statusClass()"
-      >
-        <div class="w-2 h-2 rounded-full bg-current"></div>
-        <span class="capitalize">{{ robot().status }}</span>
-      </div>
+      <app-robot-status-badge class="absolute top-2 right-2" [status]="robot().status" />
 
       <!-- Expert -->
       <div class="pr-14">
@@ -51,29 +45,4 @@ import { ExpertBadge } from '@app/shared/components/expert-badge';
 })
 export class RobotTile {
   robot = input.required<Robot>();
-
-  statusClass = computed(() => {
-    switch (this.robot().status) {
-      case 'draft':
-        return 'text-zinc-400';
-
-      case 'configured':
-        return 'text-sky-400';
-
-      case 'analyzed':
-        return 'text-amber-400';
-
-      case 'validated':
-        return 'text-emerald-400';
-
-      case 'invalid':
-        return 'text-rose-400';
-
-      case 'live':
-        return 'text-green-500';
-
-      default:
-        return 'text-zinc-400';
-    }
-  });
 }
