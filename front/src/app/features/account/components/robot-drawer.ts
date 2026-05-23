@@ -21,27 +21,19 @@ import { RobotStatusBadge } from './robot-status-badge';
     <div class="h-full flex flex-col p-4">
       <!-- HEADER -->
       <div class="relative pb-4 border-b border-white/10">
-        <!-- top right actions -->
         <div class="absolute top-0 right-0 flex gap-1">
-          <!-- settings -->
           <button mat-icon-button [matMenuTriggerFor]="menu" aria-label="Robot settings">
             <mat-icon>settings</mat-icon>
           </button>
 
-          <!-- close -->
           <button mat-icon-button (click)="close.emit()" aria-label="Close drawer">
             <mat-icon>close</mat-icon>
           </button>
         </div>
 
         <div class="flex items-center gap-4">
-          <!-- expert -->
           <app-expert-badge [expert]="robot().expert" />
-
-          <!-- symbol + timeframe -->
           <div class="text-sm font-medium">{{ robot().symbol }} · {{ robot().timeframe }}</div>
-
-          <!-- status -->
           <app-robot-status-badge [status]="robot().status" />
         </div>
       </div>
