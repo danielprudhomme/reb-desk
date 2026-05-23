@@ -4,9 +4,15 @@ import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { Robot, RobotInput } from '@app/core/models/robot';
-import { DELETE_ROBOT, GET_ROBOTS_BY_ACCOUNT, UPSERT_ROBOT } from './robot.graphql';
+import {
+  CREATE_DRAFT_ROBOTS,
+  DELETE_ROBOT,
+  GET_ROBOTS_BY_ACCOUNT,
+  UPSERT_ROBOT,
+} from './robot.graphql';
 import { Reference } from '@apollo/client';
 import { ModifierDetails } from '@apollo/client/cache';
+import { RobotConfiguration } from '@shared/models/robot-configuration';
 
 @Injectable({ providedIn: 'root' })
 export class RobotService {
@@ -52,6 +58,16 @@ export class RobotService {
 
           cache.gc();
         },
+      }),
+    );
+  }
+
+  async createDraftRobots(accountId: string, inputs: RobotConfiguration[]) {
+    await firstValueFrom(
+      this.apollo.mutate({
+        mutation: CREATE_DRAFT_ROBOTS,
+        variables: { accountId, inputs },
+        refetchQueries: ['GetRobotsByAccount'],
       }),
     );
   }

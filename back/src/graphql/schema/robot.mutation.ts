@@ -1,4 +1,10 @@
 export default /* GraphQL */ `
+  input CreateDraftRobotInput {
+    expert: ExpertAdvisor!
+    timeframe: Timeframe!
+    symbol: Symbol!
+  }
+
   input RobotInput {
     id: ID
     accountId: ID!
@@ -13,7 +19,8 @@ export default /* GraphQL */ `
   }
 
   extend type Mutation {
-    upsertRobot(input: RobotInput!): Robot!
+    createDraftRobots(accountId: ID!, inputs: [CreateDraftRobotInput!]!): [Robot!]!
     deleteRobot(id: ID!): Boolean!
+    upsertRobot(input: RobotInput!): Robot!
   }
 `;

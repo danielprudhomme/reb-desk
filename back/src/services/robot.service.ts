@@ -1,15 +1,25 @@
 import { collections } from '@sec/db/collections.ts';
 import { Robot } from '@sec/db/models/robot.ts';
 import { RobotInput } from '@sec/models/robot.input.ts';
+import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
 import crypto from 'node:crypto';
 
 export const robotService = {
+  createDrafts(accountId: string, inputs: RobotConfiguration[]): Robot[] {
+    const existingDrafts = collections.Robot().find({ accountId, status: 'draft' });
+    existingDrafts.forEach((draft) => collections.Robot().remove(draft));
+
+    const created = inputs.map((input) =>
+      this.upsert({ ...input, accountId, status: 'draft', parameters: [] }),
+    );
+
+    return created;
+  },
+
   upsert(input: RobotInput): Robot {
     const robots = collections.Robot();
 
     const id = input.id ?? crypto.randomUUID();
-
-    const strategySignature = this.createStrategySignature(input);
 
     const robot: Robot = {
       id,
@@ -19,7 +29,7 @@ export const robotService = {
       symbol: input.symbol,
       status: input.status,
       parameters: input.parameters,
-      strategySignature,
+      strategySignature: this.createStrategySignature(input),
     };
 
     const existing = robots.findOne({ id });
@@ -31,14 +41,6 @@ export const robotService = {
       });
 
       return robot;
-    }
-
-    const duplicate = robots.findOne({
-      strategySignature,
-    });
-
-    if (duplicate) {
-      throw new Error(`Robot strategy already exists`);
     }
 
     robots.insert(robot);

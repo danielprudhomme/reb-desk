@@ -128,15 +128,19 @@ export class AccountDetails {
           maxRobots,
         );
 
-        this.robots.set(
-          robots.map((config) => ({
-            ...config,
-            id: '',
-            accountId: this.accountId!,
-            status: 'draft',
-            parameters: [],
-          })),
-        );
+        console.log('div rbotos', robots);
+
+        this.robotService.createDraftRobots(this.accountId!, robots);
+
+        // this.robots.set(
+        //   robots.map((config) => ({
+        //     ...config,
+        //     id: '',
+        //     accountId: this.accountId!,
+        //     status: 'draft',
+        //     parameters: [],
+        //   })),
+        // );
       });
   }
 

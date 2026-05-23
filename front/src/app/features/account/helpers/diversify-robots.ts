@@ -1,7 +1,7 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol } from '@shared/models/symbol';
-import { RobotConfiguration } from '@app/core/models/robot';
+import { RobotConfiguration } from '@shared/models/robot-configuration';
 
 function extractCurrencies(symbol: Symbol): [string, string] {
   return [symbol.slice(0, 3), symbol.slice(3, 6)];
@@ -92,7 +92,9 @@ export function diversifyRobots(
   // Shuffle
   candidates.sort(() => Math.random() - 0.5);
 
-  const selected = [...existingRobots];
+  const selected = [
+    ...existingRobots.map((r) => ({ expert: r.expert, timeframe: r.timeframe, symbol: r.symbol })),
+  ];
   const stats = createStats();
 
   // Initialize with existing robots

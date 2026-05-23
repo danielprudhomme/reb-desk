@@ -20,6 +20,23 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
   }
 `;
 
+export const CREATE_DRAFT_ROBOTS = gql`
+  mutation CreateDraftRobots($accountId: ID!, $inputs: [CreateDraftRobotInput!]!) {
+    createDraftRobots(accountId: $accountId, inputs: $inputs) {
+      id
+      accountId
+      expert
+      timeframe
+      symbol
+      status
+      parameters {
+        name
+        value
+      }
+    }
+  }
+`;
+
 export const UPSERT_ROBOT = gql`
   mutation UpsertRobot($input: RobotInput!) {
     upsertRobot(input: $input) {
