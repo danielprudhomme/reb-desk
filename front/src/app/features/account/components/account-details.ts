@@ -133,7 +133,7 @@ export class AccountDetails {
             ...config,
             id: '',
             accountId: this.accountId!,
-            status: 'inProgress',
+            status: 'draft',
             parameters: [],
           })),
         );

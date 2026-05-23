@@ -114,7 +114,7 @@ export class RobotTable {
       expert,
       symbol,
       timeframe,
-      status: 'inProgress',
+      status: 'draft',
       parameters: [],
     });
   }
