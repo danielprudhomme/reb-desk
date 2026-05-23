@@ -126,18 +126,7 @@ export class AccountDetails {
           this.symbols,
           maxRobots,
         );
-
         this.robotService.createDraftRobots(this.accountId!, robots);
-
-        // this.robots.set(
-        //   robots.map((config) => ({
-        //     ...config,
-        //     id: '',
-        //     accountId: this.accountId!,
-        //     status: 'draft',
-        //     parameters: [],
-        //   })),
-        // );
       });
   }
 
