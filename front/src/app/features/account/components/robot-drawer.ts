@@ -42,12 +42,19 @@ import { AnalysisRequest } from '@shared/models/analysis-request';
       </div>
 
       <!-- CONTENT SLOT -->
-      <div class="flex-1 overflow-auto pt-4">
-        <mat-tab-group>
+      <div class="flex-1 pt-4 overflow-hidden">
+        <mat-tab-group class="h-full">
           <mat-tab label="Choose pass">
-            <app-pass-analysis-table [request]="analysisRequest()" />
+            <div class="h-full overflow-auto">
+              <app-pass-analysis-table
+                [config]="{ showRobotConfiguration: false }"
+                [request]="analysisRequest()"
+              />
+            </div>
           </mat-tab>
+
           <mat-tab label="Parameters"> Content 2 </mat-tab>
+
           <mat-tab label="History"> Content 3 </mat-tab>
         </mat-tab-group>
       </div>

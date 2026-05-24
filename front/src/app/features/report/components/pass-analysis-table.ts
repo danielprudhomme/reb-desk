@@ -88,7 +88,7 @@ interface TableItem extends GroupedBacktestPassAnalysis {
         </td>
       </ng-container>
 
-      <ng-container matColumnDef="longTermSummary">
+      <ng-container matColumnDef="longTermSummary" [sticky]="true">
         <th mat-header-cell *matHeaderCellDef mat-sort-header>Summary</th>
 
         <td mat-cell *matCellDef="let pass">
@@ -184,6 +184,7 @@ interface TableItem extends GroupedBacktestPassAnalysis {
   `,
 })
 export class PassAnalysisTable {
+  config = input<{ showRobotConfiguration: boolean }>({ showRobotConfiguration: true });
   request = input.required<AnalysisRequest>();
   private rebReportService = inject(RebReportService);
   private sort = viewChild.required(MatSort);
@@ -199,14 +200,12 @@ export class PassAnalysisTable {
       valueType: BACKTEST_THRESHOLD_VALUE_TYPE[threshold.type],
     })),
   );
-  displayedColumns = computed(() => [
-    'expert',
-    'symbol',
-    'timeframe',
-    'score',
-    'longTermSummary',
-    ...this.thresholds().map((t) => t.columnName),
-  ]);
+  displayedColumns = computed(() => {
+    const columns = ['score', 'longTermSummary', ...this.thresholds().map((t) => t.columnName)];
+    return this.config().showRobotConfiguration
+      ? ['expert', 'symbol', 'timeframe', ...columns]
+      : columns;
+  });
   dataSource = computed(() => {
     const groupedReports = this.analysisResource.value();
     if (!groupedReports) return new MatTableDataSource([]);
