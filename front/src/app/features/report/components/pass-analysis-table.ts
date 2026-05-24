@@ -12,6 +12,7 @@ import { BacktestLongTermSummary } from '../models/backtest-long-term-summary';
 import { FormatPipe } from '@app/shared/pipes/format.pipe';
 import { BACKTEST_THRESHOLD_VALUE_TYPE } from '@shared/constants/backtest-threshold-value-type';
 import { MatTooltipModule } from '@angular/material/tooltip';
+import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { TimeUnit } from '@shared/models/time-unit';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
@@ -39,6 +40,7 @@ interface TableItem extends GroupedBacktestPassAnalysis {
     MatTableModule,
     MatSortModule,
     MatTooltipModule,
+    MatProgressSpinnerModule,
     ScrollingModule,
     PassAnalysisLongTermSummaryCell,
     FormatPipe,
@@ -168,7 +170,14 @@ interface TableItem extends GroupedBacktestPassAnalysis {
           class="mat-cell text-center py-10 opacity-60"
           [attr.colspan]="displayedColumns().length"
         >
-          No report found
+          @if (analysisResource.isLoading()) {
+            <div class="flex items-center justify-start gap-2">
+              <mat-spinner diameter="20"></mat-spinner>
+              Loading report...
+            </div>
+          } @else {
+            No report found
+          }
         </td>
       </tr>
     </table>
