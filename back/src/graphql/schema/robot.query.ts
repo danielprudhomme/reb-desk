@@ -1,17 +1,16 @@
 export default /* GraphQL */ `
   type Robot {
     id: ID!
-    accountId: ID!
 
-    expert: ExpertAdvisor!
-    timeframe: Timeframe!
-    symbol: Symbol!
+    accountId: ID!
 
     status: RobotStatus!
 
-    strategySignature: String!
+    strategyContext: StrategyContext!
 
-    parameters: [Parameter!]!
+    parameterSetId: ID
+
+    parameterSet: ParameterSet
   }
 
   extend type Query {
