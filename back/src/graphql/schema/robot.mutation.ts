@@ -15,7 +15,7 @@ export default /* GraphQL */ `
 
     status: RobotStatus!
 
-    parameters: [ParameterInput!]!
+    parameterSetId: ID
   }
 
   extend type Mutation {

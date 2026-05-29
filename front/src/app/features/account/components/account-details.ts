@@ -147,7 +147,7 @@ export class AccountDetails {
       .afterClosed()
       .subscribe(({ maxRobots, experts }) => {
         const robots = diversifyRobots(
-          this.robots(),
+          this.robots().map((r) => r.strategyContext),
           experts,
           this.timeframes,
           this.symbols,

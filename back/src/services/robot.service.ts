@@ -4,17 +4,13 @@ import { RobotInput } from '@src/models/robot.input.ts';
 import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
 import crypto from 'node:crypto';
 import { strategyContextService } from './strategy-context.service.ts';
-import { parameterSetService } from './parameter-set.service.ts';
 
 export const robotService = {
   createDrafts(accountId: string, inputs: RobotConfiguration[]): Robot[] {
     const existingDrafts = collections.Robot().find({ accountId, status: 'draft' });
     existingDrafts.forEach((draft) => collections.Robot().remove(draft));
 
-    const created = inputs.map((input) =>
-      this.upsert({ ...input, accountId, status: 'draft', parameters: [] }),
-    );
-
+    const created = inputs.map((input) => this.upsert({ ...input, accountId, status: 'draft' }));
     return created;
   },
 
@@ -34,8 +30,6 @@ export const robotService = {
       account?.capital ?? 10000,
     );
 
-    const parameterSet = parameterSetService.findOrCreate(strategyContext.id, input.parameters);
-
     const id = input.id ?? crypto.randomUUID();
 
     const robot: Robot = {
@@ -43,7 +37,7 @@ export const robotService = {
       accountId: input.accountId,
       status: input.status,
       strategyContextId: strategyContext.id,
-      parameterSetId: parameterSet.id,
+      parameterSetId: input.parameterSetId,
     };
 
     const existing = robots.findOne({ id });

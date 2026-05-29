@@ -35,8 +35,10 @@ import { AnalysisRequest } from '@shared/models/analysis-request';
         </div>
 
         <div class="flex items-center gap-4">
-          <app-expert-badge [expert]="robot().expert" />
-          <div class="text-sm font-medium">{{ robot().symbol }} · {{ robot().timeframe }}</div>
+          <app-expert-badge [expert]="robot().strategyContext.expert" />
+          <div class="text-sm font-medium">
+            {{ robot().strategyContext.symbol }} · {{ robot().strategyContext.timeframe }}
+          </div>
           <app-robot-status-badge [status]="robot().status" />
         </div>
       </div>
@@ -75,9 +77,9 @@ export class RobotDrawer {
   close = output<void>();
   delete = output<Robot>();
   analysisRequest = computed<AnalysisRequest>(() => ({
-    symbols: [this.robot().symbol],
-    timeframes: [this.robot().timeframe],
-    experts: [this.robot().expert],
+    symbols: [this.robot().strategyContext.symbol],
+    timeframes: [this.robot().strategyContext.timeframe],
+    experts: [this.robot().strategyContext.expert],
     capital: this.capital(),
     thresholds: [
       {

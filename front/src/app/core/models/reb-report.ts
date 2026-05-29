@@ -1,22 +1,13 @@
 import { OptimizationModel } from '@shared/models/optimization-model';
 import { TimeUnit } from '@shared/models/time-unit';
-import { ExpertAdvisor } from '@shared/models/expert-advisor';
-import { Symbol } from '@shared/models/symbol';
-import { Timeframe } from '@shared/models/timeframe';
 import { ImportStatus } from '@shared/models/import-status';
-import { RebParameter } from './reb-parameter';
-import { Capital } from '@shared/models/capital';
+import { StrategyContext } from './strategy-context';
 
 export interface RebReport {
   id: string;
-  fingerprint: string;
   importStatus: ImportStatus;
   path: string;
-  expert: ExpertAdvisor;
-  symbol: Symbol;
-  timeframe: Timeframe;
-  leverage: number;
-  capital: Capital;
+  strategyContext: StrategyContext;
   model: OptimizationModel;
   startDate: string;
   lastValidatedDate?: string;
@@ -25,5 +16,4 @@ export interface RebReport {
   shortTermUnit: TimeUnit;
   longTermDuration: number;
   longTermUnit: TimeUnit;
-  parameters: RebParameter[];
 }

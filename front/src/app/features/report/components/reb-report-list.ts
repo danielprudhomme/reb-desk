@@ -92,10 +92,10 @@ export class RebReportList {
       .reports()
       ?.filter(
         (report) =>
-          (symbols.length === 0 || symbols.includes(report.symbol)) &&
-          (timeframes.length === 0 || timeframes.includes(report.timeframe)) &&
-          (experts.length === 0 || experts.includes(report.expert)) &&
-          (capital === null || report.capital === capital),
+          (symbols.length === 0 || symbols.includes(report.strategyContext.symbol)) &&
+          (timeframes.length === 0 || timeframes.includes(report.strategyContext.timeframe)) &&
+          (experts.length === 0 || experts.includes(report.strategyContext.expert)) &&
+          (capital === null || report.strategyContext.capital === capital),
       );
 
     const dataSource = new MatTableDataSource<RebReport>(reports);

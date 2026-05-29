@@ -1,21 +1,29 @@
 import { gql } from 'apollo-angular';
 
+const ROBOT_FIELDS = `
+  id
+  accountId
+  status
+  strategyContext {
+    expert
+    symbol
+    timeframe
+    leverage
+    capital
+  }
+  parameterSet {
+    id
+    parameters {
+      name
+      value
+    }
+  }
+`;
+
 export const GET_ROBOTS_BY_ACCOUNT = gql`
   query RobotsByAccount($accountId: ID!) {
     robotsByAccount(accountId: $accountId) {
-      id
-      accountId
-
-      expert
-      timeframe
-      symbol
-
-      status
-
-      parameters {
-        name
-        value
-      }
+      ${ROBOT_FIELDS}
     }
   }
 `;
@@ -23,16 +31,7 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
 export const CREATE_DRAFT_ROBOTS = gql`
   mutation CreateDraftRobots($accountId: ID!, $inputs: [CreateDraftRobotInput!]!) {
     createDraftRobots(accountId: $accountId, inputs: $inputs) {
-      id
-      accountId
-      expert
-      timeframe
-      symbol
-      status
-      parameters {
-        name
-        value
-      }
+      ${ROBOT_FIELDS}
     }
   }
 `;
@@ -40,21 +39,7 @@ export const CREATE_DRAFT_ROBOTS = gql`
 export const UPSERT_ROBOT = gql`
   mutation UpsertRobot($input: RobotInput!) {
     upsertRobot(input: $input) {
-      id
-      accountId
-
-      expert
-      timeframe
-      symbol
-
-      status
-
-      strategySignature
-
-      parameters {
-        name
-        value
-      }
+      ${ROBOT_FIELDS}
     }
   }
 `;

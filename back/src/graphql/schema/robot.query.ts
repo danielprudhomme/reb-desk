@@ -8,8 +8,6 @@ export default /* GraphQL */ `
 
     strategyContext: StrategyContext!
 
-    parameterSetId: ID
-
     parameterSet: ParameterSet
   }
 

@@ -7,7 +7,7 @@ import { Robot } from '@src/db/models/robot.ts';
 export const robotResolvers = {
   Robot: {
     strategyContext: (robot: Robot) =>
-      collections.StrategyContext().find({ id: robot.strategyContextId }),
+      collections.StrategyContext().findOne({ id: robot.strategyContextId }),
     parameterSet: (robot: Robot) =>
       !robot.parameterSetId
         ? null

@@ -1,12 +1,24 @@
-import { RobotConfiguration } from '@shared/models/robot-configuration';
 import { RobotStatus } from '@shared/models/robot-status';
-import { Parameter } from '@shared/models/parameter';
+import { StrategyContext } from './strategy-context';
+import { ParameterSet } from './parameter-set';
+import { ExpertAdvisor } from '@shared/models/expert-advisor';
+import { Timeframe } from '@shared/models/timeframe';
+import { Symbol } from '@shared/models/symbol';
 
-export interface Robot extends RobotConfiguration {
+export interface Robot {
   id: string;
   accountId: string;
   status: RobotStatus;
-  parameters: Parameter[];
+  strategyContext: StrategyContext;
+  parameterSet?: ParameterSet;
 }
 
-export type RobotInput = Omit<Robot, 'id'> & { id?: string };
+export interface RobotInput {
+  id?: string;
+  accountId: string;
+  expert: ExpertAdvisor;
+  timeframe: Timeframe;
+  symbol: Symbol;
+  status: RobotStatus;
+  parameterSetId?: string;
+}
