@@ -1,4 +1,4 @@
-import { RebReport } from '@sec/db/models/reb-report.ts';
+import { RebReport } from '@src/db/models/reb-report.ts';
 import { collections } from '../../db/collections.ts';
 
 export const rebReportResolvers = {

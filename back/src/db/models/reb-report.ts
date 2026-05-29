@@ -2,9 +2,9 @@ import { OptimizationModel } from '../../../../shared/models/optimization-model.
 import { TimeUnit } from '../../../../shared/models/time-unit.ts';
 import { ImportStatus } from '../../../../shared/models/import-status.ts';
 import { createHash } from 'crypto';
-import { ParsedRebReport } from '@sec/models/parsed-reb-report.ts';
+import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { Parameter } from '@shared/models/parameter.ts';
-import { ParsedRebPass } from '@sec/models/parsed-reb-pass.ts';
+import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
 
 export interface RebReport {
   id: string;

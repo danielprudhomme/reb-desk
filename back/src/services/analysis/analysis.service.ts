@@ -4,7 +4,7 @@ import { collections } from '../../db/collections.ts';
 import { BacktestPass, BacktestWithResults } from '@shared/models/backtest-pass.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { TimeUnit } from '@shared/models/time-unit.ts';
-import { RebReport } from '@sec/db/models/reb-report.ts';
+import { RebReport } from '@src/db/models/reb-report.ts';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
 import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 import { Capital } from '@shared/models/capital.ts';

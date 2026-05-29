@@ -1,6 +1,6 @@
-import { collections } from '@sec/db/collections.ts';
-import { Robot } from '@sec/db/models/robot.ts';
-import { RobotInput } from '@sec/models/robot.input.ts';
+import { collections } from '@src/db/collections.ts';
+import { Robot } from '@src/db/models/robot.ts';
+import { RobotInput } from '@src/models/robot.input.ts';
 import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
 import crypto from 'node:crypto';
 import { strategyContextService } from './strategy-context.service.ts';

@@ -7,7 +7,7 @@ import { collections } from '../db/collections.ts';
 import { ParsedRebReport } from '../models/parsed-reb-report.ts';
 import { parseRebReport } from './parser/reb-report.parser.ts';
 import expertConst from '@shared/constants/expert.constants.ts';
-import { buildRebReportFingerprintHash } from '@sec/db/models/reb-report.ts';
+import { buildRebReportFingerprintHash } from '@src/db/models/reb-report.ts';
 import { strategyContextService } from './strategy-context.service.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 

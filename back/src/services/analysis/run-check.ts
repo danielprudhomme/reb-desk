@@ -1,4 +1,4 @@
-import { BACKTEST_THRESHOLD_COMPUTE } from '@sec/constants/backtest-threshold.constants.ts';
+import { BACKTEST_THRESHOLD_COMPUTE } from '@src/constants/backtest-threshold.constants.ts';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { GroupedBacktestPass } from '@shared/models/backtest-pass.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';

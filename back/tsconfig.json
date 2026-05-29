@@ -11,7 +11,7 @@
 
     "paths": {
       "@shared/*": ["../shared/*"],
-      "@sec/*": ["./src/*"]
+      "@src/*": ["./src/*"]
     }
   },
   "exclude": ["node_modules"]

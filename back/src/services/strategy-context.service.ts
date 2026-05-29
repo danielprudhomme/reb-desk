@@ -1,5 +1,5 @@
-import { collections } from '@sec/db/collections.ts';
-import { StrategyContext } from '@sec/db/models/strategy-context.ts';
+import { collections } from '@src/db/collections.ts';
+import { StrategyContext } from '@src/db/models/strategy-context.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { Symbol } from '@shared/models/symbol.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';

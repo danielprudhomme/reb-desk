@@ -1,8 +1,8 @@
-import { collections } from '@sec/db/collections.ts';
-import { robotService } from '@sec/services/robot.service.ts';
-import { RobotInput } from '@sec/models/robot.input.ts';
+import { collections } from '@src/db/collections.ts';
+import { robotService } from '@src/services/robot.service.ts';
+import { RobotInput } from '@src/models/robot.input.ts';
 import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
-import { Robot } from '@sec/db/models/robot.ts';
+import { Robot } from '@src/db/models/robot.ts';
 
 export const robotResolvers = {
   Robot: {

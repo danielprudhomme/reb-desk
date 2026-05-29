@@ -1,7 +1,7 @@
 import crypto from 'node:crypto';
-import { Account } from '@sec/db/models/account.ts';
-import { AccountInput } from '@sec/models/account.input.ts';
-import { collections } from '@sec/db/collections.ts';
+import { Account } from '@src/db/models/account.ts';
+import { AccountInput } from '@src/models/account.input.ts';
+import { collections } from '@src/db/collections.ts';
 
 export const accountService = {
   getAll() {

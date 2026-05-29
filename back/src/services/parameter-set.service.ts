@@ -1,5 +1,5 @@
-import { collections } from '@sec/db/collections.ts';
-import { ParameterSet } from '@sec/db/models/parameter-set.ts';
+import { collections } from '@src/db/collections.ts';
+import { ParameterSet } from '@src/db/models/parameter-set.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { createHash } from 'crypto';
 
