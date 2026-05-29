@@ -1,16 +1,9 @@
-import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-import { Timeframe } from '@shared/models/timeframe.ts';
-import { Symbol } from '@shared/models/symbol.ts';
-import { Parameter } from '@shared/models/parameter.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
 
 export interface Robot {
   id: string;
   accountId: string;
   status: RobotStatus;
-  expert: ExpertAdvisor;
-  symbol: Symbol;
-  timeframe: Timeframe;
-  parameters: Parameter[];
-  strategySignature: string;
+  strategyContextId: string;
+  parameterSetId?: string;
 }

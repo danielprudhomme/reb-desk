@@ -3,8 +3,8 @@ import type { OptimizationModel } from '@shared/models/optimization-model.ts';
 import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
+import { Symbol } from '@shared/models/symbol.ts';
 import { ParsedRebReport } from '../../models/parsed-reb-report.ts';
-import { ParsedRebParameter } from '../../models/parsed-reb-parameter.ts';
 import {
   extractExpert,
   extractValue,
@@ -14,15 +14,19 @@ import {
 } from './parser-helper.ts';
 import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
 import { Parameter } from '@shared/models/parameter.ts';
-import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-import { ParsedRebPass } from '@sec/models/parsed-reb-pass.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
 
-export async function parseRebReport(filePath: string): Promise<{
-  report: ParsedRebReport;
-  parameters: ParsedRebParameter[];
-}> {
-  const { content, lines, expert, fixedParameters, passParameters } = await parseRebFile(filePath);
+export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
+  const content = await readFile(filePath, { encoding: 'utf-8' });
+  const lines = content.split(/\r?\n/);
+  const expert = extractExpert(lines);
 
+  const allowedParameters = rebParamsDefinitions.getParameters(expert);
+  const passNumbers = getLinesSection(content, 'SENS DES PASSAGES').map((n) => +n);
+  const fixedParameters = parseFixedParameters(content, allowedParameters);
+  const passParameters = parsePassParameters(content);
+  const passShortTermResults = parseResults(content, 'RESULTATS COURT TERME');
+  const passLongTermResults = parseResults(content, 'RESULTATS LONG TERME');
   const startDate = parseDate(requiredValue(lines, 'DATE DE DEBUT TESTS :'));
   const lastValidatedRaw = extractValue(lines, 'DERNIERE DATE VALIDE :');
   const lastValidatedDate = lastValidatedRaw ? parseDate(lastValidatedRaw) : undefined;
@@ -35,72 +39,30 @@ export async function parseRebReport(filePath: string): Promise<{
     longTermDuration,
     longTermUnit,
   });
-  const variableParameters = consolidatePassParameters(passParameters);
-
-  return {
-    report: {
-      importStatus,
-      expert,
-      symbol: requiredValue(lines, 'SYMBOLE :'),
-      timeframe: requiredValue(lines, 'UNITE DE TEMPS :'),
-      leverage: parseInt(requiredValue(lines, 'SPREAD :')),
-      capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
-      model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
-      startDate,
-      lastValidatedDate,
-      shortTermCount: parseInt(requiredValue(lines, 'NOMBRE DE COURT TERME :')),
-      shortTermDuration: parseInt(requiredValue(lines, 'DUREE COURT TERME :')),
-      shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
-      longTermDuration,
-      longTermUnit,
-    },
-    parameters: [...fixedParameters, ...variableParameters],
-  };
-}
-
-export async function parseRebPass(filePath: string): Promise<ParsedRebPass[]> {
-  const { content, fixedParameters, passParameters } = await parseRebFile(filePath);
-
-  const passIds = getLinesSection(content, 'SENS DES PASSAGES').map((id) => +id);
-  const passShortTermResults = parseResults(content, 'RESULTATS COURT TERME');
-  const passLongTermResults = parseResults(content, 'RESULTATS LONG TERME');
-
-  const fixedPassParameters = fixedParameters.map((p) => ({
-    name: p.name,
-    value: p.values[0],
+  const parsedPasses = passNumbers.map((passNumber, index) => ({
+    passNumber,
+    parameters: [...fixedParameters, ...passParameters[index]],
+    shortTermResults: passShortTermResults[index],
+    longTermResults: passLongTermResults[index],
   }));
 
-  const passes: ParsedRebPass[] = passIds.map((passId, index) => {
-    const parameters = passParameters[index];
-
-    return {
-      passId,
-      fixedParameters: fixedPassParameters,
-      parameters,
-      shortTermResults: passShortTermResults[index],
-      longTermResults: passLongTermResults[index],
-    };
-  });
-
-  return passes;
-}
-
-async function parseRebFile(filePath: string): Promise<{
-  content: string;
-  lines: string[];
-  expert: ExpertAdvisor;
-  fixedParameters: ParsedRebParameter[];
-  passParameters: Parameter[][];
-}> {
-  const content = await readFile(filePath, { encoding: 'utf-8' });
-  const lines = content.split(/\r?\n/);
-  const expert = extractExpert(lines);
-  const allowedParameters = rebParamsDefinitions.getParameters(expert);
-
-  const fixedParameters = parseFixedParameters(content, allowedParameters);
-  const passParameters = parsePassParameters(content);
-
-  return { content, lines, expert, fixedParameters, passParameters };
+  return {
+    importStatus,
+    expert,
+    symbol: requiredValue(lines, 'SYMBOLE :') as Symbol,
+    timeframe: requiredValue(lines, 'UNITE DE TEMPS :') as Timeframe,
+    leverage: parseInt(requiredValue(lines, 'SPREAD :')),
+    capital: parseFloat(requiredValue(lines, 'CAPITAL :')),
+    model: parseModel(requiredValue(lines, "MODELE D'OPTIMISATION :")),
+    startDate,
+    lastValidatedDate,
+    shortTermCount: parseInt(requiredValue(lines, 'NOMBRE DE COURT TERME :')),
+    shortTermDuration: parseInt(requiredValue(lines, 'DUREE COURT TERME :')),
+    shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
+    longTermDuration,
+    longTermUnit,
+    parsedPasses,
+  };
 }
 
 function parseTimeUnit(value: string): TimeUnit {
@@ -177,10 +139,10 @@ function addDuration(date: Date, duration: number, unit: TimeUnit): Date {
   return d;
 }
 
-function parseFixedParameters(content: string, allowed: string[]): ParsedRebParameter[] {
+function parseFixedParameters(content: string, allowed: string[]): Parameter[] {
   const lines = getLinesSection(content, 'PARAMETRES OPTIMISATION');
 
-  const parameters: ParsedRebParameter[] = [];
+  const parameters: Parameter[] = [];
 
   for (const line of lines.filter((line) => line.includes('='))) {
     const trimmed = line.trim();
@@ -193,17 +155,14 @@ function parseFixedParameters(content: string, allowed: string[]): ParsedRebPara
     const optimized = values[4] === 'Y';
 
     if (!optimized) {
-      parameters.push({
-        name,
-        values: [parseParameterValue(values[0])],
-      });
+      parameters.push({ name, value: parseParameterValue(values[0]) });
     }
   }
 
   return parameters;
 }
 
-function parsePassParameters(content: string): { name: string; value: number }[][] {
+function parsePassParameters(content: string): Parameter[][] {
   const lines = getLinesSection(content, 'PARAMETRES IMPORT');
 
   return lines.map((line) => {
@@ -260,24 +219,4 @@ function mapToPassResults(values: number[]): BacktestPassResult[] {
   }
 
   return results;
-}
-
-function consolidatePassParameters(
-  parameters: { name: string; value: number }[][],
-): ParsedRebParameter[] {
-  const map = new Map<string, Set<number>>();
-
-  for (const group of parameters) {
-    for (const param of group) {
-      if (!map.has(param.name)) {
-        map.set(param.name, new Set());
-      }
-      map.get(param.name)!.add(param.value);
-    }
-  }
-
-  return Array.from(map.entries()).map(([name, valuesSet]) => ({
-    name,
-    values: Array.from(valuesSet).sort((a, b) => a - b),
-  }));
 }

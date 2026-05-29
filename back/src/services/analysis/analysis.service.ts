@@ -1,19 +1,16 @@
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from '../../db/collections.ts';
-import { parseRebPass } from '../parser/reb-report.parser.ts';
-import { runChecks } from './run-check.ts';
-import { computeScore } from './compute-score.ts';
-import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
-import { BacktestPass } from '@shared/models/backtest-pass.ts';
-import { groupPasses } from './group-passes.ts';
+import { BacktestPass, BacktestWithResults } from '@shared/models/backtest-pass.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { TimeUnit } from '@shared/models/time-unit.ts';
 import { RebReport } from '@sec/db/models/reb-report.ts';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
 import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 import { Capital } from '@shared/models/capital.ts';
+import { parseRebReport } from '../parser/reb-report.parser.ts';
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface GroupedReport {
   context: {
     expert: ExpertAdvisor;
@@ -61,6 +58,7 @@ export async function runAnalysis(request: AnalysisRequest): Promise<GroupedRepo
 async function analyzeReports(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   query: any,
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   thresholds: BacktestThreshold[],
 ): Promise<GroupedReportAnalysis[]> {
   const reports = collections.RebReport().find(query);
@@ -69,69 +67,86 @@ async function analyzeReports(
     return [];
   }
 
-  const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
-  const grouped = new Map<string, GroupedReport>();
+  // const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
+  // const grouped = new Map<string, GroupedReport>();
 
   for (const report of reports) {
-    const passes: BacktestPass[] = (await parseRebPass(report.path)).map((pass) => ({
-      ...pass,
-      reportId: report.id,
-    }));
+    const backtests = collections.Backtest().find({ reportId: report.id });
+    const parsedRebReport = await parseRebReport(report.path);
 
-    const key = buildContextKey(report);
-    if (!grouped.has(key)) {
-      grouped.set(key, {
-        context: report,
-        reports: [],
-        passes: [],
-        groupedPasses: [],
-      });
-    }
-
-    const group = grouped.get(key)!;
-
-    group.reports.push(report);
-    group.passes.push(...passes);
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const backtestsWithResults: BacktestWithResults[] = backtests.map((backtest) => {
+      const passData = parsedRebReport.parsedPasses.find(
+        (pass) => pass.passNumber === backtest.passNumber,
+      );
+      return {
+        ...backtest,
+        shortTermResults: passData?.shortTermResults || [],
+        longTermResults: passData?.longTermResults || [],
+      };
+    });
   }
+  //   const passes: BacktestPass[] = (await parseRebPass(report.path)).map((pass) => ({
+  //     ...pass,
+  //     reportId: report.id,
+  //   }));
 
-  for (const group of grouped.values()) {
-    const groupedPasses = groupPasses(group.passes, 0.1);
-    const analyzedGroupedPasses = runChecks(
-      groupedPasses,
-      group.context.capital,
-      thresholds,
-      valuesByType,
-    );
-    computeScore(analyzedGroupedPasses, thresholds, valuesByType);
-    group.groupedPasses = analyzedGroupedPasses;
-  }
+  //   const key = buildContextKey(report);
+  //   if (!grouped.has(key)) {
+  //     grouped.set(key, {
+  //       context: report,
+  //       reports: [],
+  //       passes: [],
+  //       groupedPasses: [],
+  //     });
+  //   }
 
-  return Array.from(grouped.values()).map((group) => ({
-    expert: group.context.expert,
-    symbol: group.context.symbol,
-    timeframe: group.context.timeframe,
-    capital: group.context.capital,
-    startDate: group.context.startDate,
-    shortTermCount: group.context.shortTermCount,
-    shortTermDuration: group.context.shortTermDuration,
-    shortTermUnit: group.context.shortTermUnit,
-    longTermDuration: group.context.longTermDuration,
-    longTermUnit: group.context.longTermUnit,
-    passes: group.groupedPasses,
-  }));
+  //   const group = grouped.get(key)!;
+
+  //   group.reports.push(report);
+  //   group.passes.push(...passes);
+  // }
+
+  // for (const group of grouped.values()) {
+  //   const groupedPasses = groupPasses(group.passes, 0.1);
+  //   const analyzedGroupedPasses = runChecks(
+  //     groupedPasses,
+  //     group.context.capital,
+  //     thresholds,
+  //     valuesByType,
+  //   );
+  //   computeScore(analyzedGroupedPasses, thresholds, valuesByType);
+  //   group.groupedPasses = analyzedGroupedPasses;
+  // }
+
+  // return Array.from(grouped.values()).map((group) => ({
+  //   expert: group.context.expert,
+  //   symbol: group.context.symbol,
+  //   timeframe: group.context.timeframe,
+  //   capital: group.context.capital,
+  //   startDate: group.context.startDate,
+  //   shortTermCount: group.context.shortTermCount,
+  //   shortTermDuration: group.context.shortTermDuration,
+  //   shortTermUnit: group.context.shortTermUnit,
+  //   longTermDuration: group.context.longTermDuration,
+  //   longTermUnit: group.context.longTermUnit,
+  //   passes: group.groupedPasses,
+  // }));
+
+  return [];
 }
 
-function buildContextKey(report: RebReport): string {
-  return [
-    report.expert,
-    report.symbol,
-    report.timeframe,
-    report.capital,
-    report.startDate,
-    report.shortTermCount,
-    report.shortTermDuration,
-    report.shortTermUnit,
-    report.longTermDuration,
-    report.longTermUnit,
-  ].join('|');
-}
+// function buildContextKey(report: RebReport): string {
+//   return [
+//     report.expert,
+//     report.symbol,
+//     report.timeframe,
+//     report.capital,
+//     report.startDate,
+//     report.shortTermCount,
+//     report.shortTermDuration,
+//     report.shortTermUnit,
+//     report.longTermDuration,
+//     report.longTermUnit,
+//   ].join('|');
+// }

@@ -2,6 +2,16 @@ import { GroupedBacktestPassParameter } from './backtest-pass-parameter';
 import { BacktestPassResult } from './backtest-pass-result';
 import { Parameter } from './parameter';
 
+export interface BacktestWithResults {
+  id: string;
+  strategyContextId: string;
+  parameterSetId: string;
+  reportId: string;
+  passNumber: number;
+  shortTermResults: BacktestPassResult[];
+  longTermResults: BacktestPassResult[];
+}
+
 export interface BaseBacktestPass {
   shortTermResults: BacktestPassResult[];
   longTermResults: BacktestPassResult[];

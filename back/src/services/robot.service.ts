@@ -3,6 +3,8 @@ import { Robot } from '@sec/db/models/robot.ts';
 import { RobotInput } from '@sec/models/robot.input.ts';
 import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
 import crypto from 'node:crypto';
+import { strategyContextService } from './strategy-context.service.ts';
+import { parameterSetService } from './parameter-set.service.ts';
 
 export const robotService = {
   createDrafts(accountId: string, inputs: RobotConfiguration[]): Robot[] {
@@ -18,18 +20,30 @@ export const robotService = {
 
   upsert(input: RobotInput): Robot {
     const robots = collections.Robot();
+    const account = collections.Account().findOne({ id: input.accountId });
+
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    const strategyContext = strategyContextService.findOrCreate(
+      input.expert,
+      input.symbol,
+      input.timeframe,
+      account?.leverage ?? 1,
+      account?.capital ?? 10000,
+    );
+
+    const parameterSet = parameterSetService.findOrCreate(strategyContext.id, input.parameters);
 
     const id = input.id ?? crypto.randomUUID();
 
     const robot: Robot = {
       id,
       accountId: input.accountId,
-      expert: input.expert,
-      timeframe: input.timeframe,
-      symbol: input.symbol,
       status: input.status,
-      parameters: input.parameters,
-      strategySignature: this.createStrategySignature(input),
+      strategyContextId: strategyContext.id,
+      parameterSetId: parameterSet.id,
     };
 
     const existing = robots.findOne({ id });
@@ -57,20 +71,5 @@ export const robotService = {
 
     collections.Robot().remove(robot);
     return true;
-  },
-
-  createStrategySignature(input: RobotInput): string {
-    const normalizedParameters = [...input.parameters]
-      .sort((a, b) => a.name.localeCompare(b.name))
-      .map((p) => ({ name: p.name.trim(), value: Number(p.value) }));
-
-    const normalizedString = JSON.stringify({
-      expert: input.expert,
-      symbol: input.symbol,
-      timeframe: input.timeframe,
-      parameters: normalizedParameters,
-    });
-
-    return crypto.createHash('sha256').update(normalizedString).digest('hex');
   },
 };

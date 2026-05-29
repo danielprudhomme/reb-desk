@@ -1,18 +1,17 @@
 import { OptimizationModel } from '../../../../shared/models/optimization-model.ts';
 import { TimeUnit } from '../../../../shared/models/time-unit.ts';
-import { ExpertAdvisor } from '../../../../shared/models/expert-advisor.ts';
 import { ImportStatus } from '../../../../shared/models/import-status.ts';
+import { createHash } from 'crypto';
+import { ParsedRebReport } from '@sec/models/parsed-reb-report.ts';
+import { Parameter } from '@shared/models/parameter.ts';
+import { ParsedRebPass } from '@sec/models/parsed-reb-pass.ts';
 
 export interface RebReport {
   id: string;
+  strategyContextId: string;
   fingerprint: string;
   importStatus: ImportStatus;
   path: string;
-  expert: ExpertAdvisor;
-  symbol: string;
-  timeframe: string;
-  leverage: number;
-  capital: number;
   model: OptimizationModel;
   startDate: string;
   lastValidatedDate?: string;
@@ -21,4 +20,36 @@ export interface RebReport {
   shortTermUnit: TimeUnit;
   longTermDuration: number;
   longTermUnit: TimeUnit;
+}
+
+function normalizeParameter(p: Parameter): string {
+  return `${p.name}=${p.value}`;
+}
+
+function normalizePass(pass: ParsedRebPass): string {
+  return [pass.passNumber, pass.parameters.map(normalizeParameter).sort().join('|')].join(':');
+}
+
+export function buildRebReportFingerprintHash(parsed: ParsedRebReport): string {
+  const parameters = parsed.parsedPasses.map(normalizePass).sort().join('#');
+
+  const normalized = [
+    parsed.importStatus,
+    parsed.expert,
+    parsed.symbol,
+    parsed.timeframe,
+    parsed.leverage,
+    parsed.capital,
+    parsed.model,
+    parsed.startDate,
+    parsed.lastValidatedDate ?? '',
+    parsed.shortTermCount,
+    parsed.shortTermDuration,
+    parsed.shortTermUnit,
+    parsed.longTermDuration,
+    parsed.longTermUnit,
+    parameters,
+  ].join('||');
+
+  return createHash('sha1').update(normalized).digest('hex');
 }
