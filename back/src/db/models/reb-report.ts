@@ -3,8 +3,8 @@ import { TimeUnit } from '../../../../shared/models/time-unit.ts';
 import { ImportStatus } from '../../../../shared/models/import-status.ts';
 import { createHash } from 'crypto';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
-import { Parameter } from '@shared/models/parameter.ts';
 import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
+import { normalizeParameters } from '@src/services/parameter.helper.ts';
 
 export interface RebReport {
   id: string;
@@ -22,12 +22,8 @@ export interface RebReport {
   longTermUnit: TimeUnit;
 }
 
-function normalizeParameter(p: Parameter): string {
-  return `${p.name}=${p.value}`;
-}
-
 function normalizePass(pass: ParsedRebPass): string {
-  return [pass.passNumber, pass.parameters.map(normalizeParameter).sort().join('|')].join(':');
+  return [pass.passNumber, normalizeParameters(pass.parameters)].join(':');
 }
 
 export function buildRebReportFingerprintHash(parsed: ParsedRebReport): string {
