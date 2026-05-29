@@ -2,20 +2,22 @@ import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { collections } from '../../db/collections.ts';
 import { BacktestPass, BacktestWithResults } from '@shared/models/backtest-pass.ts';
-import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { TimeUnit } from '@shared/models/time-unit.ts';
 import { RebReport } from '@src/db/models/reb-report.ts';
 import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
 import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 import { Capital } from '@shared/models/capital.ts';
 import { parseRebReport } from '../parser/reb-report.parser.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Symbol } from '@shared/models/symbol.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface GroupedReport {
   context: {
     expert: ExpertAdvisor;
-    symbol: string;
-    timeframe: string;
+    symbol: Symbol;
+    timeframe: Timeframe;
     capital: Capital;
     startDate: string;
     shortTermCount: number;

@@ -1,11 +1,13 @@
 import { ExpertAdvisor } from './expert-advisor';
+import { Symbol } from './symbol';
 import { TimeUnit } from './time-unit';
 import { GroupedBacktestPassAnalysis } from './backtest-pass-analysis';
+import { Timeframe } from './timeframe';
 
 export interface GroupedReportAnalysis {
   expert: ExpertAdvisor;
-  symbol: string;
-  timeframe: string;
+  symbol: Symbol;
+  timeframe: Timeframe;
   capital: number;
   startDate: string;
   shortTermCount: number;

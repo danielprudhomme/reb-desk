@@ -1,15 +1,10 @@
 export default /* GraphQL */ `
   type StrategyContext {
     id: ID!
-
     expert: ExpertAdvisor!
-
-    symbol: String!
-
-    timeframe: String!
-
+    timeframe: Timeframe!
+    symbol: Symbol!
     leverage: Int!
-
     capital: Float!
   }
 `;

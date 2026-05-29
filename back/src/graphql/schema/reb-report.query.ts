@@ -25,20 +25,11 @@ export default /* GraphQL */ `
     longTermDuration: Int!
 
     longTermUnit: TimeUnit!
-  }
 
-  input ParameterFilter {
-    name: String!
-    value: Float
-    min: Float
-    max: Float
-  }
-
-  input RebReportFilter {
-    parameters: [ParameterFilter!]
+    backtests: [Backtest!]
   }
 
   extend type Query {
-    rebReports(filter: RebReportFilter): [RebReport!]!
+    rebReports: [RebReport!]!
   }
 `;

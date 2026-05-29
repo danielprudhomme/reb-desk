@@ -17,11 +17,13 @@ import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { TimeUnit } from '@shared/models/time-unit';
 import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
+import { Symbol } from '@shared/models/symbol';
+import { Timeframe } from '@shared/models/timeframe';
 
 interface TableItem extends GroupedBacktestPassAnalysis {
   expert: ExpertAdvisor;
-  symbol: string;
-  timeframe: string;
+  symbol: Symbol;
+  timeframe: Timeframe;
   capital: number;
   startDate: string;
   shortTermCount: number;
