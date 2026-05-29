@@ -2,6 +2,8 @@ export default /* GraphQL */ `
   type RebReport {
     id: ID!
 
+    strategyContextId: ID!
+
     strategyContext: StrategyContext!
 
     fingerprint: String!

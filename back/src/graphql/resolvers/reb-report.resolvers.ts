@@ -4,7 +4,8 @@ import { collections } from '../../db/collections.ts';
 export const rebReportResolvers = {
   RebReport: {
     strategyContext: (report: RebReport) =>
-      collections.StrategyContext().find({ id: report.strategyContextId }),
+      collections.StrategyContext().findOne({ id: report.strategyContextId }),
+    backtests: (report: RebReport) => collections.Backtest().find({ reportId: report.id }),
   },
 
   Query: {

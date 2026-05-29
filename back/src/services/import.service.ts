@@ -69,6 +69,10 @@ async function processRebFiles(
         continue;
       }
 
+      console.log(`parsedReport.symbol: ${parsedReport.symbol}`);
+      console.log(`parsedReport.timeframe: ${parsedReport.timeframe}`);
+      console.log(`parsedReport.expert: ${parsedReport.expert}`);
+
       const strategyContext = strategyContextService.findOrCreate(
         parsedReport.expert,
         parsedReport.symbol,

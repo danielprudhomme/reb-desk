@@ -8,4 +8,8 @@ export const backtestResolvers = {
         ? null
         : collections.ParameterSet().findOne({ id: backtest.parameterSetId }),
   },
+
+  Query: {
+    backtests: () => collections.Backtest().find(),
+  },
 };
