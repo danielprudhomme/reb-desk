@@ -1,20 +1,21 @@
-import { collections } from '@src/db/collections.ts';
-import { Account } from '@src/db/models/account.ts';
-import { AccountInput } from '@src/models/account.input.ts';
+import { deleteById } from '@src/db/crud.ts';
+import { db } from '@src/db/database.ts';
+import { AccountInsert, accounts } from '@src/db/schema/account.ts';
 import { accountService } from '@src/services/account.service.ts';
 
 export const accountResolvers = {
   Mutation: {
-    upsertAccount: (_: unknown, { input }: { input: AccountInput }) => accountService.upsert(input),
-    deleteAccount: async (_: unknown, { id }: { id: string }) => accountService.delete(id),
+    upsertAccount: (_: unknown, { input }: { input: AccountInsert }) =>
+      accountService.upsert(input),
+    deleteAccount: async (_: unknown, { id }: { id: string }) => deleteById(accounts, id),
   },
 
   Query: {
-    accounts: () => accountService.getAll(),
-    account: (_: unknown, { id }: { id: string }) => accountService.getById(id),
-  },
-
-  Account: {
-    robots: (account: Account) => collections.Robot().find({ accountId: account.id }),
+    accounts: () => db.query.accounts.findMany({ with: { robots: true } }),
+    account: (_: unknown, { id }: { id: string }) =>
+      db.query.accounts.findFirst({
+        where: (accounts, { eq }) => eq(accounts.id, id),
+        with: { robots: true },
+      }),
   },
 };

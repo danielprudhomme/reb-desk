@@ -1,32 +1,39 @@
-import { collections } from '@src/db/collections.ts';
-import { StrategyContext } from '@src/db/models/strategy-context.ts';
+import { StrategyContext, strategyContexts } from '@src/db/schema/index.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { Symbol } from '@shared/models/symbol.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
+import { Tx } from '@src/db/database.ts';
 
 export const strategyContextService = {
-  findOrCreate(
+  async findOrCreateTx(
+    tx: Tx,
     expert: ExpertAdvisor,
     symbol: Symbol,
     timeframe: Timeframe,
     leverage: number,
     capital: number,
-  ): StrategyContext {
-    const strategyContext: StrategyContext = {
-      id: buildStrategyContextKey(expert, symbol, timeframe, leverage, capital),
-      expert,
-      symbol,
-      timeframe,
-      leverage,
-      capital,
-    };
+  ): Promise<StrategyContext> {
+    const id = buildStrategyContextKey(expert, symbol, timeframe, leverage, capital);
 
-    const existing = collections.StrategyContext().findOne({ id: strategyContext.id });
+    const existing = await tx.query.strategyContexts.findFirst({
+      where: (t, { eq }) => eq(t.id, id),
+    });
 
     if (existing) return existing;
 
-    collections.StrategyContext().insert(strategyContext);
-    return strategyContext;
+    const [created] = await tx
+      .insert(strategyContexts)
+      .values({
+        id,
+        expert,
+        symbol,
+        timeframe,
+        leverage,
+        capital,
+      })
+      .returning();
+
+    return created;
   },
 };
 

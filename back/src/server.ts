@@ -1,14 +1,13 @@
-import { createYoga } from 'graphql-yoga';
 import express from 'express';
 import cors from 'cors';
-import { reportRouter } from './routes/report.route.ts';
-import { initDB } from './db/init.ts';
-import { schema } from './graphql/schema.ts';
 import { APP_CONFIG } from './config.ts';
+import { createYoga } from 'graphql-yoga';
+import { schema } from './graphql/schema.ts';
+import { reportRouter } from './routes/report.route.ts';
 import { analysisRouter } from './routes/analysis.route.ts';
 
 async function start() {
-  await initDB();
+  // await initDB();
 
   const yoga = createYoga({ schema });
 

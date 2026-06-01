@@ -1,69 +1,79 @@
-import { collections } from '@src/db/collections.ts';
-import { Robot } from '@src/db/models/robot.ts';
-import { RobotInput } from '@src/models/robot.input.ts';
-import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
+import { Robot, robots } from '@src/db/schema/robot.ts';
 import crypto from 'node:crypto';
+import { db, Tx } from '@src/db/database.ts';
+import { and, eq } from 'drizzle-orm';
+import { accounts } from '@src/db/schema/account.ts';
 import { strategyContextService } from './strategy-context.service.ts';
+import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
+import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
 
 export const robotService = {
-  createDrafts(accountId: string, inputs: RobotConfiguration[]): Robot[] {
-    const existingDrafts = collections.Robot().find({ accountId, status: 'draft' });
-    existingDrafts.forEach((draft) => collections.Robot().remove(draft));
+  insertMany(inputs: InsertRobotInput[]): Promise<Robot[]> {
+    const accountId = inputs[0]?.accountId;
 
-    const created = inputs.map((input) => this.upsert({ ...input, accountId, status: 'draft' }));
-    return created;
+    if (!accountId) {
+      throw new Error('Account ID is required');
+    }
+
+    return db.transaction(async (tx) => {
+      await tx
+        .delete(robots)
+        .where(and(eq(robots.accountId, accountId), eq(robots.status, 'draft')));
+
+      const created: Robot[] = [];
+      for (const input of inputs) {
+        const robot = await insertRobotTx(tx, input);
+        created.push(robot);
+      }
+
+      return created;
+    });
   },
 
-  upsert(input: RobotInput): Robot {
-    const robots = collections.Robot();
-    const account = collections.Account().findOne({ id: input.accountId });
-
-    if (!account) {
-      throw new Error('Account not found');
-    }
-
-    const strategyContext = strategyContextService.findOrCreate(
-      input.expert,
-      input.symbol,
-      input.timeframe,
-      account?.leverage ?? 1,
-      account?.capital ?? 10000,
-    );
-
-    const id = input.id ?? crypto.randomUUID();
-
-    const robot: Robot = {
-      id,
-      accountId: input.accountId,
-      status: input.status,
-      strategyContextId: strategyContext.id,
-      parameterSetId: input.parameterSetId,
-    };
-
-    const existing = robots.findOne({ id });
-
-    if (existing) {
-      robots.update({
-        ...existing,
-        ...robot,
-      });
-
-      return robot;
-    }
-
-    robots.insert(robot);
-
-    return robot;
+  insert(input: InsertRobotInput): Promise<Robot> {
+    return db.transaction((tx) => insertRobotTx(tx, input));
   },
 
-  delete(id: string): boolean {
-    const robot = collections.Robot().findOne({ id });
-
-    if (!robot) {
-      throw new Error('Robot not found');
-    }
-
-    collections.Robot().remove(robot);
-    return true;
+  update(input: UpdateRobotInput): Promise<Robot> {
+    return db.transaction(async (tx) => {
+      const [updated] = await tx
+        .update(robots)
+        .set(input)
+        .where(eq(robots.id, input.id))
+        .returning();
+      return updated;
+    });
   },
 };
+
+async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<Robot> {
+  const account = await tx.query.accounts.findFirst({
+    where: eq(accounts.id, input.accountId),
+  });
+
+  if (!account) {
+    throw new Error('Account not found');
+  }
+
+  const strategyContext = await strategyContextService.findOrCreateTx(
+    tx,
+    input.expert,
+    input.symbol,
+    input.timeframe,
+    account.leverage,
+    account.capital,
+  );
+
+  const [created] = await tx
+    .insert(robots)
+    .values({
+      id: crypto.randomUUID(),
+      accountId: input.accountId,
+      status: 'draft',
+      strategyContextId: strategyContext.id,
+      parameterSetId: null,
+    })
+    .returning();
+
+  return created;
+}

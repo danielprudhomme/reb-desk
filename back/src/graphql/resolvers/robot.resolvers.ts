@@ -1,30 +1,24 @@
-import { collections } from '@src/db/collections.ts';
 import { robotService } from '@src/services/robot.service.ts';
-import { RobotInput } from '@src/models/robot.input.ts';
-import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
-import { Robot } from '@src/db/models/robot.ts';
+import { robots } from '@src/db/schema/robot.ts';
+import { db } from '@src/db/database.ts';
+import { deleteById } from '@src/db/crud.ts';
+import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
+import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
 
 export const robotResolvers = {
-  Robot: {
-    strategyContext: (robot: Robot) =>
-      collections.StrategyContext().findOne({ id: robot.strategyContextId }),
-    parameterSet: (robot: Robot) =>
-      !robot.parameterSetId
-        ? null
-        : collections.ParameterSet().findOne({ id: robot.parameterSetId }),
-  },
-
   Mutation: {
-    upsertRobot: (_: unknown, { input }: { input: RobotInput }) => robotService.upsert(input),
-    deleteRobot: async (_: unknown, { id }: { id: string }) => robotService.delete(id),
-    createDraftRobots: async (
-      _: unknown,
-      { accountId, inputs }: { accountId: string; inputs: RobotConfiguration[] },
-    ) => robotService.createDrafts(accountId, inputs),
+    deleteRobot: async (_: unknown, { id }: { id: string }) => deleteById(robots, id),
+    insertRobot: (_: unknown, { input }: { input: InsertRobotInput }) => robotService.insert(input),
+    insertRobots: async (_: unknown, { inputs }: { inputs: InsertRobotInput[] }) =>
+      robotService.insertMany(inputs),
+    updateRobot: (_: unknown, { input }: { input: UpdateRobotInput }) => robotService.update(input),
   },
 
   Query: {
     robotsByAccount: (_: unknown, { accountId }: { accountId: string }) =>
-      collections.Robot().find({ accountId }),
+      db.query.robots.findMany({
+        where: (robots, { eq }) => eq(robots.accountId, accountId),
+        with: { parameterSet: true, strategyContext: true },
+      }),
   },
 };

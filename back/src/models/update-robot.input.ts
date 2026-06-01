@@ -1,9 +1,7 @@
 import { RobotStatus } from '@shared/models/robot-status.ts';
 
-export interface Robot {
+export interface UpdateRobotInput {
   id: string;
-  accountId: string;
   status: RobotStatus;
-  strategyContextId: string;
-  parameterSetId?: string;
+  parameterSetId: string;
 }

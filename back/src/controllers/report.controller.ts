@@ -1,5 +1,5 @@
 import { Request, Response } from 'express';
-import { runRebuild, runImport } from '../services/import.service.ts';
+import { runImport } from '../services/import.service.ts';
 
 export async function importReports(req: Request, res: Response) {
   const { folderPath } = req.body as { folderPath: string };
@@ -17,12 +17,12 @@ export async function importReports(req: Request, res: Response) {
   }
 }
 
-export async function rebuildReports(req: Request, res: Response) {
-  try {
-    const result = await runRebuild();
+// export async function rebuildReports(req: Request, res: Response) {
+//   try {
+//     const result = await runRebuild();
 
-    res.json(result);
-  } catch (err) {
-    res.status(500).json({ error: 'Rebuild failed', detail: String(err) });
-  }
-}
+//     res.json(result);
+//   } catch (err) {
+//     res.status(500).json({ error: 'Rebuild failed', detail: String(err) });
+//   }
+// }

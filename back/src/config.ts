@@ -3,7 +3,7 @@ import path from 'path';
 export const APP_CONFIG = {
   frontUrl: 'http://localhost:4200',
   dataDir: 'C:\\Dev\\RebDeskData',
-  dbFile: 'reb-desk.db',
+  dbFile: 'rebdesk.db',
   importDir: 'Imports',
 };
 
