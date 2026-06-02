@@ -4,14 +4,13 @@ export const GET_REB_REPORTS = gql`
   query GetRebReports {
     rebReports {
       id
-      path
-      importStatus
-      expert
-      symbol
-      timeframe
-      leverage
-      capital
-      model
+      strategyContext {
+        expert
+        symbol
+        timeframe
+        leverage
+        capital
+      }
       startDate
       shortTermCount
       shortTermDuration
@@ -19,9 +18,8 @@ export const GET_REB_REPORTS = gql`
       longTermDuration
       longTermUnit
 
-      parameters {
-        name
-        values
+      backtests {
+        id
       }
     }
   }

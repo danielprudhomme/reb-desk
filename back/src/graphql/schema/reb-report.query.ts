@@ -6,14 +6,6 @@ export default /* GraphQL */ `
 
     strategyContext: StrategyContext!
 
-    fingerprint: String!
-
-    path: String!
-
-    importStatus: ImportStatus!
-
-    model: OptimizationModel!
-
     startDate: String!
 
     lastValidatedDate: String

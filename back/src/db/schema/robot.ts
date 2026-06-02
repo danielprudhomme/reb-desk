@@ -2,7 +2,7 @@ import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { strategyContexts } from './strategy-context.ts';
 import { parameterSets } from './parameter-set.ts';
 import { accounts } from './account.ts';
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
+import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 
 export const robots = sqliteTable(
   'robot',
@@ -38,6 +38,23 @@ export const robots = sqliteTable(
     parameterSetIdx: index('idx_robot_parameter_set').on(table.parameterSetId),
   }),
 );
+
+export const robotsRelations = relations(robots, ({ one }) => ({
+  account: one(accounts, {
+    fields: [robots.accountId],
+    references: [accounts.id],
+  }),
+
+  strategyContext: one(strategyContexts, {
+    fields: [robots.strategyContextId],
+    references: [strategyContexts.id],
+  }),
+
+  parameterSet: one(parameterSets, {
+    fields: [robots.parameterSetId],
+    references: [parameterSets.id],
+  }),
+}));
 
 export type Robot = InferSelectModel<typeof robots>;
 export type RobotInsert = InferInsertModel<typeof robots>;

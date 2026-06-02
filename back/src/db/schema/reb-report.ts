@@ -1,7 +1,7 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { strategyContexts } from './strategy-context.ts';
-import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
-import { Backtest } from './backtest.ts';
+import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
+import { Backtest, backtests } from './backtest.ts';
 
 export const rebReports = sqliteTable(
   'reb_report',
@@ -37,12 +37,21 @@ export const rebReports = sqliteTable(
 
     longTermUnit: text('long_term_unit').notNull(),
   },
-  (table) => ({
-    fingerprintIdx: uniqueIndex('idx_reb_report_fingerprint').on(table.fingerprint),
+  (table) => [
+    uniqueIndex('idx_reb_report_fingerprint').on(table.fingerprint),
 
-    strategyContextIdx: index('idx_reb_report_strategy_context').on(table.strategyContextId),
-  }),
+    index('idx_reb_report_strategy_context').on(table.strategyContextId),
+  ],
 );
+
+export const rebReportsRelations = relations(rebReports, ({ one, many }) => ({
+  strategyContext: one(strategyContexts, {
+    fields: [rebReports.strategyContextId],
+    references: [strategyContexts.id],
+  }),
+
+  backtests: many(backtests),
+}));
 
 export type RebReport = InferSelectModel<typeof rebReports>;
 export type RebReportInsert = InferInsertModel<typeof rebReports>;
