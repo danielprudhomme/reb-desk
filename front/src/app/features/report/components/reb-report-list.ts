@@ -29,23 +29,23 @@ import { ExpertBadge } from '@app/shared/components/expert-badge';
         <ng-container matColumnDef="expert">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Expert</th>
           <td mat-cell *matCellDef="let report">
-            <app-expert-badge [expert]="report.expert" />
+            <app-expert-badge [expert]="report.strategyContext.expert" />
           </td>
         </ng-container>
 
         <ng-container matColumnDef="symbol">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Symbol</th>
-          <td mat-cell *matCellDef="let report">{{ report.symbol }}</td>
+          <td mat-cell *matCellDef="let report">{{ report.strategyContext.symbol }}</td>
         </ng-container>
 
         <ng-container matColumnDef="timeframe">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Timeframe</th>
-          <td mat-cell *matCellDef="let report">{{ report.timeframe }}</td>
+          <td mat-cell *matCellDef="let report">{{ report.strategyContext.timeframe }}</td>
         </ng-container>
 
         <ng-container matColumnDef="capital">
           <th mat-header-cell *matHeaderCellDef mat-sort-header>Capital</th>
-          <td mat-cell *matCellDef="let report">{{ report.capital }}</td>
+          <td mat-cell *matCellDef="let report">{{ report.strategyContext.capital }}</td>
         </ng-container>
 
         <ng-container matColumnDef="startDate">
