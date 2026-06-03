@@ -7,8 +7,6 @@ export const parameterSets = sqliteTable('parameter_set', {
   id: text('id').primaryKey(),
 
   strategyContextId: text('strategy_context_id').notNull(),
-
-  fingerprint: text('fingerprint').notNull(),
 });
 
 export const parameterSetsRelations = relations(parameterSets, ({ one, many }) => ({

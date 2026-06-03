@@ -57,8 +57,8 @@ export async function runImport(folderPath: string): Promise<void> {
 
       const { newPath } = await moveFileToImportedFolder(filePath, parsedReport);
 
-      await db.transaction((tx) => {
-        return rebReportService.insertTx(tx, parsedReport, newPath);
+      await db.transaction(async (tx) => {
+        await rebReportService.insertTx(tx, parsedReport, newPath);
       });
     } catch (err) {
       results.errors.push(`${filePath}: ${String(err)}`);

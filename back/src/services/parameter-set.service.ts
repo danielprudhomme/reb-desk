@@ -1,30 +1,38 @@
-import { ParameterSet } from '@src/db/schema/parameter-set.ts';
+import { ParameterSet, parameterSets } from '@src/db/schema/parameter-set.ts';
+import { parameters } from '@src/db/schema/parameter.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { createHash } from 'crypto';
 import { normalizeParameters } from './parameter.helper.ts';
+import { Tx } from '@src/db/database.ts';
 
-// export const parameterSetService = {
-//   findOrCreate(strategyContextId: string, parameters: Parameter[]): ParameterSet {
-//     const fingerprint = buildParameterFingerprint(strategyContextId, parameters);
+export const parameterSetService = {
+  async findOrCreateTx(
+    tx: Tx,
+    strategyContextId: string,
+    params: Parameter[],
+  ): Promise<ParameterSet> {
+    const id = buildParameterSetKey(strategyContextId, params);
 
-//     const existing = collections.ParameterSet().findOne({ fingerprint });
+    const [created] = await tx
+      .insert(parameterSets)
+      .values({
+        id,
+        strategyContextId,
+      })
+      .returning();
 
-//     if (existing) return existing;
+    await tx.insert(parameters).values(
+      params.map((param) => ({
+        ...param,
+        parameterSetId: created.id,
+      })),
+    );
 
-//     const newSet = {
-//       id: crypto.randomUUID(),
-//       strategyContextId,
-//       fingerprint,
-//       parameters,
-//     };
+    return created;
+  },
+};
 
-//     collections.ParameterSet().insert(newSet);
-
-//     return newSet;
-//   },
-// };
-
-// function buildParameterFingerprint(strategyContextId: string, parameters: Parameter[]): string {
-//   const normalized = [strategyContextId.trim(), normalizeParameters(parameters)].join('||');
-//   return createHash('sha1').update(normalized).digest('hex');
-// }
+function buildParameterSetKey(strategyContextId: string, parameters: Parameter[]): string {
+  const normalized = [strategyContextId.trim(), normalizeParameters(parameters)].join('||');
+  return createHash('sha1').update(normalized).digest('hex');
+}

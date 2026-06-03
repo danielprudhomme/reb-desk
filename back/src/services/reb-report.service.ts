@@ -1,10 +1,11 @@
 import { Tx } from '@src/db/database.ts';
-import { RebReport, rebReports } from '@src/db/schema/index.ts';
+import { backtests, RebReport, rebReports } from '@src/db/schema/index.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { normalizeParameters } from './parameter.helper.ts';
 import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
 import { createHash } from 'crypto';
 import { strategyContextService } from './strategy-context.service.ts';
+import { parameterSetService } from './parameter-set.service.ts';
 
 export const rebReportService = {
   async insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): Promise<RebReport> {
@@ -45,6 +46,22 @@ export const rebReportService = {
         longTermUnit: parsedReport.longTermUnit,
       })
       .returning();
+
+    for (const pass of parsedReport.parsedPasses) {
+      const parameterSet = await parameterSetService.findOrCreateTx(
+        tx,
+        strategyContext.id,
+        pass.parameters,
+      );
+
+      await tx.insert(backtests).values({
+        id: crypto.randomUUID(),
+        strategyContextId: strategyContext.id,
+        parameterSetId: parameterSet.id,
+        reportId: created.id,
+        passNumber: pass.passNumber,
+      });
+    }
 
     return created;
   },
