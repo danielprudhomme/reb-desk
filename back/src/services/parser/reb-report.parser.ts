@@ -1,6 +1,5 @@
 import { readFile } from 'node:fs/promises';
 import type { OptimizationModel } from '@shared/models/optimization-model.ts';
-import rebParamsDefinitions from '@shared/constants/reb-parameters-definitions.ts';
 import type { TimeUnit } from '@shared/models/time-unit.ts';
 import { ImportStatus } from '@shared/models/import-status.ts';
 import { Symbol } from '@shared/models/symbol.ts';
@@ -15,13 +14,14 @@ import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
+import { getAllParameters } from '@src/constants/reb-parameters-definitions.ts';
 
 export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
   const expert = extractExpert(lines);
 
-  const allowedParameters = rebParamsDefinitions.getParameters(expert);
+  const allowedParameters = getAllParameters(expert);
   const passNumbers = getLinesSection(content, 'SENS DES PASSAGES').map((n) => +n);
   const fixedParameters = parseFixedParameters(content, allowedParameters);
   const passParameters = parsePassParameters(content);

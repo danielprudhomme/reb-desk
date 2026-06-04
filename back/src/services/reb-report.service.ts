@@ -51,7 +51,7 @@ export const rebReportService = {
     for (const pass of parsedReport.parsedPasses) {
       const parameterSet = await parameterSetService.findOrCreateTx(
         tx,
-        strategyContext.id,
+        parsedReport.expert,
         pass.parameters,
       );
 

@@ -1,20 +1,25 @@
-import { sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { sqliteTable, text, real, integer, index } from 'drizzle-orm/sqlite-core';
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm/table';
-import { backtests, strategyContexts } from './index.ts';
+import { backtests } from './index.ts';
 import { relations } from 'drizzle-orm/relations';
 
-export const parameterSets = sqliteTable('parameter_set', {
-  id: text('id').primaryKey(),
+export const parameterSets = sqliteTable(
+  'parameter_set',
+  {
+    id: text('id').primaryKey(),
 
-  strategyContextId: text('strategy_context_id').notNull(),
-});
+    parameters: text('parameters').notNull(),
 
-export const parameterSetsRelations = relations(parameterSets, ({ one, many }) => ({
-  strategyContext: one(strategyContexts, {
-    fields: [parameterSets.strategyContextId],
-    references: [strategyContexts.id],
-  }),
+    parametersHash: text('parameters_hash').notNull(),
 
+    initLotSize: real('init_lot_size').notNull(),
+
+    fixedLotSize: integer('fixed_lot_size', { mode: 'boolean' }).notNull(),
+  },
+  (table) => [index('idx_parameter_set_hash').on(table.parametersHash)],
+);
+
+export const parameterSetsRelations = relations(parameterSets, ({ many }) => ({
   backtests: many(backtests),
 }));
 

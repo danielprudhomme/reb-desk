@@ -1,38 +1,60 @@
 import { ParameterSet, parameterSets } from '@src/db/schema/parameter-set.ts';
-import { parameters } from '@src/db/schema/parameter.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { createHash } from 'crypto';
-import { normalizeParameters } from './parameter.helper.ts';
 import { Tx } from '@src/db/database.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import {
+  getLotSizeParameters,
+  getStrategyParameters,
+} from '@src/constants/reb-parameters-definitions.ts';
 
 export const parameterSetService = {
   async findOrCreateTx(
     tx: Tx,
-    strategyContextId: string,
-    params: Parameter[],
+    expert: ExpertAdvisor,
+    parameters: Parameter[],
   ): Promise<ParameterSet> {
-    const id = buildParameterSetKey(strategyContextId, params);
+    const parametersString = buildParametersString(
+      expert,
+      Object.fromEntries(parameters.map((p) => [p.name, p.value])),
+    );
+
+    const lotSizeParams = getLotSizeParameters(expert);
+
+    const getParam = (name: string) => parameters.find((p) => p.name === name)?.value;
+
+    const fixedLotSize: boolean = Boolean(
+      (lotSizeParams.fixedLotSize && Number(getParam(lotSizeParams.fixedLotSize)) === 1) ||
+      (lotSizeParams.adaptLotSize && Number(getParam(lotSizeParams.adaptLotSize)) === 0),
+    );
 
     const [created] = await tx
       .insert(parameterSets)
       .values({
-        id,
-        strategyContextId,
+        id: crypto.randomUUID(),
+        parameters: parametersString,
+        parametersHash: buildParametersHash(parametersString),
+        initLotSize: Number(getParam(lotSizeParams.initLotSize)),
+        fixedLotSize,
       })
       .returning();
-
-    await tx.insert(parameters).values(
-      params.map((param) => ({
-        ...param,
-        parameterSetId: created.id,
-      })),
-    );
 
     return created;
   },
 };
 
-function buildParameterSetKey(strategyContextId: string, parameters: Parameter[]): string {
-  const normalized = [strategyContextId.trim(), normalizeParameters(parameters)].join('||');
-  return createHash('sha1').update(normalized).digest('hex');
+function buildParametersString(expert: ExpertAdvisor, params: Record<string, unknown>): string {
+  const keys = getStrategyParameters(expert);
+  return keys.map((key) => `${key}=${normalizeValue(params[key])}`).join('|');
+}
+
+function buildParametersHash(parametersString: string): string {
+  return createHash('sha256').update(parametersString).digest('hex');
+}
+
+function normalizeValue(value: unknown): string {
+  if (typeof value === 'boolean') return value ? '1' : '0';
+  if (typeof value === 'number') return value.toFixed(10).replace(/\.?0+$/, '');
+  if (value === null || value === undefined) return '';
+  return String(value).trim();
 }
