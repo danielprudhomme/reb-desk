@@ -1,20 +1,13 @@
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { strategyContexts } from './strategy-context.ts';
 import { parameterSets } from './parameter-set.ts';
 import { rebReports } from './reb-report.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
+import { backtestResults } from './backtest-result.ts';
 
 export const backtests = sqliteTable(
   'backtest',
   {
     id: text('id').primaryKey(),
-
-    strategyContextId: text('strategy_context_id')
-      .notNull()
-      .references(() => strategyContexts.id, {
-        onDelete: 'cascade',
-        onUpdate: 'cascade',
-      }),
 
     parameterSetId: text('parameter_set_id')
       .notNull()
@@ -33,15 +26,13 @@ export const backtests = sqliteTable(
     passNumber: integer('pass_number').notNull(),
   },
   (table) => [
-    index('idx_backtest_strategy_context').on(table.strategyContextId),
-
     index('idx_backtest_parameter_set').on(table.parameterSetId),
 
     index('idx_backtest_report').on(table.reportId),
   ],
 );
 
-export const backtestsRelations = relations(backtests, ({ one }) => ({
+export const backtestsRelations = relations(backtests, ({ one, many }) => ({
   report: one(rebReports, {
     fields: [backtests.reportId],
     references: [rebReports.id],
@@ -52,10 +43,7 @@ export const backtestsRelations = relations(backtests, ({ one }) => ({
     references: [parameterSets.id],
   }),
 
-  strategyContext: one(strategyContexts, {
-    fields: [backtests.strategyContextId],
-    references: [strategyContexts.id],
-  }),
+  results: many(backtestResults),
 }));
 
 export type Backtest = InferSelectModel<typeof backtests>;

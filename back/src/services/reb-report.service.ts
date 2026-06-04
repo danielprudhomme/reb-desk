@@ -6,6 +6,7 @@ import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
 import { createHash } from 'crypto';
 import { strategyContextService } from './strategy-context.service.ts';
 import { parameterSetService } from './parameter-set.service.ts';
+import { backtestResults } from '@src/db/schema/backtest-result.ts';
 
 export const rebReportService = {
   async insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): Promise<RebReport> {
@@ -54,13 +55,30 @@ export const rebReportService = {
         pass.parameters,
       );
 
+      const backtestId = crypto.randomUUID();
+
       await tx.insert(backtests).values({
-        id: crypto.randomUUID(),
-        strategyContextId: strategyContext.id,
+        id: backtestId,
         parameterSetId: parameterSet.id,
         reportId: created.id,
         passNumber: pass.passNumber,
       });
+
+      await tx.insert(backtestResults).values([
+        ...pass.shortTermResults.map((result, position) => ({
+          backtestId,
+          type: 'short_term' as const,
+          position,
+          ...result,
+        })),
+
+        ...pass.longTermResults.map((result, position) => ({
+          backtestId,
+          type: 'long_term' as const,
+          position,
+          ...result,
+        })),
+      ]);
     }
 
     return created;
