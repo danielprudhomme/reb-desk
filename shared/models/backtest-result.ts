@@ -1,4 +1,5 @@
-export interface BacktestPassResult {
+export interface BacktestResult {
+  position: number;
   result: number;
   trades: number;
   profitFactor: number;

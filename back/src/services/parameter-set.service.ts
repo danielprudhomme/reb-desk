@@ -7,6 +7,7 @@ import {
   getStrategyParameters,
 } from '@src/constants/reb-parameters-definitions.ts';
 import { ParameterSetDb, parameterSetsTable } from '@src/db/schema/parameter-set.ts';
+import { ParameterSet } from '@shared/models/parameter-set.ts';
 
 export const parameterSetService = {
   async findOrCreateTx(
@@ -40,6 +41,15 @@ export const parameterSetService = {
       .returning();
 
     return created;
+  },
+
+  mapDbToModel(db: ParameterSetDb): ParameterSet {
+    const parameters = db.parameters.split('|').map((param) => {
+      const [name, value] = param.split('=');
+      return { name, value: Number(value) } as Parameter;
+    });
+
+    return { id: db.id, parameters };
   },
 };
 

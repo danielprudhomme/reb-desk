@@ -1,12 +1,12 @@
-import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import valueTypeConst from '@shared/constants/backtest-threshold-value-type.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
+import { AnalyzedGroupedBacktest } from '@shared/models/backtest.ts';
 
 export function computeScore(
-  groupedPasses: GroupedBacktestPassAnalysis[],
+  groupedBacktests: AnalyzedGroupedBacktest[],
   thresholds: BacktestThreshold[],
   valuesByType: ValuesByThresholdType,
 ) {
@@ -14,8 +14,8 @@ export function computeScore(
     thresholds.map((t) => [t.type, t]),
   ) as Record<BacktestThresholdType, BacktestThreshold>;
 
-  groupedPasses.forEach((pass) => {
-    pass.checks.forEach((check) => {
+  groupedBacktests.forEach((backtest) => {
+    backtest.checks.forEach((check) => {
       const { min, max } = valuesByType[check.type];
 
       if (!min || min === max) {
@@ -39,23 +39,23 @@ export function computeScore(
       }
     });
 
-    const ok = pass.checks.every((c) => c.score > 0);
+    const ok = backtest.checks.every((c) => c.score > 0);
 
-    const totalWeight = pass.checks.reduce(
+    const totalWeight = backtest.checks.reduce(
       (acc, c) => acc + (thresholdsMap[c.type].weight ?? 1),
       0,
     );
     const score =
-      pass.checks.reduce((acc, c) => acc + c.score * (thresholdsMap[c.type].weight ?? 1), 0) /
+      backtest.checks.reduce((acc, c) => acc + c.score * (thresholdsMap[c.type].weight ?? 1), 0) /
       totalWeight;
 
-    const hasCriticalFail = pass.checks.some(
+    const hasCriticalFail = backtest.checks.some(
       (c) => !c.ok && (thresholds.find((t) => t.type === c.type)?.weight ?? 1) >= 3,
     );
     const finalScore = !ok ? (hasCriticalFail ? score * 0.5 : score * 0.75) : score;
 
-    pass.ok = ok;
-    pass.score = finalScore;
+    backtest.ok = ok;
+    backtest.score = finalScore;
   });
 }
 

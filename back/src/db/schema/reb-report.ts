@@ -1,5 +1,5 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { strategyContexts } from './strategy-context.ts';
+import { strategyContextsTable } from './strategy-context.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 import { backtestsTable } from './index.ts';
 
@@ -10,7 +10,7 @@ export const rebReportsTable = sqliteTable(
 
     strategyContextId: text('strategy_context_id')
       .notNull()
-      .references(() => strategyContexts.id, {
+      .references(() => strategyContextsTable.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade',
       }),
@@ -45,9 +45,9 @@ export const rebReportsTable = sqliteTable(
 );
 
 export const rebReportsRelations = relations(rebReportsTable, ({ one, many }) => ({
-  strategyContext: one(strategyContexts, {
+  strategyContext: one(strategyContextsTable, {
     fields: [rebReportsTable.strategyContextId],
-    references: [strategyContexts.id],
+    references: [strategyContextsTable.id],
   }),
 
   backtests: many(backtestsTable),

@@ -10,11 +10,11 @@ import {
   parseParameterValue,
   requiredValue,
 } from './parser-helper.ts';
-import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { getAllParameters } from '@src/constants/reb-parameters-definitions.ts';
+import { ParsedRebPassResult } from '@src/models/parsed-reb-pass.ts';
 
 export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
@@ -183,7 +183,7 @@ function parsePassParameters(content: string): Parameter[][] {
   });
 }
 
-function parseResults(content: string, section: string): BacktestPassResult[][] {
+function parseResults(content: string, section: string): ParsedRebPassResult[][] {
   const lines = getLinesSection(content, section);
 
   return lines.map((line) => {
@@ -197,9 +197,9 @@ function parseResults(content: string, section: string): BacktestPassResult[][] 
   });
 }
 
-function mapToPassResults(values: number[]): BacktestPassResult[] {
+function mapToPassResults(values: number[]): ParsedRebPassResult[] {
   const metricsPerPass = 6;
-  const results: BacktestPassResult[] = [];
+  const results: ParsedRebPassResult[] = [];
 
   for (let i = 0; i < values.length; i += metricsPerPass) {
     const slice = values.slice(i, i + metricsPerPass);

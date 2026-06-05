@@ -6,7 +6,7 @@ import { MatTabsModule } from '@angular/material/tabs';
 import { Robot } from '@app/core/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
-import { PassAnalysisTable } from '@app/features/report/components/pass-analysis-table';
+// import { PassAnalysisTable } from '@app/features/report/components/pass-analysis-table';
 import { AnalysisRequest } from '@shared/models/analysis-request';
 
 @Component({
@@ -18,7 +18,7 @@ import { AnalysisRequest } from '@shared/models/analysis-request';
     MatTabsModule,
     ExpertBadge,
     RobotStatusBadge,
-    PassAnalysisTable,
+    // PassAnalysisTable,
   ],
   template: `
     <div class="h-full flex flex-col p-4">
@@ -48,10 +48,10 @@ import { AnalysisRequest } from '@shared/models/analysis-request';
         <mat-tab-group class="h-full">
           <mat-tab label="Choose pass">
             <div class="h-full overflow-auto">
-              <app-pass-analysis-table
+              <!-- <app-pass-analysis-table
                 [config]="{ showRobotConfiguration: false }"
                 [request]="analysisRequest()"
-              />
+              /> -->
             </div>
           </mat-tab>
 

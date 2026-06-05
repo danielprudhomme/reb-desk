@@ -1,19 +1,18 @@
 import { BACKTEST_THRESHOLD_COMPUTE } from '@src/constants/backtest-threshold.constants.ts';
-import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
-import { GroupedBacktestPass } from '@shared/models/backtest-pass.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
 import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
+import { AnalyzedGroupedBacktest, GroupedBacktest } from '@shared/models/backtest.ts';
 
 export function runChecks(
-  passes: GroupedBacktestPass[],
+  groupedBacktests: GroupedBacktest[],
   capital: number,
   thresholds: BacktestThreshold[],
   valuesByType: ValuesByThresholdType,
-): GroupedBacktestPassAnalysis[] {
-  return passes.map((pass) => {
+): AnalyzedGroupedBacktest[] {
+  return groupedBacktests.map((backtest) => {
     const checks: BacktestThresholdCheck[] = thresholds.map((threshold) => {
-      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type](pass, capital);
+      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type]({ ...backtest, capital });
 
       const validCount = passValues.filter((value) =>
         threshold.operator === '>' ? value > threshold.value : value < threshold.value,
@@ -52,7 +51,7 @@ export function runChecks(
       };
     });
 
-    return { ...pass, ok: false, checks, score: 0 };
+    return { ...backtest, ok: false, checks, score: 0 };
   });
 }
 

@@ -1,84 +1,84 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
+import { BacktestResult } from '@shared/models/backtest-result.ts';
 import { BacktestThresholdType } from '@shared/models/backtest-threshold-type.ts';
-import { BaseBacktestPass } from '@shared/models/backtest-pass.ts';
 
-type ThresholdComputation = (pass: BaseBacktestPass, capital: number) => number[];
+type ThresholdComputation = ({
+  shortTermResults,
+  longTermResults,
+  capital,
+}: {
+  shortTermResults: BacktestResult[];
+  longTermResults: BacktestResult[];
+  capital: number;
+}) => number[];
 
 export const BACKTEST_THRESHOLD_COMPUTE: Record<BacktestThresholdType, ThresholdComputation> = {
   // ===== RESULT =====
-  shortTermResultPercent: (p, capital) => p.shortTermResults.map((r) => (r.result / capital) * 100),
+  shortTermResultPercent: (p) => p.shortTermResults.map((r) => (r.result / p.capital) * 100),
 
-  shortTermResultAmount: (p, capital) => p.shortTermResults.map((r) => r.result),
+  shortTermResultAmount: (p) => p.shortTermResults.map((r) => r.result),
 
-  shortTermResultPercentAvg: (p, capital) => [
-    avg(p.shortTermResults.map((r) => (r.result / capital) * 100)),
+  shortTermResultPercentAvg: (p) => [
+    avg(p.shortTermResults.map((r) => (r.result / p.capital) * 100)),
   ],
 
-  shortTermResultAmountAvg: (p, capital) => [avg(p.shortTermResults.map((r) => r.result))],
+  shortTermResultAmountAvg: (p) => [avg(p.shortTermResults.map((r) => r.result))],
 
-  shortTermResultPercentSum: (p, capital) => [
-    sum(p.shortTermResults.map((r) => (r.result / capital) * 100)),
+  shortTermResultPercentSum: (p) => [
+    sum(p.shortTermResults.map((r) => (r.result / p.capital) * 100)),
   ],
 
-  shortTermResultAmountSum: (p, capital) => [sum(p.shortTermResults.map((r) => r.result))],
+  shortTermResultAmountSum: (p) => [sum(p.shortTermResults.map((r) => r.result))],
 
-  longTermResultPercent: (p, capital) => p.longTermResults.map((r) => (r.result / capital) * 100),
+  longTermResultPercent: (p) => p.longTermResults.map((r) => (r.result / p.capital) * 100),
 
-  longTermResultAmount: (p, capital) => p.longTermResults.map((r) => r.result),
+  longTermResultAmount: (p) => p.longTermResults.map((r) => r.result),
 
-  longTermResultPercentLast: (p, capital) => [
-    last(p.longTermResults.map((r) => (r.result / capital) * 100)),
+  longTermResultPercentLast: (p) => [
+    last(p.longTermResults.map((r) => (r.result / p.capital) * 100)),
   ],
 
-  longTermResultAmountLast: (p, capital) => [last(p.longTermResults.map((r) => r.result))],
+  longTermResultAmountLast: (p) => [last(p.longTermResults.map((r) => r.result))],
 
   // ===== DRAWDOWN =====
-  shortTermDrawdownPercent: (p, capital) => p.shortTermResults.map((r) => r.drawdownPercent),
+  shortTermDrawdownPercent: (p) => p.shortTermResults.map((r) => r.drawdownPercent),
 
-  shortTermDrawdownAmount: (p, capital) => p.shortTermResults.map((r) => r.drawdownAmount),
+  shortTermDrawdownAmount: (p) => p.shortTermResults.map((r) => r.drawdownAmount),
 
-  longTermDrawdownPercent: (p, capital) => p.longTermResults.map((r) => r.drawdownPercent),
+  longTermDrawdownPercent: (p) => p.longTermResults.map((r) => r.drawdownPercent),
 
-  longTermDrawdownAmount: (p, capital) => p.longTermResults.map((r) => r.drawdownAmount),
+  longTermDrawdownAmount: (p) => p.longTermResults.map((r) => r.drawdownAmount),
 
-  longTermDrawdownPercentLast: (p, capital) => [
-    last(p.longTermResults.map((r) => r.drawdownPercent)),
-  ],
+  longTermDrawdownPercentLast: (p) => [last(p.longTermResults.map((r) => r.drawdownPercent))],
 
-  longTermDrawdownAmountLast: (p, capital) => [
-    last(p.longTermResults.map((r) => r.drawdownAmount)),
-  ],
+  longTermDrawdownAmountLast: (p) => [last(p.longTermResults.map((r) => r.drawdownAmount))],
 
   // ===== TRADES =====
-  shortTermTrades: (p, capital) => p.shortTermResults.map((r) => r.trades),
+  shortTermTrades: (p) => p.shortTermResults.map((r) => r.trades),
 
-  longTermTrades: (p, capital) => p.longTermResults.map((r) => r.trades),
+  longTermTrades: (p) => p.longTermResults.map((r) => r.trades),
 
   // ===== RATIOS =====
-  shortTermGainLossRatio: (p, capital) =>
-    p.shortTermResults.map((r) => r.result / r.drawdownAmount),
+  shortTermGainLossRatio: (p) => p.shortTermResults.map((r) => r.result / r.drawdownAmount),
 
-  shortTermGainLossRatioGlobal: (p, capital) => [
+  shortTermGainLossRatioGlobal: (p) => [
     sum(p.shortTermResults.map((r) => r.result)) /
       sum(p.shortTermResults.map((r) => r.drawdownAmount)),
   ],
 
-  longTermGainLossRatio: (p, capital) => p.longTermResults.map((r) => r.result / r.drawdownAmount),
+  longTermGainLossRatio: (p) => p.longTermResults.map((r) => r.result / r.drawdownAmount),
 
-  longTermGainLossRatioLast: (p, capital) => [
+  longTermGainLossRatioLast: (p) => [
     last(p.longTermResults.map((r) => r.result / r.drawdownAmount)),
   ],
 
-  shortTermEuroPerTrade: (p, capital) => p.shortTermResults.map((r) => r.result / r.trades),
+  shortTermEuroPerTrade: (p) => p.shortTermResults.map((r) => r.result / r.trades),
 
-  longTermEuroPerTrade: (p, capital) => p.longTermResults.map((r) => r.result / r.trades),
+  longTermEuroPerTrade: (p) => p.longTermResults.map((r) => r.result / r.trades),
 
-  longTermEuroPerTradeLast: (p, capital) => [
-    last(p.longTermResults.map((r) => r.result / r.trades)),
-  ],
+  longTermEuroPerTradeLast: (p) => [last(p.longTermResults.map((r) => r.result / r.trades))],
 
   // ===== META =====
-  passCount: (p, capital) => [p.shortTermResults.length],
+  passCount: (p) => [p.shortTermResults.length],
 
   passIndex: () => {
     throw new Error('not implemented');

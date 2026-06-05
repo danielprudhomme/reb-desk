@@ -1,7 +1,7 @@
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm';
 import { integer, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 
-export const strategyContexts = sqliteTable('strategy_context', {
+export const strategyContextsTable = sqliteTable('strategy_context', {
   id: text('id').primaryKey(),
 
   expert: text('expert').notNull(),
@@ -12,5 +12,5 @@ export const strategyContexts = sqliteTable('strategy_context', {
   capital: real('capital').notNull(),
 });
 
-export type StrategyContext = InferSelectModel<typeof strategyContexts>;
-export type StrategyContextInsert = InferInsertModel<typeof strategyContexts>;
+export type StrategyContextDb = InferSelectModel<typeof strategyContextsTable>;
+export type StrategyContextInsertDb = InferInsertModel<typeof strategyContextsTable>;

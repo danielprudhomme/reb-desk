@@ -1,4 +1,4 @@
-import { BacktestPassResult } from '@shared/models/backtest-pass-result';
+import { BacktestResult } from '@shared/models/backtest-result';
 import { TimeUnit } from '@shared/models/time-unit';
 
 export class BacktestLongTermSummary {
@@ -9,7 +9,7 @@ export class BacktestLongTermSummary {
   averageRewardRatio: number;
 
   constructor(
-    longTermResults: BacktestPassResult[],
+    longTermResults: BacktestResult[],
     capital: number,
     longTermUnit: TimeUnit,
     longTermDuration: number,

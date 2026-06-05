@@ -1,14 +1,13 @@
 import { Component, inject } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { PassAnalysisTable } from './pass-analysis-table';
 import { AnalysisRequest } from '@shared/models/analysis-request';
 
 @Component({
   selector: 'app-report-analysis',
-  imports: [PassAnalysisTable],
+  // imports: [PassAnalysisTable],
   template: `
     <div class="h-full overflow-auto">
-      <app-pass-analysis-table [request]="this.request" />
+      <!-- <app-pass-analysis-table [request]="this.request" /> -->
     </div>
   `,
 })
