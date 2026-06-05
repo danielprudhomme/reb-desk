@@ -11,11 +11,8 @@ export const accountResolvers = {
   },
 
   Query: {
-    accounts: () => db.query.accountsTable.findMany({ with: { robots: true } }),
+    accounts: () => db.query.accountsTable.findMany(),
     account: (_: unknown, { id }: { id: string }) =>
-      db.query.accountsTable.findFirst({
-        where: (accounts, { eq }) => eq(accounts.id, id),
-        with: { robots: true },
-      }),
+      db.query.accountsTable.findFirst({ where: (accounts, { eq }) => eq(accounts.id, id) }),
   },
 };

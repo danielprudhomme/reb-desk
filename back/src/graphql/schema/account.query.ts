@@ -4,7 +4,6 @@ export default /* GraphQL */ `
     name: String!
     capital: Float!
     leverage: Float!
-    robots: [Robot!]!
   }
 
   extend type Query {
