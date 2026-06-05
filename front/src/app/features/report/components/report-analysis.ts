@@ -16,10 +16,6 @@ export class ReportAnalysis {
   reportId = inject(ActivatedRoute).snapshot.paramMap.get('reportId')!;
   request: AnalysisRequest = {
     reportId: this.reportId,
-    symbols: [],
-    timeframes: [],
-    experts: [],
-    capital: 0,
     thresholds: [
       {
         type: 'longTermResultPercent',

@@ -16,13 +16,3 @@ export async function importReports(req: Request, res: Response) {
     res.status(500).json({ error: 'Import failed', detail: String(err) });
   }
 }
-
-// export async function rebuildReports(req: Request, res: Response) {
-//   try {
-//     const result = await runRebuild();
-
-//     res.json(result);
-//   } catch (err) {
-//     res.status(500).json({ error: 'Rebuild failed', detail: String(err) });
-//   }
-// }

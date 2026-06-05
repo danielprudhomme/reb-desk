@@ -1,6 +1,7 @@
-import { ReportFilter } from './report-filter';
 import { BacktestThreshold } from './backtest-threshold';
 
-export interface AnalysisRequest extends ReportFilter {
+export interface AnalysisRequest {
+  reportId?: string;
+  strategyContextId?: string;
   thresholds: BacktestThreshold[];
 }

@@ -1,15 +1,35 @@
-// import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
-// import { GroupedBacktestPassAnalysis } from '@shared/models/backtest-pass-analysis.ts';
-// import { BacktestPass, BacktestWithResults } from '@shared/models/backtest-pass.ts';
-// import { TimeUnit } from '@shared/models/time-unit.ts';
-// import { RebReport } from '@src/db/schema/reb-report.ts';
-// import { GroupedReportAnalysis } from '@shared/models/grouped-report-analysis.ts';
-// import { AnalysisRequest } from '@shared/models/analysis-request.ts';
-// import { Capital } from '@shared/models/capital.ts';
-// import { parseRebReport } from '../parser/reb-report.parser.ts';
-// import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-// import { Symbol } from '@shared/models/symbol.ts';
-// import { Timeframe } from '@shared/models/timeframe.ts';
+import { AnalysisRequest } from '@shared/models/analysis-request.ts';
+import { db } from '@src/db/database.ts';
+import { backtests, rebReports } from '@src/db/schema/index.ts';
+import { eq } from 'drizzle-orm';
+
+export async function runAnalysis(request: AnalysisRequest): Promise<void> {
+  if (!request.reportId && !request.strategyContextId) {
+    throw new Error('reportId or strategyContextId must be provided');
+  }
+
+  const condition = request.reportId
+    ? eq(backtests.reportId, request.reportId)
+    : eq(rebReports.strategyContextId, request.strategyContextId!);
+
+  const ids = (
+    await db
+      .select({ id: backtests.id })
+      .from(backtests)
+      .innerJoin(rebReports, eq(backtests.reportId, rebReports.id))
+      .where(condition)
+  ).map((x) => x.id);
+
+  const backtestList = await db.query.backtests.findMany({
+    where: (backtests, { inArray }) => inArray(backtests.id, ids),
+    with: {
+      parameterSet: true,
+      results: true,
+    },
+  });
+
+  console.log('Analysis result:', backtestList.length, backtestList[0]);
+}
 
 // // eslint-disable-next-line @typescript-eslint/no-unused-vars
 // interface GroupedReport {
@@ -28,32 +48,6 @@
 //   reports: RebReport[];
 //   passes: BacktestPass[];
 //   groupedPasses: GroupedBacktestPassAnalysis[];
-// }
-
-// export async function runAnalysis(request: AnalysisRequest): Promise<GroupedReportAnalysis[]> {
-//   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-//   const query: any = {};
-//   if (request.reportId) {
-//     query.id = request.reportId;
-//   } else {
-//     if (request.experts?.length) {
-//       query.expert = { $in: request.experts };
-//     }
-
-//     if (request.symbols?.length) {
-//       query.symbol = { $in: request.symbols };
-//     }
-
-//     if (request.timeframes?.length) {
-//       query.timeframe = { $in: request.timeframes };
-//     }
-
-//     if (request.capital) {
-//       query.capital = { $eq: request.capital };
-//     }
-//   }
-
-//   return await analyzeReports(query, request.thresholds);
 // }
 
 // async function analyzeReports(

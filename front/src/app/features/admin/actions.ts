@@ -1,21 +1,18 @@
 import { Component, inject } from '@angular/core';
 import { ImportFolder } from './import-folder';
-import { RebReportService } from '../../services/reb-report.service';
-import { MatButtonModule } from '@angular/material/button';
+import { RebReportService } from '@app/services/reb-report.service';
 
 @Component({
   selector: 'app-actions',
-  imports: [MatButtonModule, ImportFolder],
-  template: `
-    <app-import-folder />
-
-    <button matButton="filled" (click)="rebuild()">Rebuild</button>
-  `,
+  imports: [ImportFolder],
+  template: ` <app-import-folder /> `,
 })
 export class Actions {
   private rebReportService = inject(RebReportService);
 
-  rebuild() {
-    this.rebReportService.rebuild().subscribe();
+  constructor() {
+    this.rebReportService
+      .analyze({ reportId: '686c8114-dd1c-4a91-9ad8-d6d35f66d211', thresholds: [] })
+      .subscribe();
   }
 }
