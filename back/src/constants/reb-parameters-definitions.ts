@@ -36,6 +36,7 @@ const COMMON_PARAMETERS: string[] = [
 
   'Max_Lot_Size_For_10k',
   'Min_Hours_Between_Trade',
+  'Max_Amount_Of_First_Entries',
 ];
 
 const EXPERT_PARAMETER_DEFINITIONS: Record<ExpertAdvisor, string[]> = {

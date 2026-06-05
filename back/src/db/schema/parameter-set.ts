@@ -1,9 +1,9 @@
 import { sqliteTable, text, real, integer, index } from 'drizzle-orm/sqlite-core';
 import { InferInsertModel, InferSelectModel } from 'drizzle-orm/table';
-import { backtests } from './index.ts';
+import { backtestsTable } from './index.ts';
 import { relations } from 'drizzle-orm/relations';
 
-export const parameterSets = sqliteTable(
+export const parameterSetsTable = sqliteTable(
   'parameter_set',
   {
     id: text('id').primaryKey(),
@@ -19,9 +19,9 @@ export const parameterSets = sqliteTable(
   (table) => [index('idx_parameter_set_hash').on(table.parametersHash)],
 );
 
-export const parameterSetsRelations = relations(parameterSets, ({ many }) => ({
-  backtests: many(backtests),
+export const parameterSetsRelations = relations(parameterSetsTable, ({ many }) => ({
+  backtests: many(backtestsTable),
 }));
 
-export type ParameterSet = InferSelectModel<typeof parameterSets>;
-export type ParameterSetInsert = InferInsertModel<typeof parameterSets>;
+export type ParameterSetDb = InferSelectModel<typeof parameterSetsTable>;
+export type ParameterSetInsertDb = InferInsertModel<typeof parameterSetsTable>;

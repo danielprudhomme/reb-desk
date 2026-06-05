@@ -1,17 +1,16 @@
 import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
 import { strategyContexts } from './strategy-context.ts';
-import { parameterSets } from './parameter-set.ts';
-import { accounts } from './account.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
+import { accountsTable, parameterSetsTable } from './index.ts';
 
-export const robots = sqliteTable(
+export const robotsTable = sqliteTable(
   'robot',
   {
     id: text('id').primaryKey(),
 
     accountId: text('account_id')
       .notNull()
-      .references(() => accounts.id, {
+      .references(() => accountsTable.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade',
       }),
@@ -25,36 +24,34 @@ export const robots = sqliteTable(
         onUpdate: 'cascade',
       }),
 
-    parameterSetId: text('parameter_set_id').references(() => parameterSets.id, {
+    parameterSetId: text('parameter_set_id').references(() => parameterSetsTable.id, {
       onDelete: 'set null',
       onUpdate: 'cascade',
     }),
   },
-  (table) => ({
-    accountIdx: index('idx_robot_account').on(table.accountId),
-
-    contextIdx: index('idx_robot_context').on(table.strategyContextId),
-
-    parameterSetIdx: index('idx_robot_parameter_set').on(table.parameterSetId),
-  }),
+  (table) => [
+    index('idx_robot_account').on(table.accountId),
+    index('idx_robot_context').on(table.strategyContextId),
+    index('idx_robot_parameter_set').on(table.parameterSetId),
+  ],
 );
 
-export const robotsRelations = relations(robots, ({ one }) => ({
-  account: one(accounts, {
-    fields: [robots.accountId],
-    references: [accounts.id],
+export const robotsRelations = relations(robotsTable, ({ one }) => ({
+  account: one(accountsTable, {
+    fields: [robotsTable.accountId],
+    references: [accountsTable.id],
   }),
 
   strategyContext: one(strategyContexts, {
-    fields: [robots.strategyContextId],
+    fields: [robotsTable.strategyContextId],
     references: [strategyContexts.id],
   }),
 
-  parameterSet: one(parameterSets, {
-    fields: [robots.parameterSetId],
-    references: [parameterSets.id],
+  parameterSet: one(parameterSetsTable, {
+    fields: [robotsTable.parameterSetId],
+    references: [parameterSetsTable.id],
   }),
 }));
 
-export type Robot = InferSelectModel<typeof robots>;
-export type RobotInsert = InferInsertModel<typeof robots>;
+export type RobotDb = InferSelectModel<typeof robotsTable>;
+export type RobotInsertDb = InferInsertModel<typeof robotsTable>;

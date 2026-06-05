@@ -1,13 +1,13 @@
 import { integer, primaryKey, real, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { backtests } from './index.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
+import { backtestsTable } from './backtest.ts';
 
-export const backtestResults = sqliteTable(
+export const backtestResultsTable = sqliteTable(
   'backtest_result',
   {
     backtestId: text('backtest_id')
       .notNull()
-      .references(() => backtests.id, {
+      .references(() => backtestsTable.id, {
         onDelete: 'cascade',
       }),
 
@@ -36,12 +36,12 @@ export const backtestResults = sqliteTable(
   ],
 );
 
-export const backtestResultsRelations = relations(backtestResults, ({ one }) => ({
-  backtest: one(backtests, {
-    fields: [backtestResults.backtestId],
-    references: [backtests.id],
+export const backtestResultsRelations = relations(backtestResultsTable, ({ one }) => ({
+  backtest: one(backtestsTable, {
+    fields: [backtestResultsTable.backtestId],
+    references: [backtestsTable.id],
   }),
 }));
 
-export type BacktestResult = InferSelectModel<typeof backtestResults>;
-export type BacktestResultInsert = InferInsertModel<typeof backtestResults>;
+export type BacktestResultDb = InferSelectModel<typeof backtestResultsTable>;
+export type BacktestResultInsertDb = InferInsertModel<typeof backtestResultsTable>;

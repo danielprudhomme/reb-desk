@@ -1,9 +1,9 @@
 import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { strategyContexts } from './strategy-context.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
-import { Backtest, backtests } from './backtest.ts';
+import { backtestsTable } from './index.ts';
 
-export const rebReports = sqliteTable(
+export const rebReportsTable = sqliteTable(
   'reb_report',
   {
     id: text('id').primaryKey(),
@@ -44,17 +44,14 @@ export const rebReports = sqliteTable(
   ],
 );
 
-export const rebReportsRelations = relations(rebReports, ({ one, many }) => ({
+export const rebReportsRelations = relations(rebReportsTable, ({ one, many }) => ({
   strategyContext: one(strategyContexts, {
-    fields: [rebReports.strategyContextId],
+    fields: [rebReportsTable.strategyContextId],
     references: [strategyContexts.id],
   }),
 
-  backtests: many(backtests),
+  backtests: many(backtestsTable),
 }));
 
-export type RebReport = InferSelectModel<typeof rebReports>;
-export type RebReportInsert = InferInsertModel<typeof rebReports>;
-export type RebReportWithBacktests = RebReport & {
-  backtests: Backtest[];
-};
+export type RebReportDb = InferSelectModel<typeof rebReportsTable>;
+export type RebReportInsertDb = InferInsertModel<typeof rebReportsTable>;

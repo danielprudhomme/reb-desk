@@ -1,14 +1,21 @@
 import { BacktestPassResult } from '@shared/models/backtest-pass-result.ts';
-import { BacktestPass, GroupedBacktestPass } from '@shared/models/backtest-pass.ts';
+import {
+  BacktestPass,
+  BacktestWithResults,
+  GroupedBacktestPass,
+} from '@shared/models/backtest-pass.ts';
 
 type InternalGroup = GroupedBacktestPass & {
   representative: BacktestPass;
 };
 
-export function groupPasses(passes: BacktestPass[], margin: number): GroupedBacktestPass[] {
+export function groupBacktests(
+  backtests: BacktestWithResults[],
+  margin: number,
+): GroupedBacktestPass[] {
   const groups: InternalGroup[] = [];
 
-  for (const pass of passes) {
+  for (const pass of backtests) {
     let foundGroup: InternalGroup | undefined;
 
     for (const group of groups) {

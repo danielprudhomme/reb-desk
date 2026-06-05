@@ -1,11 +1,11 @@
 import crypto from 'node:crypto';
-import { AccountInsert, accounts } from '@src/db/schema/account.ts';
 import { insertOne, updateById } from '@src/db/crud.ts';
+import { AccountInsertDb, accountsTable } from '@src/db/schema/index.ts';
 
 export const accountService = {
-  async upsert(input: Omit<AccountInsert, 'id'> & { id?: string }) {
+  async upsert(input: Omit<AccountInsertDb, 'id'> & { id?: string }) {
     if (!input.id) {
-      return await insertOne(accounts, {
+      return await insertOne(accountsTable, {
         id: crypto.randomUUID(),
         name: input.name!,
         capital: input.capital!,
@@ -13,7 +13,7 @@ export const accountService = {
       });
     }
 
-    return await updateById(accounts, input.id, {
+    return await updateById(accountsTable, input.id, {
       name: input.name,
       capital: input.capital,
       leverage: input.leverage,

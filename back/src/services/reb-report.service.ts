@@ -1,18 +1,22 @@
 import { Tx } from '@src/db/database.ts';
-import { backtests, RebReport, rebReports } from '@src/db/schema/index.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { normalizeParameters } from './parameter.helper.ts';
 import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
 import { createHash } from 'crypto';
 import { strategyContextService } from './strategy-context.service.ts';
 import { parameterSetService } from './parameter-set.service.ts';
-import { backtestResults } from '@src/db/schema/backtest-result.ts';
+import {
+  backtestResultsTable,
+  backtestsTable,
+  RebReportDb,
+  rebReportsTable,
+} from '@src/db/schema/index.ts';
 
 export const rebReportService = {
-  async insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): Promise<RebReport> {
+  async insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): Promise<RebReportDb> {
     const fingerprint = buildFingerprint(parsedReport);
 
-    const existing = await tx.query.rebReports.findFirst({
+    const existing = await tx.query.rebReportsTable.findFirst({
       where: (reports, { eq }) => eq(reports.fingerprint, fingerprint),
     });
 
@@ -30,7 +34,7 @@ export const rebReportService = {
     );
 
     const [created] = await tx
-      .insert(rebReports)
+      .insert(rebReportsTable)
       .values({
         id: crypto.randomUUID(),
         strategyContextId: strategyContext.id,
@@ -57,14 +61,14 @@ export const rebReportService = {
 
       const backtestId = crypto.randomUUID();
 
-      await tx.insert(backtests).values({
+      await tx.insert(backtestsTable).values({
         id: backtestId,
         parameterSetId: parameterSet.id,
         reportId: created.id,
         passNumber: pass.passNumber,
       });
 
-      await tx.insert(backtestResults).values([
+      await tx.insert(backtestResultsTable).values([
         ...pass.shortTermResults.map((result, position) => ({
           backtestId,
           type: 'short_term' as const,

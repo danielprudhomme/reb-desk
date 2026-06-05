@@ -1,14 +1,13 @@
-import { Robot, robots } from '@src/db/schema/robot.ts';
 import crypto from 'node:crypto';
 import { db, Tx } from '@src/db/database.ts';
 import { and, eq } from 'drizzle-orm';
-import { accounts } from '@src/db/schema/account.ts';
 import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
+import { accountsTable, RobotDb, robotsTable } from '@src/db/schema/index.ts';
 
 export const robotService = {
-  insertMany(inputs: InsertRobotInput[]): Promise<Robot[]> {
+  insertMany(inputs: InsertRobotInput[]): Promise<RobotDb[]> {
     const accountId = inputs[0]?.accountId;
 
     if (!accountId) {
@@ -17,10 +16,10 @@ export const robotService = {
 
     return db.transaction(async (tx) => {
       await tx
-        .delete(robots)
-        .where(and(eq(robots.accountId, accountId), eq(robots.status, 'draft')));
+        .delete(robotsTable)
+        .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')));
 
-      const created: Robot[] = [];
+      const created: RobotDb[] = [];
       for (const input of inputs) {
         const robot = await insertRobotTx(tx, input);
         created.push(robot);
@@ -30,25 +29,25 @@ export const robotService = {
     });
   },
 
-  insert(input: InsertRobotInput): Promise<Robot> {
+  insert(input: InsertRobotInput): Promise<RobotDb> {
     return db.transaction((tx) => insertRobotTx(tx, input));
   },
 
-  update(input: UpdateRobotInput): Promise<Robot> {
+  update(input: UpdateRobotInput): Promise<RobotDb> {
     return db.transaction(async (tx) => {
       const [updated] = await tx
-        .update(robots)
+        .update(robotsTable)
         .set(input)
-        .where(eq(robots.id, input.id))
+        .where(eq(robotsTable.id, input.id))
         .returning();
       return updated;
     });
   },
 };
 
-async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<Robot> {
-  const account = await tx.query.accounts.findFirst({
-    where: eq(accounts.id, input.accountId),
+async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<RobotDb> {
+  const account = await tx.query.accountsTable.findFirst({
+    where: eq(accountsTable.id, input.accountId),
   });
 
   if (!account) {
@@ -65,7 +64,7 @@ async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<Robot> {
   );
 
   const [created] = await tx
-    .insert(robots)
+    .insert(robotsTable)
     .values({
       id: crypto.randomUUID(),
       accountId: input.accountId,

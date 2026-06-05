@@ -1,4 +1,3 @@
-import { ParameterSet, parameterSets } from '@src/db/schema/parameter-set.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { createHash } from 'crypto';
 import { Tx } from '@src/db/database.ts';
@@ -7,13 +6,14 @@ import {
   getLotSizeParameters,
   getStrategyParameters,
 } from '@src/constants/reb-parameters-definitions.ts';
+import { ParameterSetDb, parameterSetsTable } from '@src/db/schema/parameter-set.ts';
 
 export const parameterSetService = {
   async findOrCreateTx(
     tx: Tx,
     expert: ExpertAdvisor,
     parameters: Parameter[],
-  ): Promise<ParameterSet> {
+  ): Promise<ParameterSetDb> {
     const parametersString = buildParametersString(
       expert,
       Object.fromEntries(parameters.map((p) => [p.name, p.value])),
@@ -29,7 +29,7 @@ export const parameterSetService = {
     );
 
     const [created] = await tx
-      .insert(parameterSets)
+      .insert(parameterSetsTable)
       .values({
         id: crypto.randomUUID(),
         parameters: parametersString,

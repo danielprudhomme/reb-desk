@@ -1,6 +1,6 @@
 import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 import { db } from '@src/db/database.ts';
-import { backtests, rebReports } from '@src/db/schema/index.ts';
+import { backtestsTable, rebReportsTable } from '@src/db/schema/index.ts';
 import { eq } from 'drizzle-orm';
 
 export async function runAnalysis(request: AnalysisRequest): Promise<void> {
@@ -9,19 +9,19 @@ export async function runAnalysis(request: AnalysisRequest): Promise<void> {
   }
 
   const condition = request.reportId
-    ? eq(backtests.reportId, request.reportId)
-    : eq(rebReports.strategyContextId, request.strategyContextId!);
+    ? eq(backtestsTable.reportId, request.reportId)
+    : eq(rebReportsTable.strategyContextId, request.strategyContextId!);
 
   const ids = (
     await db
-      .select({ id: backtests.id })
-      .from(backtests)
-      .innerJoin(rebReports, eq(backtests.reportId, rebReports.id))
+      .select({ id: backtestsTable.id })
+      .from(backtestsTable)
+      .innerJoin(rebReportsTable, eq(backtestsTable.reportId, rebReportsTable.id))
       .where(condition)
   ).map((x) => x.id);
 
-  const backtestList = await db.query.backtests.findMany({
-    where: (backtests, { inArray }) => inArray(backtests.id, ids),
+  const backtestList = await db.query.backtestsTable.findMany({
+    where: (backtestsTable, { inArray }) => inArray(backtestsTable.id, ids),
     with: {
       parameterSet: true,
       results: true,

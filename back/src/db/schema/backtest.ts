@@ -1,24 +1,22 @@
 import { index, integer, sqliteTable, text } from 'drizzle-orm/sqlite-core';
-import { parameterSets } from './parameter-set.ts';
-import { rebReports } from './reb-report.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
-import { backtestResults } from './backtest-result.ts';
+import { backtestResultsTable, parameterSetsTable, rebReportsTable } from './index.ts';
 
-export const backtests = sqliteTable(
+export const backtestsTable = sqliteTable(
   'backtest',
   {
     id: text('id').primaryKey(),
 
     parameterSetId: text('parameter_set_id')
       .notNull()
-      .references(() => parameterSets.id, {
+      .references(() => parameterSetsTable.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade',
       }),
 
     reportId: text('report_id')
       .notNull()
-      .references(() => rebReports.id, {
+      .references(() => rebReportsTable.id, {
         onDelete: 'cascade',
         onUpdate: 'cascade',
       }),
@@ -32,19 +30,19 @@ export const backtests = sqliteTable(
   ],
 );
 
-export const backtestsRelations = relations(backtests, ({ one, many }) => ({
-  report: one(rebReports, {
-    fields: [backtests.reportId],
-    references: [rebReports.id],
+export const backtestsRelations = relations(backtestsTable, ({ one, many }) => ({
+  report: one(rebReportsTable, {
+    fields: [backtestsTable.reportId],
+    references: [rebReportsTable.id],
   }),
 
-  parameterSet: one(parameterSets, {
-    fields: [backtests.parameterSetId],
-    references: [parameterSets.id],
+  parameterSet: one(parameterSetsTable, {
+    fields: [backtestsTable.parameterSetId],
+    references: [parameterSetsTable.id],
   }),
 
-  results: many(backtestResults),
+  results: many(backtestResultsTable),
 }));
 
-export type Backtest = InferSelectModel<typeof backtests>;
-export type BacktestInsert = InferInsertModel<typeof backtests>;
+export type BacktestDb = InferSelectModel<typeof backtestsTable>;
+export type BacktestInsertDb = InferInsertModel<typeof backtestsTable>;
