@@ -2,9 +2,7 @@ import { Component, computed, inject, input, output } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
-import { Robot } from '@app/core/models/robot';
 import { MatMenuModule } from '@angular/material/menu';
-import { MatIcon } from '@angular/material/icon';
 import { RobotService } from '@app/services/robot.service';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { MatButtonModule } from '@angular/material/button';
@@ -12,11 +10,11 @@ import { ConfirmationService } from '@app/core/services/confirmation.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RobotTile } from './robot-tile';
 import { RobotCreateTile } from './robot-create-tile';
+import { Robot } from '@shared/models/robot';
 
 @Component({
   selector: 'app-robot-table',
   imports: [
-    MatIcon,
     MatTableModule,
     MatMenuModule,
     MatButtonModule,
@@ -64,19 +62,6 @@ import { RobotCreateTile } from './robot-create-tile';
       <tr mat-header-row *matHeaderRowDef="displayedColumns(); sticky: true"></tr>
       <tr mat-row *matRowDef="let row; columns: displayedColumns()"></tr>
     </table>
-
-    <mat-menu #robotOptionsMenu="matMenu">
-      <ng-template matMenuContent let-robot="robot">
-        <!-- <button mat-menu-item (click)="modifyRobot(robot)">
-          <mat-icon>edit</mat-icon>
-          <span>Edit</span>
-        </button> -->
-        <button mat-menu-item (click)="deleteRobot(robot)">
-          <mat-icon>delete</mat-icon>
-          <span>Delete</span>
-        </button>
-      </ng-template>
-    </mat-menu>
   `,
 })
 export class RobotTable {
@@ -110,23 +95,6 @@ export class RobotTable {
   // modifyRobot(robot: Robot) {}
 
   createRobot(timeframe: Timeframe, symbol: Symbol, expert: ExpertAdvisor) {
-    this.robotService.upsertRobot({
-      accountId: this.accountId(),
-      expert,
-      symbol,
-      timeframe,
-      status: 'draft',
-      parameterSetId: undefined,
-    });
-  }
-
-  deleteRobot(robot: Robot) {
-    this.confirmationService
-      .confirm({ message: 'Are you sure to delete this robot ?', title: 'Delete Robot' })
-      .subscribe((confirmed) => {
-        if (confirmed) {
-          this.robotService.deleteRobot(robot);
-        }
-      });
+    this.robotService.insertRobot(this.accountId(), { expert, symbol, timeframe });
   }
 }

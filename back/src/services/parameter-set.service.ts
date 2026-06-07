@@ -10,11 +10,7 @@ import { ParameterSetDb, parameterSetsTable } from '@src/db/schema/parameter-set
 import { ParameterSet } from '@shared/models/parameter-set.ts';
 
 export const parameterSetService = {
-  async findOrCreateTx(
-    tx: Tx,
-    expert: ExpertAdvisor,
-    parameters: Parameter[],
-  ): Promise<ParameterSetDb> {
+  findOrCreateTx(tx: Tx, expert: ExpertAdvisor, parameters: Parameter[]): ParameterSetDb {
     const parametersString = buildParametersString(
       expert,
       Object.fromEntries(parameters.map((p) => [p.name, p.value])),
@@ -24,12 +20,12 @@ export const parameterSetService = {
 
     const getParam = (name: string) => parameters.find((p) => p.name === name)?.value;
 
-    const fixedLotSize: boolean = Boolean(
+    const fixedLotSize = Boolean(
       (lotSizeParams.fixedLotSize && Number(getParam(lotSizeParams.fixedLotSize)) === 1) ||
       (lotSizeParams.adaptLotSize && Number(getParam(lotSizeParams.adaptLotSize)) === 0),
     );
 
-    const [created] = await tx
+    const [created] = tx
       .insert(parameterSetsTable)
       .values({
         id: crypto.randomUUID(),
@@ -38,7 +34,8 @@ export const parameterSetService = {
         initLotSize: Number(getParam(lotSizeParams.initLotSize)),
         fixedLotSize,
       })
-      .returning();
+      .returning()
+      .all();
 
     return created;
   },

@@ -3,6 +3,7 @@ import { backtestsTable, rebReportsTable } from '@src/db/schema/index.ts';
 import { eq } from 'drizzle-orm';
 import { parameterSetService } from './parameter-set.service.ts';
 import { Backtest } from '@shared/models/backtest.ts';
+import { strategyContextService } from './strategy-context.service.ts';
 
 export const backtestService = {
   async getBacktests({
@@ -49,7 +50,7 @@ export const backtestService = {
 
       parameterSet: parameterSetService.mapDbToModel(backtest.parameterSet),
 
-      strategyContext: backtest.report.strategyContext,
+      strategyContext: strategyContextService.mapDbToModel(backtest.report.strategyContext),
 
       shortTermResults: backtest.results.filter((result) => result.type === 'short_term'),
 

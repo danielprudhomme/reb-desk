@@ -28,17 +28,25 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
   }
 `;
 
-export const CREATE_DRAFT_ROBOTS = gql`
-  mutation CreateDraftRobots($accountId: ID!, $inputs: [CreateDraftRobotInput!]!) {
-    createDraftRobots(accountId: $accountId, inputs: $inputs) {
+export const INSERT_ROBOTS = gql`
+  mutation InsertRobots($inputs: [InsertRobotInput!]!) {
+    insertRobots(inputs: $inputs) {
       ${ROBOT_FIELDS}
     }
   }
 `;
 
-export const UPSERT_ROBOT = gql`
-  mutation UpsertRobot($input: RobotInput!) {
-    upsertRobot(input: $input) {
+export const INSERT_ROBOT = gql`
+  mutation InsertRobot($input: InsertRobotInput!) {
+    insertRobot(input: $input) {
+      ${ROBOT_FIELDS}
+    }
+  }
+`;
+
+export const UPDATE_ROBOT = gql`
+  mutation UpdateRobot($input: UpdateRobotInput!) {
+    updateRobot(input: $input) {
       ${ROBOT_FIELDS}
     }
   }

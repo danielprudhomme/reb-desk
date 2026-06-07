@@ -1,27 +1,33 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { StrategyContext } from '@shared/models/strategy-context.ts';
 import { Symbol } from '@shared/models/symbol.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { Tx } from '@src/db/database.ts';
 import { StrategyContextDb, strategyContextsTable } from '@src/db/schema/strategy-context.ts';
+import { eq } from 'drizzle-orm';
 
 export const strategyContextService = {
-  async findOrCreateTx(
+  findOrCreateTx(
     tx: Tx,
     expert: ExpertAdvisor,
     symbol: Symbol,
     timeframe: Timeframe,
     leverage: number,
     capital: number,
-  ): Promise<StrategyContextDb> {
+  ): StrategyContextDb {
     const id = buildStrategyContextKey(expert, symbol, timeframe, leverage, capital);
 
-    const existing = await tx.query.strategyContextsTable.findFirst({
-      where: (t, { eq }) => eq(t.id, id),
-    });
+    const existing = tx
+      .select()
+      .from(strategyContextsTable)
+      .where(eq(strategyContextsTable.id, id))
+      .get();
 
-    if (existing) return existing;
+    if (existing) {
+      return existing;
+    }
 
-    const [created] = await tx
+    return tx
       .insert(strategyContextsTable)
       .values({
         id,
@@ -31,9 +37,19 @@ export const strategyContextService = {
         leverage,
         capital,
       })
-      .returning();
+      .returning()
+      .get();
+  },
 
-    return created;
+  mapDbToModel(db: StrategyContextDb): StrategyContext {
+    return {
+      id: db.id,
+      expert: db.expert as ExpertAdvisor,
+      symbol: db.symbol as Symbol,
+      timeframe: db.timeframe as Timeframe,
+      capital: db.capital,
+      leverage: db.leverage,
+    };
   },
 };
 

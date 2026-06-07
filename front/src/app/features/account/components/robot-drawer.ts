@@ -3,11 +3,11 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
-import { Robot } from '@app/core/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
 // import { PassAnalysisTable } from '@app/features/report/components/pass-analysis-table';
 import { AnalysisRequest } from '@shared/models/analysis-request';
+import { Robot } from '@shared/models/robot';
 
 @Component({
   selector: 'app-robot-drawer',

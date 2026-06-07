@@ -4,57 +4,77 @@ import { and, eq } from 'drizzle-orm';
 import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
-import { accountsTable, RobotDb, robotsTable } from '@src/db/schema/index.ts';
+import {
+  accountsTable,
+  ParameterSetDb,
+  RobotDb,
+  robotsTable,
+  StrategyContextDb,
+} from '@src/db/schema/index.ts';
+import { Robot } from '@shared/models/robot.ts';
+import { parameterSetService } from './parameter-set.service.ts';
+import { RobotStatus } from '@shared/models/robot-status.ts';
 
 export const robotService = {
-  insertMany(inputs: InsertRobotInput[]): Promise<RobotDb[]> {
+  async insertMany(inputs: InsertRobotInput[]): Promise<Robot[]> {
     const accountId = inputs[0]?.accountId;
 
     if (!accountId) {
       throw new Error('Account ID is required');
     }
 
-    return db.transaction(async (tx) => {
-      await tx
-        .delete(robotsTable)
-        .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')));
+    const created = db.transaction((tx) => {
+      tx.delete(robotsTable)
+        .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')))
+        .run();
 
       const created: RobotDb[] = [];
+
       for (const input of inputs) {
-        const robot = await insertRobotTx(tx, input);
+        const robot = insertRobotTx(tx, input);
         created.push(robot);
       }
 
       return created;
     });
+
+    const ids = created.map((robot) => robot.id);
+    return await findMany(ids);
   },
 
-  insert(input: InsertRobotInput): Promise<RobotDb> {
-    return db.transaction((tx) => insertRobotTx(tx, input));
+  async insert(input: InsertRobotInput): Promise<Robot> {
+    const created = db.transaction((tx) => insertRobotTx(tx, input));
+
+    return await findOne(created.id);
   },
 
-  update(input: UpdateRobotInput): Promise<RobotDb> {
-    return db.transaction(async (tx) => {
-      const [updated] = await tx
-        .update(robotsTable)
-        .set(input)
-        .where(eq(robotsTable.id, input.id))
-        .returning();
-      return updated;
-    });
+  async update(input: UpdateRobotInput): Promise<Robot> {
+    const updated = db
+      .update(robotsTable)
+      .set({
+        status: input.status,
+        parameterSetId: input.parameterSetId,
+      })
+      .where(eq(robotsTable.id, input.id))
+      .returning()
+      .get();
+
+    return await findOne(updated.id);
   },
 };
 
-async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<RobotDb> {
-  const account = await tx.query.accountsTable.findFirst({
-    where: eq(accountsTable.id, input.accountId),
-  });
+function insertRobotTx(tx: Tx, input: InsertRobotInput): RobotDb {
+  const account = tx
+    .select()
+    .from(accountsTable)
+    .where(eq(accountsTable.id, input.accountId))
+    .get();
 
   if (!account) {
     throw new Error('Account not found');
   }
 
-  const strategyContext = await strategyContextService.findOrCreateTx(
+  const strategyContext = strategyContextService.findOrCreateTx(
     tx,
     input.expert,
     input.symbol,
@@ -63,7 +83,7 @@ async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<RobotDb> 
     account.capital,
   );
 
-  const [created] = await tx
+  return tx
     .insert(robotsTable)
     .values({
       id: crypto.randomUUID(),
@@ -72,7 +92,38 @@ async function insertRobotTx(tx: Tx, input: InsertRobotInput): Promise<RobotDb> 
       strategyContextId: strategyContext.id,
       parameterSetId: null,
     })
-    .returning();
+    .returning()
+    .get();
+}
 
-  return created;
+async function findMany(ids: string[]): Promise<Robot[]> {
+  return (
+    await db.query.robotsTable.findMany({
+      where: (robots, { inArray }) => inArray(robots.id, ids),
+      with: {
+        parameterSet: true,
+        strategyContext: true,
+      },
+    })
+  ).map((robot) => mapQueryToModel(robot));
+}
+
+async function findOne(id: string): Promise<Robot> {
+  return (await findMany([id]))[0];
+}
+
+function mapQueryToModel(
+  robot: RobotDb & { strategyContext: StrategyContextDb } & { parameterSet: ParameterSetDb | null },
+): Robot {
+  return {
+    id: robot.id,
+    accountId: robot.accountId,
+    status: robot.status as RobotStatus,
+    strategyContextId: robot.strategyContextId,
+    strategyContext: strategyContextService.mapDbToModel(robot.strategyContext),
+    parameterSetId: robot.parameterSetId ?? undefined,
+    parameterSet: robot.parameterSet
+      ? parameterSetService.mapDbToModel(robot.parameterSet)
+      : undefined,
+  };
 }

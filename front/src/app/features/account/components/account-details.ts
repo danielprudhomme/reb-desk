@@ -19,7 +19,7 @@ import { GenerateRobotsDialog } from './generate-robots-dialog';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol, symbols } from '@shared/models/symbol';
 import { diversifyRobots } from '../helpers/diversify-robots';
-import { Robot } from '@app/core/models/robot';
+import { Robot } from '@shared/models/robot';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RobotDrawer } from './robot-drawer';
 
@@ -90,6 +90,7 @@ import { RobotDrawer } from './robot-drawer';
           <app-robot-drawer
             [capital]="account().capital"
             [robot]="selectedRobot()!"
+            (delete)="deleteRobot($event)"
             (close)="closeDrawer()"
           />
         }
@@ -153,7 +154,7 @@ export class AccountDetails {
           this.symbols,
           maxRobots,
         );
-        this.robotService.createDraftRobots(this.accountId!, robots);
+        this.robotService.insertRobots(this.accountId!, robots);
       });
   }
 
@@ -170,6 +171,17 @@ export class AccountDetails {
   onRobotClicked(robot: Robot) {
     this.selectedRobot.set(robot);
     this.drawer().open();
+  }
+
+  deleteRobot(robot: Robot) {
+    this.confirmationService
+      .confirm({ message: 'Are you sure to delete this robot ?', title: 'Delete Robot' })
+      .subscribe((confirmed) => {
+        if (confirmed) {
+          this.robotService.deleteRobot(robot);
+          this.closeDrawer();
+        }
+      });
   }
 
   closeDrawer() {

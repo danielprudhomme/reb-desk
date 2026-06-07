@@ -11,20 +11,23 @@ import {
   RebReportDb,
   rebReportsTable,
 } from '@src/db/schema/index.ts';
+import { eq } from 'drizzle-orm';
 
 export const rebReportService = {
-  async insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): Promise<RebReportDb> {
+  insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): RebReportDb {
     const fingerprint = buildFingerprint(parsedReport);
 
-    const existing = await tx.query.rebReportsTable.findFirst({
-      where: (reports, { eq }) => eq(reports.fingerprint, fingerprint),
-    });
+    const existing = tx
+      .select()
+      .from(rebReportsTable)
+      .where(eq(rebReportsTable.fingerprint, fingerprint))
+      .get();
 
     if (existing) {
       return existing;
     }
 
-    const strategyContext = await strategyContextService.findOrCreateTx(
+    const strategyContext = strategyContextService.findOrCreateTx(
       tx,
       parsedReport.expert,
       parsedReport.symbol,
@@ -33,7 +36,7 @@ export const rebReportService = {
       parsedReport.capital,
     );
 
-    const [created] = await tx
+    const created = tx
       .insert(rebReportsTable)
       .values({
         id: crypto.randomUUID(),
@@ -50,10 +53,11 @@ export const rebReportService = {
         longTermDuration: parsedReport.longTermDuration,
         longTermUnit: parsedReport.longTermUnit,
       })
-      .returning();
+      .returning()
+      .get();
 
     for (const pass of parsedReport.parsedPasses) {
-      const parameterSet = await parameterSetService.findOrCreateTx(
+      const parameterSet = parameterSetService.findOrCreateTx(
         tx,
         parsedReport.expert,
         pass.parameters,
@@ -61,14 +65,14 @@ export const rebReportService = {
 
       const backtestId = crypto.randomUUID();
 
-      await tx.insert(backtestsTable).values({
+      tx.insert(backtestsTable).values({
         id: backtestId,
         parameterSetId: parameterSet.id,
         reportId: created.id,
         passNumber: pass.passNumber,
       });
 
-      await tx.insert(backtestResultsTable).values([
+      tx.insert(backtestResultsTable).values([
         ...pass.shortTermResults.map((result, position) => ({
           backtestId,
           type: 'short_term' as const,

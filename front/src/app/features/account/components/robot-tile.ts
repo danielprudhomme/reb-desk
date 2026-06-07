@@ -1,5 +1,5 @@
 import { Component, input } from '@angular/core';
-import { Robot } from '@app/core/models/robot';
+import { Robot } from '@shared/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
 

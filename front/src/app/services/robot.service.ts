@@ -5,15 +5,14 @@ import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { Reference } from '@apollo/client';
-
-import { Robot, RobotInput } from '@app/core/models/robot';
 import { RobotConfiguration } from '@shared/models/robot-configuration';
-
+import { Robot } from '@shared/models/robot';
 import {
-  CREATE_DRAFT_ROBOTS,
   DELETE_ROBOT,
   GET_ROBOTS_BY_ACCOUNT,
-  UPSERT_ROBOT,
+  INSERT_ROBOT,
+  INSERT_ROBOTS,
+  UPDATE_ROBOT,
 } from './robot.graphql';
 
 @Injectable({ providedIn: 'root' })
@@ -71,21 +70,21 @@ export class RobotService {
   // ---------------------------
   // BULK CREATE (draft robots)
   // ---------------------------
-  async createDraftRobots(accountId: string, inputs: RobotConfiguration[]) {
+  async insertRobots(accountId: string, inputs: RobotConfiguration[]) {
     const cleanInputs = (inputs as any[]).map(({ __typename, ...input }: any) => ({
       ...input,
+      accountId,
     }));
 
     await firstValueFrom(
-      this.apollo.mutate<{ createDraftRobots: Robot[] }>({
-        mutation: CREATE_DRAFT_ROBOTS,
+      this.apollo.mutate<{ insertRobots: Robot[] }>({
+        mutation: INSERT_ROBOTS,
         variables: {
-          accountId,
           inputs: cleanInputs,
         },
 
         update: (cache, { data }) => {
-          const robots = data?.createDraftRobots;
+          const robots = data?.insertRobots;
           if (!robots?.length) return;
 
           cache.modify({
@@ -110,17 +109,21 @@ export class RobotService {
     );
   }
 
-  // ---------------------------
-  // UPSERT
-  // ---------------------------
-  async upsertRobot(input: RobotInput) {
+  async insertRobot(accountId: string, input: RobotConfiguration) {
+    const { __typename, ...cleanInput } = input as any;
+
     await firstValueFrom(
-      this.apollo.mutate<{ upsertRobot: Robot }>({
-        mutation: UPSERT_ROBOT,
-        variables: { input },
+      this.apollo.mutate<{ insertRobot: Robot }>({
+        mutation: INSERT_ROBOT,
+        variables: {
+          input: {
+            ...cleanInput,
+            accountId,
+          },
+        },
 
         update: (cache, { data }) => {
-          const robot = data?.upsertRobot;
+          const robot = data?.insertRobot;
           if (!robot) return;
 
           cache.modify({
@@ -129,15 +132,34 @@ export class RobotService {
                 const newRef = toReference({
                   __typename: 'Robot',
                   id: robot.id,
-                })!;
+                });
 
-                const filtered = existingRefs.filter((r) => readField('id', r) !== robot.id);
+                if (!newRef) {
+                  return existingRefs;
+                }
 
-                return [...filtered, newRef];
+                const filteredRefs = existingRefs.filter(
+                  (ref) => readField('id', ref) !== robot.id,
+                );
+
+                return [...filteredRefs, newRef];
               },
             },
           });
         },
+      }),
+    );
+  }
+
+  // ---------------------------
+  // UPDATE
+  // ---------------------------
+  async updateRobot(robot: Robot) {
+    const input = { id: robot.id, status: robot.status, parameterSetId: robot.parameterSetId };
+    await firstValueFrom(
+      this.apollo.mutate<{ updateRobot: Robot }>({
+        mutation: UPDATE_ROBOT,
+        variables: { input },
       }),
     );
   }
