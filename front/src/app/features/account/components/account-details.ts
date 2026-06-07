@@ -146,7 +146,10 @@ export class AccountDetails {
     this.dialog
       .open(GenerateRobotsDialog, { disableClose: true })
       .afterClosed()
-      .subscribe(({ maxRobots, experts }) => {
+      .subscribe((result) => {
+        if (!result) return;
+        const { maxRobots, experts } = result;
+
         const robots = diversifyRobots(
           this.robots().map((r) => r.strategyContext),
           experts,
