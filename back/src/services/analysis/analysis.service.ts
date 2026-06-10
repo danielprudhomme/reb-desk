@@ -8,6 +8,7 @@ import { AnalyzedGroupedBacktest } from '@shared/models/backtest.ts';
 
 export async function runAnalysis(request: AnalysisRequest): Promise<AnalyzedGroupedBacktest[]> {
   const backtests = await backtestService.getBacktests(request);
+
   const groupedBacktests = groupBacktests(backtests, 0.1);
 
   const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
@@ -17,6 +18,7 @@ export async function runAnalysis(request: AnalysisRequest): Promise<AnalyzedGro
     request.thresholds,
     valuesByType,
   );
+
   computeScore(analyzedGroupedPasses, request.thresholds, valuesByType);
 
   return analyzedGroupedPasses;

@@ -16,7 +16,7 @@ export function computeScore(
 
   groupedBacktests.forEach((backtest) => {
     backtest.checks.forEach((check) => {
-      const { min, max } = valuesByType[check.type];
+      const { min, max } = valuesByType[check.type] ?? {};
 
       if (!min || min === max) {
         check.score = check.ok ? 0.5 : 0;

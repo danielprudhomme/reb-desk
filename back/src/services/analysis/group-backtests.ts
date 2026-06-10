@@ -1,24 +1,12 @@
 import { BacktestResult } from '@shared/models/backtest-result.ts';
 import { Backtest, GroupedBacktest } from '@shared/models/backtest.ts';
-import { GroupedParameterSet, ParameterSet } from '@shared/models/parameter-set.ts';
-
-interface InternalGroup {
-  reportIds: string[];
-  parameterSetIds: string[];
-  passNumbers: number[];
-  parameterSets: ParameterSet[];
-
-  groupedParameterSet: GroupedParameterSet;
-
-  shortTermResults: BacktestResult[];
-  longTermResults: BacktestResult[];
-}
+import { GroupedParameterSet } from '@shared/models/parameter-set.ts';
 
 export function groupBacktests(backtests: Backtest[], margin: number): GroupedBacktest[] {
-  const groups: InternalGroup[] = [];
+  const groups: GroupedBacktest[] = [];
 
   for (const backtest of backtests) {
-    let foundGroup: InternalGroup | undefined;
+    let foundGroup: GroupedBacktest | undefined;
 
     for (const group of groups) {
       const shortMatch = areResultsClose(backtest.shortTermResults, group.shortTermResults, margin);
@@ -41,14 +29,13 @@ export function groupBacktests(backtests: Backtest[], margin: number): GroupedBa
         })),
       };
 
-      const newGroup: InternalGroup = {
+      const newGroup: GroupedBacktest = {
+        ...backtest,
         reportIds: [backtest.reportId],
         parameterSetIds: [backtest.parameterSetId],
         passNumbers: [backtest.passNumber],
         parameterSets: [backtest.parameterSet],
         groupedParameterSet,
-        shortTermResults: backtest.shortTermResults,
-        longTermResults: backtest.longTermResults,
       };
 
       groups.push(newGroup);

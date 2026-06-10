@@ -2,6 +2,7 @@ import { GroupedParameterSet, ParameterSet } from './parameter-set';
 import { BacktestResult } from './backtest-result';
 import { StrategyContext } from './strategy-context';
 import { BacktestThresholdCheck } from './backtest-threshold-check';
+import { TimeUnit } from './time-unit';
 
 export interface Backtest {
   reportId: string;
@@ -10,6 +11,8 @@ export interface Backtest {
   passNumber: number;
   parameterSet: ParameterSet;
   strategyContext: StrategyContext;
+  longTermUnit: TimeUnit;
+  longTermDuration: number;
   shortTermResults: BacktestResult[];
   longTermResults: BacktestResult[];
 }
@@ -20,6 +23,9 @@ export interface GroupedBacktest {
   passNumbers: number[];
   parameterSets: ParameterSet[];
   groupedParameterSet: GroupedParameterSet;
+  strategyContext: StrategyContext;
+  longTermUnit: TimeUnit;
+  longTermDuration: number;
   shortTermResults: BacktestResult[];
   longTermResults: BacktestResult[];
 }

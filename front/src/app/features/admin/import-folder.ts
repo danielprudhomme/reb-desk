@@ -25,7 +25,7 @@ import { firstValueFrom, map } from 'rxjs';
 })
 export class ImportFolder {
   private rebReportService = inject(RebReportService);
-  model = signal({ folderPath: 'C:\\Metatrader\\Imports\\RSI Opti 2' });
+  model = signal({ folderPath: 'C:\\Metatrader\\Imports\\test' });
   form = form(
     this.model,
     (schemaPath) => {

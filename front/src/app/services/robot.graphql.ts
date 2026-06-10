@@ -5,6 +5,7 @@ const ROBOT_FIELDS = `
   accountId
   status
   strategyContext {
+    id
     expert
     symbol
     timeframe

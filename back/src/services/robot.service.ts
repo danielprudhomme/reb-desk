@@ -16,6 +16,18 @@ import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
 
 export const robotService = {
+  async findByAccount(accountId: string): Promise<Robot[]> {
+    return (
+      await db.query.robotsTable.findMany({
+        where: (robots, { eq }) => eq(robots.accountId, accountId),
+        with: {
+          parameterSet: true,
+          strategyContext: true,
+        },
+      })
+    ).map((robot) => mapQueryToModel(robot));
+  },
+
   async insertMany(inputs: InsertRobotInput[]): Promise<Robot[]> {
     const accountId = inputs[0]?.accountId;
 
@@ -119,7 +131,6 @@ function mapQueryToModel(
     id: robot.id,
     accountId: robot.accountId,
     status: robot.status as RobotStatus,
-    strategyContextId: robot.strategyContextId,
     strategyContext: strategyContextService.mapDbToModel(robot.strategyContext),
     parameterSetId: robot.parameterSetId ?? undefined,
     parameterSet: robot.parameterSet

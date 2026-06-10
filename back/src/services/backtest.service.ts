@@ -4,6 +4,7 @@ import { eq } from 'drizzle-orm';
 import { parameterSetService } from './parameter-set.service.ts';
 import { Backtest } from '@shared/models/backtest.ts';
 import { strategyContextService } from './strategy-context.service.ts';
+import { TimeUnit } from '@shared/models/time-unit.ts';
 
 export const backtestService = {
   async getBacktests({
@@ -47,13 +48,11 @@ export const backtestService = {
       id: backtest.id,
       parameterSetId: backtest.parameterSetId,
       passNumber: backtest.passNumber,
-
       parameterSet: parameterSetService.mapDbToModel(backtest.parameterSet),
-
       strategyContext: strategyContextService.mapDbToModel(backtest.report.strategyContext),
-
+      longTermUnit: backtest.report.longTermUnit as TimeUnit,
+      longTermDuration: backtest.report.longTermDuration,
       shortTermResults: backtest.results.filter((result) => result.type === 'short_term'),
-
       longTermResults: backtest.results.filter((result) => result.type === 'long_term'),
     }));
 

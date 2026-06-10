@@ -8,9 +8,7 @@ import { FormValueControl } from '@angular/forms/signals';
 @Component({
   selector: 'app-expert-select',
   standalone: true,
-
   imports: [MatFormFieldModule, MatSelectModule, ExpertBadge],
-
   template: `
     <mat-form-field>
       <mat-label>Experts</mat-label>

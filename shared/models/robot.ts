@@ -6,7 +6,6 @@ export interface Robot {
   id: string;
   accountId: string;
   status: RobotStatus;
-  strategyContextId: string;
   strategyContext: StrategyContext;
   parameterSetId?: string;
   parameterSet?: ParameterSet;

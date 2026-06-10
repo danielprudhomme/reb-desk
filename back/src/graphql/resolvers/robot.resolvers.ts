@@ -1,5 +1,4 @@
 import { robotService } from '@src/services/robot.service.ts';
-import { db } from '@src/db/database.ts';
 import { deleteById } from '@src/db/crud.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
@@ -16,9 +15,6 @@ export const robotResolvers = {
 
   Query: {
     robotsByAccount: (_: unknown, { accountId }: { accountId: string }) =>
-      db.query.robotsTable.findMany({
-        where: (robots, { eq }) => eq(robots.accountId, accountId),
-        with: { parameterSet: true, strategyContext: true },
-      }),
+      robotService.findByAccount(accountId),
   },
 };

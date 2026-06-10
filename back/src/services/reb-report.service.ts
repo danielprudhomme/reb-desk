@@ -65,28 +65,32 @@ export const rebReportService = {
 
       const backtestId = crypto.randomUUID();
 
-      tx.insert(backtestsTable).values({
-        id: backtestId,
-        parameterSetId: parameterSet.id,
-        reportId: created.id,
-        passNumber: pass.passNumber,
-      });
+      tx.insert(backtestsTable)
+        .values({
+          id: backtestId,
+          parameterSetId: parameterSet.id,
+          reportId: created.id,
+          passNumber: pass.passNumber,
+        })
+        .execute();
 
-      tx.insert(backtestResultsTable).values([
-        ...pass.shortTermResults.map((result, position) => ({
-          backtestId,
-          type: 'short_term' as const,
-          position,
-          ...result,
-        })),
+      tx.insert(backtestResultsTable)
+        .values([
+          ...pass.shortTermResults.map((result, position) => ({
+            backtestId,
+            type: 'short_term' as const,
+            position,
+            ...result,
+          })),
 
-        ...pass.longTermResults.map((result, position) => ({
-          backtestId,
-          type: 'long_term' as const,
-          position,
-          ...result,
-        })),
-      ]);
+          ...pass.longTermResults.map((result, position) => ({
+            backtestId,
+            type: 'long_term' as const,
+            position,
+            ...result,
+          })),
+        ])
+        .execute();
     }
 
     return created;
