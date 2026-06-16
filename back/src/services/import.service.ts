@@ -7,6 +7,11 @@ import expertConst from '@shared/constants/expert.constants.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { db } from '@src/db/database.ts';
 import { rebReportService } from './reb-report.service.ts';
+import { logService } from './log.service.ts';
+import { strategyContextService } from './strategy-context.service.ts';
+import { parameterSetService } from './parameter-set.service.ts';
+import { backtestsTable } from '@src/db/schema/backtest.ts';
+import { backtestResultsTable } from '@src/db/schema/backtest-result.ts';
 
 async function ensureDirectory(dir: string) {
   try {
@@ -39,6 +44,8 @@ export async function runImport(folderPath: string): Promise<void> {
 
   const files = await findRebFiles(folderPath);
 
+  logService.info('import', `Started on ${files.length} files.`);
+
   const results = {
     skipped: 0,
     inserted: 0,
@@ -46,24 +53,112 @@ export async function runImport(folderPath: string): Promise<void> {
     errors: [] as string[],
   };
 
+  let index = 0;
   for (const filePath of files) {
+    index++;
+
     try {
+      logService.info('import', `Import file ${index} / ${files.length}`);
       const parsedReport = await parseRebReport(filePath);
 
       if (parsedReport.importStatus !== 'completed') {
         results.skipped++;
+        logService.info('import', `File skipped (not completed)`);
         continue;
       }
 
-      const { newPath } = await moveFileToImportedFolder(filePath, parsedReport);
+      const fingerprint = rebReportService.buildFingerprint({
+        ...parsedReport,
+        passes: parsedReport.parsedPasses,
+      });
+
+      const existingReport = await db.query.rebReportsTable.findFirst({
+        where: (reports, { eq }) => eq(reports.fingerprint, fingerprint),
+      });
+
+      if (existingReport) {
+        results.skipped++;
+        logService.info('import', 'File skipped (already imported)');
+        continue;
+      }
+
+      const newProjectName = generateNewProjectName(parsedReport);
+      const newPath = `${newProjectName}.reb`;
 
       db.transaction((tx) => {
-        rebReportService.insertTx(tx, parsedReport, newPath);
+        const strategyContext = strategyContextService.findOrCreateTx(
+          tx,
+          parsedReport.expert,
+          parsedReport.symbol,
+          parsedReport.timeframe,
+          parsedReport.leverage,
+          parsedReport.capital,
+        );
+
+        const rebReport = rebReportService.insertTx(tx, {
+          id: crypto.randomUUID(),
+          strategyContextId: strategyContext.id,
+          fingerprint,
+          importStatus: parsedReport.importStatus,
+          path: newPath,
+          model: parsedReport.model,
+          startDate: parsedReport.startDate,
+          lastValidatedDate: parsedReport.lastValidatedDate ?? null,
+          shortTermCount: parsedReport.shortTermCount,
+          shortTermDuration: parsedReport.shortTermDuration,
+          shortTermUnit: parsedReport.shortTermUnit,
+          longTermDuration: parsedReport.longTermDuration,
+          longTermUnit: parsedReport.longTermUnit,
+        });
+
+        for (const pass of parsedReport.parsedPasses) {
+          const parameterSet = parameterSetService.findOrCreateTx(
+            tx,
+            parsedReport.expert,
+            pass.parameters,
+          );
+
+          const backtestId = crypto.randomUUID();
+
+          tx.insert(backtestsTable)
+            .values({
+              id: backtestId,
+              parameterSetId: parameterSet.id,
+              reportId: rebReport.id,
+              passNumber: pass.passNumber,
+            })
+            .execute();
+
+          tx.insert(backtestResultsTable)
+            .values([
+              ...pass.shortTermResults.map((result, position) => ({
+                backtestId,
+                type: 'short_term' as const,
+                position,
+                ...result,
+              })),
+
+              ...pass.longTermResults.map((result, position) => ({
+                backtestId,
+                type: 'long_term' as const,
+                position,
+                ...result,
+              })),
+            ])
+            .execute();
+        }
       });
+
+      await moveFileToImportedFolder(filePath, newProjectName);
+
+      logService.info('import', 'File imported succesfully', `File path: : ${newPath}`);
     } catch (err) {
+      logService.error('import', 'File import failed', String(err));
       results.errors.push(`${filePath}: ${String(err)}`);
     }
   }
+
+  logService.info('import', 'Import finished', results);
 }
 
 function replaceValue(lines: string[], key: string, newValue: string) {
@@ -73,19 +168,18 @@ function replaceValue(lines: string[], key: string, newValue: string) {
   }
 }
 
-async function moveFileToImportedFolder(
-  filePath: string,
-  parsedReport: ParsedRebReport,
-): Promise<{ newPath: string }> {
-  const content = await readFile(filePath, 'utf-8');
-  const lines = content.split(/\r?\n/);
-
+function generateNewProjectName(parsedReport: ParsedRebReport): string {
   const expertName = expertConst.EXPERT_NAMES[parsedReport.expert].replaceAll(' ', '');
   const startDate = parsedReport.startDate.replaceAll('-', '').substring(2);
   const shortTerm = `${parsedReport.shortTermCount}x${parsedReport.shortTermDuration}${parsedReport.shortTermUnit.toString()[0]}`;
   const longTerm = `${parsedReport.longTermDuration}${parsedReport.longTermUnit.toString()[0]}`;
   const currentDate = formatDateCompact();
-  const newProjectName = `${parsedReport.symbol}-${parsedReport.timeframe}-${expertName}-${parsedReport.capital}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
+  return `${parsedReport.symbol}-${parsedReport.timeframe}-${expertName}-${parsedReport.capital}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
+}
+
+async function moveFileToImportedFolder(filePath: string, newProjectName: string): Promise<void> {
+  const content = await readFile(filePath, 'utf-8');
+  const lines = content.split(/\r?\n/);
 
   replaceValue(lines, 'NOM PROJET :', newProjectName);
 
@@ -93,8 +187,6 @@ async function moveFileToImportedFolder(
   const newPath = join(IMPORTS_PATH, `${newProjectName}.reb`);
 
   await writeFile(newPath, newContent, 'utf-8');
-
-  return { newPath };
 }
 
 function formatDateCompact(date = new Date()): string {

@@ -1,126 +1,63 @@
 import { Tx } from '@src/db/database.ts';
-import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { normalizeParameters } from './parameter.helper.ts';
-import { ParsedRebPass } from '@src/models/parsed-reb-pass.ts';
 import { createHash } from 'crypto';
-import { strategyContextService } from './strategy-context.service.ts';
-import { parameterSetService } from './parameter-set.service.ts';
-import {
-  backtestResultsTable,
-  backtestsTable,
-  RebReportDb,
-  rebReportsTable,
-} from '@src/db/schema/index.ts';
-import { eq } from 'drizzle-orm';
+import { RebReportDb, rebReportsTable } from '@src/db/schema/index.ts';
+import { Parameter } from '@shared/models/parameter.ts';
+import { ImportStatus } from '@shared/models/import-status.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Symbol } from '@shared/models/symbol.ts';
+import { OptimizationModel } from '@shared/models/optimization-model.ts';
+import { TimeUnit } from '@shared/models/time-unit.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
 
 export const rebReportService = {
-  insertTx(tx: Tx, parsedReport: ParsedRebReport, path: string): RebReportDb {
-    const fingerprint = buildFingerprint(parsedReport);
+  insertTx(tx: Tx, report: RebReportDb): RebReportDb {
+    return tx.insert(rebReportsTable).values(report).returning().get();
+  },
+  buildFingerprint(params: {
+    passes: { passNumber: number; parameters: Parameter[] }[];
+    importStatus: ImportStatus;
+    expert: ExpertAdvisor;
+    symbol: Symbol;
+    timeframe: Timeframe;
+    leverage: number;
+    capital: number;
+    model: OptimizationModel;
+    startDate: string;
+    lastValidatedDate?: string;
+    shortTermCount: number;
+    shortTermDuration: number;
+    shortTermUnit: TimeUnit;
+    longTermDuration: number;
+    longTermUnit: TimeUnit;
+  }): string {
+    const parameters = params.passes
+      .map((p) => normalizePass(p.passNumber, p.parameters))
+      .sort()
+      .join('#');
 
-    const existing = tx
-      .select()
-      .from(rebReportsTable)
-      .where(eq(rebReportsTable.fingerprint, fingerprint))
-      .get();
+    const normalized = [
+      params.importStatus,
+      params.expert,
+      params.symbol,
+      params.timeframe,
+      params.leverage,
+      params.capital,
+      params.model,
+      params.startDate,
+      params.lastValidatedDate ?? '',
+      params.shortTermCount,
+      params.shortTermDuration,
+      params.shortTermUnit,
+      params.longTermDuration,
+      params.longTermUnit,
+      parameters,
+    ].join('||');
 
-    if (existing) {
-      return existing;
-    }
-
-    const strategyContext = strategyContextService.findOrCreateTx(
-      tx,
-      parsedReport.expert,
-      parsedReport.symbol,
-      parsedReport.timeframe,
-      parsedReport.leverage,
-      parsedReport.capital,
-    );
-
-    const created = tx
-      .insert(rebReportsTable)
-      .values({
-        id: crypto.randomUUID(),
-        strategyContextId: strategyContext.id,
-        fingerprint,
-        importStatus: parsedReport.importStatus,
-        path,
-        model: parsedReport.model,
-        startDate: parsedReport.startDate,
-        lastValidatedDate: parsedReport.lastValidatedDate,
-        shortTermCount: parsedReport.shortTermCount,
-        shortTermDuration: parsedReport.shortTermDuration,
-        shortTermUnit: parsedReport.shortTermUnit,
-        longTermDuration: parsedReport.longTermDuration,
-        longTermUnit: parsedReport.longTermUnit,
-      })
-      .returning()
-      .get();
-
-    for (const pass of parsedReport.parsedPasses) {
-      const parameterSet = parameterSetService.findOrCreateTx(
-        tx,
-        parsedReport.expert,
-        pass.parameters,
-      );
-
-      const backtestId = crypto.randomUUID();
-
-      tx.insert(backtestsTable)
-        .values({
-          id: backtestId,
-          parameterSetId: parameterSet.id,
-          reportId: created.id,
-          passNumber: pass.passNumber,
-        })
-        .execute();
-
-      tx.insert(backtestResultsTable)
-        .values([
-          ...pass.shortTermResults.map((result, position) => ({
-            backtestId,
-            type: 'short_term' as const,
-            position,
-            ...result,
-          })),
-
-          ...pass.longTermResults.map((result, position) => ({
-            backtestId,
-            type: 'long_term' as const,
-            position,
-            ...result,
-          })),
-        ])
-        .execute();
-    }
-
-    return created;
+    return createHash('sha1').update(normalized).digest('hex');
   },
 };
 
-function normalizePass(pass: ParsedRebPass): string {
-  return [pass.passNumber, normalizeParameters(pass.parameters)].join(':');
-}
-
-function buildFingerprint(parsed: ParsedRebReport): string {
-  const parameters = parsed.parsedPasses.map(normalizePass).sort().join('#');
-
-  const normalized = [
-    parsed.importStatus,
-    parsed.expert,
-    parsed.symbol,
-    parsed.timeframe,
-    parsed.leverage,
-    parsed.capital,
-    parsed.model,
-    parsed.startDate,
-    parsed.lastValidatedDate ?? '',
-    parsed.shortTermCount,
-    parsed.shortTermDuration,
-    parsed.shortTermUnit,
-    parsed.longTermDuration,
-    parsed.longTermUnit,
-    parameters,
-  ].join('||');
-
-  return createHash('sha1').update(normalized).digest('hex');
+function normalizePass(passNumber: number, parameters: Parameter[]): string {
+  return [passNumber, normalizeParameters(parameters)].join(':');
 }
