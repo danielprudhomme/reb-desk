@@ -9,11 +9,10 @@ export function groupBacktests(backtests: Backtest[], margin: number): GroupedBa
     let foundGroup: GroupedBacktest | undefined;
 
     for (const group of groups) {
-      const shortMatch = areResultsClose(backtest.shortTermResults, group.shortTermResults, margin);
-
-      const longMatch = areResultsClose(backtest.longTermResults, group.longTermResults, margin);
-
-      if (shortMatch && longMatch) {
+      if (
+        areResultsClose(backtest.shortTermResults, group.shortTermResults, margin) &&
+        areResultsClose(backtest.longTermResults, group.longTermResults, margin)
+      ) {
         foundGroup = group;
         break;
       }
