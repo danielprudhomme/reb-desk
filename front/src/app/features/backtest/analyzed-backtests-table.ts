@@ -64,7 +64,9 @@ import { AnalysisService } from '@app/services/analysis.service';
           @let label = $any(displayConfig)[thresholdType]?.label || thresholdType;
 
           <th mat-header-cell *matHeaderCellDef mat-sort-header>
-            <span class="whitespace-nowrap block w-30">{{ label }}</span>
+            <span class="whitespace-nowrap block w-30" [matTooltip]="threshold.description">
+              {{ label }}
+            </span>
           </th>
 
           <td mat-cell *matCellDef="let backtest">
@@ -159,6 +161,7 @@ export class AnalyzedBacktestsTable {
       ...threshold,
       columnName: `check-${index}`,
       valueType: BACKTEST_THRESHOLD_VALUE_TYPE[threshold.type],
+      description: `${threshold.operator}${threshold.value} in ${threshold.passRate}% of passes`,
     })),
   );
   displayedColumns = computed(() => [

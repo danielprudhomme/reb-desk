@@ -80,9 +80,9 @@ export class RobotDrawer {
       {
         type: 'longTermResultPercent',
         operator: '>',
-        value: 0,
+        value: 5,
         passRate: 100,
-        weight: 3,
+        weight: 2,
       },
       {
         type: 'longTermResultPercent',

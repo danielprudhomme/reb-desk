@@ -1,18 +1,30 @@
 import { BACKTEST_THRESHOLD_COMPUTE } from '@src/constants/backtest-threshold.constants.ts';
 import { BacktestThresholdCheck } from '@shared/models/backtest-threshold-check.ts';
 import { BacktestThreshold } from '@shared/models/backtest-threshold.ts';
-import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 import { AnalyzedGroupedBacktest, GroupedBacktest } from '@shared/models/backtest.ts';
 
 export function runChecks(
   groupedBacktests: GroupedBacktest[],
   capital: number,
   thresholds: BacktestThreshold[],
-  valuesByType: ValuesByThresholdType,
+  valuesByType: { worstValues: number[]; min: number; max: number }[],
 ): AnalyzedGroupedBacktest[] {
   return groupedBacktests.map((backtest) => {
-    const checks: BacktestThresholdCheck[] = thresholds.map((threshold) => {
-      const passValues = BACKTEST_THRESHOLD_COMPUTE[threshold.type]({ ...backtest, capital });
+    const thresholdValuesMap = thresholds.reduce(
+      (acc, threshold) => {
+        if (!(threshold.type in acc)) {
+          acc[threshold.type] = BACKTEST_THRESHOLD_COMPUTE[threshold.type]({
+            ...backtest,
+            capital,
+          });
+        }
+        return acc;
+      },
+      {} as Record<string, number[]>,
+    );
+
+    const checks: BacktestThresholdCheck[] = thresholds.map((threshold, index) => {
+      const passValues = thresholdValuesMap[threshold.type];
 
       const validCount = passValues.filter((value) =>
         threshold.operator === '>' ? value > threshold.value : value < threshold.value,
@@ -25,13 +37,13 @@ export function runChecks(
       const bestValue = threshold.operator === '>' ? max : min;
 
       if (ok) {
-        const values = valuesByType[threshold.type];
+        const values = valuesByType[index];
         if (values) {
           values.worstValues.push(worstValue);
           values.min = Math.min(values.min, worstValue);
           values.max = Math.max(values.max, worstValue);
         } else {
-          valuesByType[threshold.type] = {
+          valuesByType[index] = {
             worstValues: [worstValue],
             min: worstValue,
             max: worstValue,

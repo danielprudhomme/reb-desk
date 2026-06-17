@@ -2,7 +2,6 @@ import { AnalysisRequest } from '@shared/models/analysis-request.ts';
 import { backtestService } from '../backtest.service.ts';
 import { groupBacktests } from './group-backtests.ts';
 import { runChecks } from './run-check.ts';
-import { ValuesByThresholdType } from './models/values-by-thresold-type.ts';
 import { computeScore } from './compute-score.ts';
 import { AnalyzedGroupedBacktest } from '@shared/models/backtest.ts';
 
@@ -11,7 +10,7 @@ export async function runAnalysis(request: AnalysisRequest): Promise<AnalyzedGro
 
   const groupedBacktests = groupBacktests(backtests, 0.1);
 
-  const valuesByType: ValuesByThresholdType = {} as ValuesByThresholdType;
+  const valuesByType: { worstValues: number[]; min: number; max: number }[] = [];
   const analyzedGroupedPasses = runChecks(
     groupedBacktests,
     backtests[0]?.strategyContext.capital || 0,
