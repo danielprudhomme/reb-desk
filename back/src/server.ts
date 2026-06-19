@@ -5,11 +5,13 @@ import { createYoga } from 'graphql-yoga';
 import { schema } from './graphql/schema.ts';
 import { importReports } from './controllers/report.controller.ts';
 import { analyze } from './controllers/analysis.controller.ts';
+import { generateRebFiles } from './controllers/generate-reb-files.controller.ts';
 
 const router = Router();
 
 router.post('/report/import', importReports);
 router.post('/analyze', analyze);
+router.post('/generateRebFiles', generateRebFiles);
 
 async function start() {
   const yoga = createYoga({ schema });
