@@ -5,7 +5,9 @@ export const APP_CONFIG = {
   dataDir: 'C:\\Dev\\RebDeskData',
   dbFile: 'rebdesk.db',
   importDir: 'Imports',
+  exportDir: 'Exports',
 };
 
 export const DB_PATH = path.join(APP_CONFIG.dataDir, APP_CONFIG.dbFile);
 export const IMPORTS_PATH = path.join(APP_CONFIG.dataDir, APP_CONFIG.importDir);
+export const EXPORTS_PATH = path.join(APP_CONFIG.dataDir, APP_CONFIG.exportDir);

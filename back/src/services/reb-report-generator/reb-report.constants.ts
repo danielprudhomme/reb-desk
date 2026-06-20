@@ -1,0 +1,339 @@
+import { TimeUnit } from '@shared/models/time-unit.ts';
+
+export const REB_CONFIG: {
+  shortTermCount: number;
+  shortTermDuration: number;
+  shortTermUnit: TimeUnit;
+  longTermDuration: number;
+  longTermUnit: TimeUnit;
+  startDate: string;
+} = {
+  shortTermCount: 36,
+  shortTermDuration: 2,
+  shortTermUnit: 'month',
+  longTermDuration: 6,
+  longTermUnit: 'year',
+  startDate: '01/05/2020',
+};
+
+export const REB_EXPERTS: Record<
+  'candleSuite' | 'emaBb' | 'rsiBreak',
+  { name: string; path: string; parameters: string }
+> = {
+  candleSuite: {
+    name: 'REB Candle-Suite',
+    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB Candle-Suite.ex5',
+    parameters: `EA_Magic_Number=123||123||1||1230||N
+EA_Comment=REB Candle-Suite
+Settings=EA Buy Settings
+Suite=4||4||1||6||Y
+Extreme_Research=50||100||200||500||Y
+Inversion=true||false||0||true||Y
+Positions=Positions and Money Management Settings
+Base_Unit=1||0||0||1||N
+ATR_Period=200||200||1||2000||N
+TP_Distance=3||1.0||1||3||Y
+SL_Ratio=0||2.0||0.200000||20.000000||N
+Break_Even_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Start_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Distance=0||0.0||0.000000||0.000000||N
+TS_Step=1||1.0||0.100000||10.000000||N
+SL_Move=0||0||0||1||N
+Distance_Between_Orders=4||4||2||8||Y
+Distance_Between_Orders_Factor=1||1.0||0.100000||10.000000||N
+Trade_Direction=3||1||0||3||N
+Ini_Lot_Size_For_10k=0.03||0.02||0.02||0.06||Y
+Use_Fixed_Lot_Size=false||false||0||true||N
+Ini_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Fixed_Grid_Size=true||false||0||true||N
+Recovery_Factor=0||0.0||0.000000||0.000000||N
+Grid_Recovery_Factor=2||1.3||0.7||2||N
+Grid_Recovery_Factor_Modifier=1||1.0||0.100000||10.000000||N
+Grid_Lot_Sum=0||0.0||0.000000||0.000000||N
+Grid_Special_Reaction=0||0||1||10||N
+Grid_Pause_Until_GSR=false||false||0||true||N
+Grid_Lot_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Grid_Result_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_On_DD=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_Mode=0||0||0||2||N
+Smart_Account_Protection_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_When_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Close_On_Common_TP=true||false||0||true||N
+Use_Common_SL=false||false||0||true||N
+Ajust_First_TP=false||false||0||true||N
+Min_TP_Move_In_Point=10||10||1||100||N
+Max_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Lot_Size_For_10k=0.1||0.0||0.000000||0.000000||N
+Max_Opened_Orders_By_EA_Per_Size=0||0||1||10||N
+Max_Opened_Orders_By_EA=0||0||1||10||N
+Max_Opened_Orders=0||0||1||10||N
+Max_Symbols_In_Same_Time=0||0||1||10||N
+Max_Daily_DD_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Daily_Loss=0||0.0||0.000000||0.000000||N
+Max_Daily_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Restart_Hour=0||0||0||86100||N
+Non_Trading_DD=5||0.0||0.000000||0.000000||N
+Stop_EA=false||false||0||true||N
+Old_Orders_Close_On_DD=0||0.0||0.000000||0.000000||N
+Max_Equity_Stop=0||0.0||0.000000||0.000000||N
+Min_Equity_Stop=0||0.0||0.000000||0.000000||N
+EA_Max_Win=0||0.0||0.000000||0.000000||N
+EA_Max_Loss=0||0.0||0.000000||0.000000||N
+EA_Monthly_Max_Win=0||0.0||0.000000||0.000000||N
+Trade_Max_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Trade_Max_Loss_In_Percent=0||0.0||0.000000||0.000000||N
+Slippage=50||50||1||500||N
+Time_Filters=Time Filters
+Max_Hours_Before_Break_Even=0||0.0||0.000000||0.000000||N
+Max_Hours_Before_Closing=0||0.0||0.000000||0.000000||N
+Min_Hours_Between_Trade=0||0.0||0.000000||0.000000||N
+Min_Hours_After_Loss=0||0.0||0.000000||0.000000||N
+Pause_Orders_On_Friday=false||false||0||true||N
+Pausing_Hour=57600||0||0||86100||N
+Close_Orders_On_Friday=false||false||0||true||N
+Closing_Hour=57600||0||0||86100||N
+Apply_Hour_Filter=false||false||0||true||N
+Start=28800||0||0||86100||N
+Stop=57600||0||0||86100||N
+Apply_Hour_Filter_Action=1||1||0||2||N
+Trade_Monday=true||false||0||true||N
+Trade_Tuesday=true||false||0||true||N
+Trade_Wednesday=true||false||0||true||N
+Trade_Thursday=true||false||0||true||N
+Trade_Friday=true||false||0||true||N
+Trade_Saturday=true||false||0||true||N
+Trade_Sunday=true||false||0||true||N
+Stop_Before_News_In_Min=5||5||1||50||N
+Start_After_News_In_Min=5||5||1||50||N
+Low_News_Filter=false||false||0||true||N
+Medium_News_Filter=false||false||0||true||N
+High_News_Filter=true||false||0||true||N
+GMT_Zone=3||3||1||30||N
+NewsSymb=USD,EUR,GBP,CHF,CAD,AUD,NZD,JPY
+Stop_Trading_If_News=false||false||0||true||N
+Close_All_Orders_If_News=false||false||0||true||N
+ATR_Max_Research=200||200||1||2000||N
+Pause_On_High_Volatity_In_Candles=0||0||1||10||N
+Force_Buy_Word=
+Force_Sell_Word=
+Force_Pause_Word=PAUSE
+Force_Non_Trading_If_Nothing_Word=NONTRADE
+Max_Amount_Of_First_Entries=1||1||1||10||N`,
+  },
+
+  emaBb: {
+    name: 'REB EMA-BB',
+    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB EMA-BB.ex5',
+    parameters: `EA_Magic_Number=123||123||1||1230||N
+EA_Comment=REB EMA-BB
+Settings=EA Buy Settings
+EMA_Slow_Period=200||50||0||200||N
+BB_Period=20||20||0||100||Y
+BB_Deviation=1||2||1||3||Y
+BB_Way=1||0||0||1||Y
+Inversion=true||false||0||true||Y
+Positions=Positions and Money Management Settings
+Base_Unit=1||0||0||1||N
+ATR_Period=200||200||1||2000||N
+TP_Distance=3||1.0||1||3||Y
+SL_Ratio=0||2.0||0.200000||20.000000||N
+Break_Even_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Start_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Distance=0||0.0||0.000000||0.000000||N
+TS_Step=1||1.0||0.100000||10.000000||N
+SL_Move=0||0||0||1||N
+Distance_Between_Orders=4||4||2||8||Y
+Distance_Between_Orders_Factor=1||1.0||0.100000||10.000000||N
+Trade_Direction=3||1||0||3||N
+Ini_Lot_Size_For_10k=0.03||0.02||0.02||0.06||Y
+Use_Fixed_Lot_Size=false||false||0||true||N
+Ini_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Fixed_Grid_Size=true||false||0||true||N
+Recovery_Factor=0||0.0||0.000000||0.000000||N
+Grid_Recovery_Factor=2||1.3||0.7||2||N
+Grid_Recovery_Factor_Modifier=1||1.0||0.100000||10.000000||N
+Grid_Lot_Sum=0||0.0||0.000000||0.000000||N
+Grid_Special_Reaction=0||0||1||10||N
+Grid_Pause_Until_GSR=false||false||0||true||N
+Grid_Lot_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Grid_Result_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_On_DD=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_Mode=0||0||0||2||N
+Smart_Account_Protection_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_When_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Close_On_Common_TP=true||false||0||true||N
+Use_Common_SL=false||false||0||true||N
+Ajust_First_TP=false||false||0||true||N
+Min_TP_Move_In_Point=10||10||1||100||N
+Max_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Lot_Size_For_10k=0.1||0.1||0.3||0.4||N
+Max_Opened_Orders_By_EA_Per_Size=0||0||1||10||N
+Max_Opened_Orders_By_EA=0||0||1||10||N
+Max_Opened_Orders=0||0||1||10||N
+Max_Symbols_In_Same_Time=0||0||1||10||N
+Max_Daily_DD_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Daily_Loss=0||0.0||0.000000||0.000000||N
+Max_Daily_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Restart_Hour=0||0||0||86100||N
+Non_Trading_DD=10||0.0||0.000000||0.000000||N
+Stop_EA=false||false||0||true||N
+Old_Orders_Close_On_DD=0||0.0||0.000000||0.000000||N
+Max_Equity_Stop=0||0.0||0.000000||0.000000||N
+Min_Equity_Stop=0||0.0||0.000000||0.000000||N
+EA_Max_Win=0||0.0||0.000000||0.000000||N
+EA_Max_Loss=0||0.0||0.000000||0.000000||N
+EA_Monthly_Max_Win=0||0.0||0.000000||0.000000||N
+Trade_Max_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Trade_Max_Loss_In_Percent=0||0.0||0.000000||0.000000||N
+Slippage=50||50||1||500||N
+Time_Filters=Time Filters
+Max_Hours_Before_Break_Even=0||0.0||0.000000||0.000000||N
+Max_Hours_Before_Closing=0||0.0||0.000000||0.000000||N
+Min_Hours_Between_Trade=0||0.0||0.000000||0.000000||N
+Min_Hours_After_Loss=0||0.0||0.000000||0.000000||N
+Pause_Orders_On_Friday=false||false||0||true||N
+Pausing_Hour=57600||0||0||86100||N
+Close_Orders_On_Friday=false||false||0||true||N
+Closing_Hour=57600||0||0||86100||N
+Apply_Hour_Filter=false||false||0||true||N
+Start=28800||0||0||86100||N
+Stop=57600||0||0||86100||N
+Apply_Hour_Filter_Action=1||1||0||2||N
+Trade_Monday=true||false||0||true||N
+Trade_Tuesday=true||false||0||true||N
+Trade_Wednesday=true||false||0||true||N
+Trade_Thursday=true||false||0||true||N
+Trade_Friday=true||false||0||true||N
+Trade_Saturday=true||false||0||true||N
+Trade_Sunday=true||false||0||true||N
+Stop_Before_News_In_Min=5||5||1||50||N
+Start_After_News_In_Min=5||5||1||50||N
+Low_News_Filter=false||false||0||true||N
+Medium_News_Filter=false||false||0||true||N
+High_News_Filter=true||false||0||true||N
+GMT_Zone=3||3||1||30||N
+NewsSymb=USD,EUR,GBP,CHF,CAD,AUD,NZD,JPY
+Stop_Trading_If_News=false||false||0||true||N
+Close_All_Orders_If_News=false||false||0||true||N
+ATR_Max_Research=200||200||1||2000||N
+Pause_On_High_Volatity_In_Candles=0||0||1||10||N
+Force_Buy_Word=
+Force_Sell_Word=
+Force_Pause_Word=PAUSE
+Force_Non_Trading_If_Nothing_Word=NONTRADE
+Max_Amount_Of_First_Entries=1||1||1||10||N`,
+  },
+
+  rsiBreak: {
+    name: 'REB RSI-Break',
+    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB RSI-Break.ex5',
+    parameters: `EA_Magic_Number=123||123||1||1230||N
+EA_Comment=REB RSI
+Settings=EA Buy Settings
+Extreme_Research=500||50||250||500||Y
+RSI_Period=14||14||1||140||N
+RSI_Start=30||30||20||50||Y
+Delta_RSI_Buy=20||20||20||40||Y
+Inversion=false||false||0||true||Y
+Positions=Positions and Money Management Settings
+Base_Unit=1||0||0||1||N
+ATR_Period=200||200||1||2000||N
+TP_Distance=3||1.0||1||3||Y
+SL_Ratio=0||2.0||0.200000||20.000000||N
+Break_Even_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Start_In_Percent=0||0.0||0.000000||0.000000||N
+TS_Distance=0||0.0||0.000000||0.000000||N
+TS_Step=1||1.0||0.100000||10.000000||N
+SL_Move=0||0||0||1||N
+Distance_Between_Orders=4||4||2||8||Y
+Distance_Between_Orders_Factor=1||1.0||0.100000||10.000000||N
+Trade_Direction=3||1||0||3||N
+Ini_Lot_Size_For_10k=0.03||0.02||0.02||0.06||Y
+Use_Fixed_Lot_Size=false||false||0||true||N
+Ini_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Fixed_Grid_Size=true||false||0||true||N
+Recovery_Factor=0||0.0||0.000000||0.000000||N
+Grid_Recovery_Factor=2||1.3||0.7||2||N
+Grid_Recovery_Factor_Modifier=1||1.0||0.100000||10.000000||N
+Grid_Lot_Sum=0||0.0||0.000000||0.000000||N
+Grid_Special_Reaction=0||0||1||10||N
+Grid_Pause_Until_GSR=false||false||0||true||N
+Grid_Lot_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Grid_Result_Boost_On_GSR=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_On_DD=0||0.0||0.000000||0.000000||N
+Smart_Loss_Management_Mode=0||0||0||2||N
+Smart_Account_Protection_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_On_DD=0||0.0||0.000000||0.000000||N
+Close_All_Orders_When_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Close_On_Common_TP=true||false||0||true||N
+Use_Common_SL=false||false||0||true||N
+Ajust_First_TP=false||false||0||true||N
+Min_TP_Move_In_Point=10||10||1||100||N
+Max_Risk_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Lot_Size_For_10k=0.1||0.0||0.000000||0.000000||N
+Max_Opened_Orders_By_EA_Per_Size=0||0||1||10||N
+Max_Opened_Orders_By_EA=0||0||1||10||N
+Max_Opened_Orders=0||0||1||10||N
+Max_Symbols_In_Same_Time=0||0||1||10||N
+Max_Daily_DD_In_Percent=0||0.0||0.000000||0.000000||N
+Max_Daily_Loss=0||0.0||0.000000||0.000000||N
+Max_Daily_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Restart_Hour=0||0||0||86100||N
+Non_Trading_DD=10||0.0||0.000000||0.000000||N
+Stop_EA=false||false||0||true||N
+Old_Orders_Close_On_DD=0||0.0||0.000000||0.000000||N
+Max_Equity_Stop=0||0.0||0.000000||0.000000||N
+Min_Equity_Stop=0||0.0||0.000000||0.000000||N
+EA_Max_Win=0||0.0||0.000000||0.000000||N
+EA_Max_Loss=0||0.0||0.000000||0.000000||N
+EA_Monthly_Max_Win=0||0.0||0.000000||0.000000||N
+Trade_Max_Profit_In_Percent=0||0.0||0.000000||0.000000||N
+Trade_Max_Loss_In_Percent=0||0.0||0.000000||0.000000||N
+Slippage=50||50||1||500||N
+Time_Filters=Time Filters
+Max_Hours_Before_Break_Even=0||0.0||0.000000||0.000000||N
+Max_Hours_Before_Closing=0||0.0||0.000000||0.000000||N
+Min_Hours_Between_Trade=0||0.0||0.000000||0.000000||N
+Min_Hours_After_Loss=0||0.0||0.000000||0.000000||N
+Pause_Orders_On_Friday=false||false||0||true||N
+Pausing_Hour=57600||0||0||86100||N
+Close_Orders_On_Friday=false||false||0||true||N
+Closing_Hour=57600||0||0||86100||N
+Apply_Hour_Filter=false||false||0||true||N
+Start=28800||0||0||86100||N
+Stop=57600||0||0||86100||N
+Apply_Hour_Filter_Action=1||1||0||2||N
+Trade_Monday=true||false||0||true||N
+Trade_Tuesday=true||false||0||true||N
+Trade_Wednesday=true||false||0||true||N
+Trade_Thursday=true||false||0||true||N
+Trade_Friday=true||false||0||true||N
+Trade_Saturday=true||false||0||true||N
+Trade_Sunday=true||false||0||true||N
+Stop_Before_News_In_Min=5||5||1||50||N
+Start_After_News_In_Min=5||5||1||50||N
+Low_News_Filter=false||false||0||true||N
+Medium_News_Filter=false||false||0||true||N
+High_News_Filter=true||false||0||true||N
+GMT_Zone=3||3||1||30||N
+NewsSymb=USD,EUR,GBP,CHF,CAD,AUD,NZD,JPY
+Stop_Trading_If_News=false||false||0||true||N
+Close_All_Orders_If_News=false||false||0||true||N
+ATR_Max_Research=200||200||1||2000||N
+Pause_On_High_Volatity_In_Candles=0||0||1||10||N
+Force_Buy_Word=
+Force_Sell_Word=
+Force_Pause_Word=PAUSE
+Force_Non_Trading_If_Nothing_Word=NONTRADE
+Max_Amount_Of_First_Entries=1||1||1||10||N`,
+  },
+};
+
+export const TIME_UNIT_LABELS: Record<TimeUnit, string> = {
+  year: 'Années',
+  month: 'Mois',
+  week: 'Semaines',
+  day: 'Jours',
+};

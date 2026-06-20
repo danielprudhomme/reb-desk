@@ -1,10 +1,7 @@
-import { readdir, mkdir, access, readFile, writeFile } from 'node:fs/promises';
-import { constants } from 'node:fs';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { IMPORTS_PATH } from '../config.ts';
 import { parseRebReport } from './parser/reb-report.parser.ts';
-import expertConst from '@shared/constants/expert.constants.ts';
-import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { db } from '@src/db/database.ts';
 import { rebReportService } from './reb-report.service.ts';
 import { logService } from './log.service.ts';
@@ -12,14 +9,7 @@ import { strategyContextService } from './strategy-context.service.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { backtestsTable } from '@src/db/schema/backtest.ts';
 import { backtestResultsTable } from '@src/db/schema/backtest-result.ts';
-
-async function ensureDirectory(dir: string) {
-  try {
-    await access(dir, constants.F_OK);
-  } catch {
-    await mkdir(dir, { recursive: true });
-  }
-}
+import { fileService } from './file.service.ts';
 
 async function findRebFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -40,7 +30,7 @@ async function findRebFiles(dir: string): Promise<string[]> {
 }
 
 export async function runImport(folderPath: string): Promise<void> {
-  await ensureDirectory(IMPORTS_PATH);
+  await fileService.ensureDirectory(IMPORTS_PATH);
 
   const files = await findRebFiles(folderPath);
 
@@ -82,7 +72,7 @@ export async function runImport(folderPath: string): Promise<void> {
         continue;
       }
 
-      const newProjectName = generateNewProjectName(parsedReport);
+      const newProjectName = rebReportService.generateProjectName(parsedReport);
       const newPath = `${newProjectName}.reb`;
 
       db.transaction((tx) => {
@@ -168,15 +158,6 @@ function replaceValue(lines: string[], key: string, newValue: string) {
   }
 }
 
-function generateNewProjectName(parsedReport: ParsedRebReport): string {
-  const expertName = expertConst.EXPERT_NAMES[parsedReport.expert].replaceAll(' ', '');
-  const startDate = parsedReport.startDate.replaceAll('-', '').substring(2);
-  const shortTerm = `${parsedReport.shortTermCount}x${parsedReport.shortTermDuration}${parsedReport.shortTermUnit.toString()[0]}`;
-  const longTerm = `${parsedReport.longTermDuration}${parsedReport.longTermUnit.toString()[0]}`;
-  const currentDate = formatDateCompact();
-  return `${parsedReport.symbol}-${parsedReport.timeframe}-${expertName}-${parsedReport.capital}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
-}
-
 async function moveFileToImportedFolder(filePath: string, newProjectName: string): Promise<void> {
   const content = await readFile(filePath, 'utf-8');
   const lines = content.split(/\r?\n/);
@@ -187,17 +168,4 @@ async function moveFileToImportedFolder(filePath: string, newProjectName: string
   const newPath = join(IMPORTS_PATH, `${newProjectName}.reb`);
 
   await writeFile(newPath, newContent, 'utf-8');
-}
-
-function formatDateCompact(date = new Date()): string {
-  const pad = (n: number) => String(n).padStart(2, '0');
-
-  return (
-    date.getFullYear() +
-    pad(date.getMonth() + 1) +
-    pad(date.getDate()) +
-    pad(date.getHours()) +
-    pad(date.getMinutes()) +
-    pad(date.getSeconds())
-  );
 }

@@ -1,4 +1,4 @@
-import { generateRebFilesForAccount } from '@src/services/generate-reb-files.service.ts';
+import { generateRebFilesForAccount } from '@src/services/reb-report-generator/generate-reb-files.service.ts';
 import { Request, Response } from 'express';
 
 export async function generateRebFiles(req: Request, res: Response) {
