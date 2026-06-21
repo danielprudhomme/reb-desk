@@ -152,14 +152,14 @@ export class AccountDetails {
       .afterClosed()
       .subscribe((result) => {
         if (!result) return;
-        const { maxRobots, experts } = result;
+        const { numberOfRobots, experts } = result;
 
         const robots = diversifyRobots(
           this.robots().map((r) => r.strategyContext),
           experts,
           this.timeframes,
           this.symbols,
-          maxRobots,
+          numberOfRobots,
         );
         this.robotService.insertRobots(this.accountId!, robots);
       });

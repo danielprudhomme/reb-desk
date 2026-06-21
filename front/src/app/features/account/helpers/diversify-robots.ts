@@ -73,79 +73,79 @@ export function diversifyRobots(
   experts: ExpertAdvisor[],
   timeframes: Timeframe[],
   symbols: Symbol[],
-  maxRobots: number,
+  numberOfRobots: number,
 ): RobotConfiguration[] {
   const candidates: RobotConfiguration[] = [];
 
   for (const expert of experts) {
     for (const timeframe of timeframes) {
       for (const symbol of symbols) {
-        candidates.push({
-          expert,
-          timeframe,
-          symbol,
-        });
+        candidates.push({ expert, timeframe, symbol });
       }
     }
   }
 
-  // Shuffle
   candidates.sort(() => Math.random() - 0.5);
 
-  const selected = [
-    ...existingRobots.map((r) => ({ expert: r.expert, timeframe: r.timeframe, symbol: r.symbol })),
-  ];
+  const selected = [...existingRobots];
   const stats = createStats();
 
-  // Initialize with existing robots
   for (const robot of existingRobots) {
     registerRobot(stats, robot);
   }
 
-  while (selected.length < maxRobots && candidates.length > 0) {
+  while (selected.length < numberOfRobots) {
     let bestIndex = -1;
     let bestScore = Number.POSITIVE_INFINITY;
 
-    for (let i = 0; i < candidates.length; i++) {
-      const candidate = candidates[i];
+    for (let level = 1; level <= 3 && bestIndex === -1; level++) {
+      for (let i = 0; i < candidates.length; i++) {
+        const candidate = candidates[i];
 
-      const [base, quote] = extractCurrencies(candidate.symbol);
+        const [base, quote] = extractCurrencies(candidate.symbol);
 
-      const expertSymbolKey = createKey(candidate.expert, candidate.symbol);
+        const expertSymbolKey = createKey(candidate.expert, candidate.symbol);
+        const exactKey = createKey(candidate.expert, candidate.timeframe, candidate.symbol);
 
-      // Hard constraint
-      if (get(stats.expertSymbolCount, expertSymbolKey) >= 1) {
-        continue;
-      }
+        // Progressive relaxation
+        if (level === 1 && get(stats.expertSymbolCount, expertSymbolKey) >= 1) {
+          continue;
+        }
 
-      const score =
-        // Global balancing
-        get(stats.expertCount, candidate.expert) * 10 +
-        get(stats.timeframeCount, candidate.timeframe) * 8 +
-        get(stats.symbolCount, candidate.symbol) * 6 +
-        // Currency exposure
-        get(stats.currencyCount, base) * 5 +
-        get(stats.currencyCount, quote) * 5 +
-        // Diversification penalties
-        get(stats.expertTimeframeCount, createKey(candidate.expert, candidate.timeframe)) * 30 +
-        get(stats.symbolTimeframeCount, createKey(candidate.symbol, candidate.timeframe)) * 15 +
-        get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, base)) * 50 +
-        get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, quote)) * 50;
+        if (
+          level === 2 &&
+          selected.some((r) => createKey(r.expert, r.timeframe, r.symbol) === exactKey)
+        ) {
+          continue;
+        }
 
-      if (score < bestScore) {
-        bestScore = score;
-        bestIndex = i;
+        const score =
+          get(stats.expertCount, candidate.expert) * 10 +
+          get(stats.timeframeCount, candidate.timeframe) * 8 +
+          get(stats.symbolCount, candidate.symbol) * 6 +
+          get(stats.currencyCount, base) * 5 +
+          get(stats.currencyCount, quote) * 5 +
+          get(stats.expertTimeframeCount, createKey(candidate.expert, candidate.timeframe)) * 30 +
+          get(stats.symbolTimeframeCount, createKey(candidate.symbol, candidate.timeframe)) * 15 +
+          get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, base)) * 50 +
+          get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, quote)) * 50;
+
+        if (score < bestScore) {
+          bestScore = score;
+          bestIndex = i;
+        }
       }
     }
 
+    // Si tout est saturé, on recycle les candidats
     if (bestIndex === -1) {
-      break;
+      candidates.push(...selected);
+      continue;
     }
 
-    const chosen = candidates.splice(bestIndex, 1)[0];
+    const chosen = candidates[bestIndex];
 
     selected.push(chosen);
-
     registerRobot(stats, chosen);
   }
 

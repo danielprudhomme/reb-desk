@@ -23,7 +23,7 @@ import { MatInputModule } from '@angular/material/input';
       <div class="flex flex-col gap-4">
         <mat-form-field appearance="outline" class="w-full mt-4">
           <mat-label>Number of robots</mat-label>
-          <input matInput type="number" [formField]="form.maxRobots" />
+          <input matInput type="number" [formField]="form.numberOfRobots" />
         </mat-form-field>
         <app-expert-select [formField]="form.experts" />
       </div>
@@ -37,14 +37,14 @@ import { MatInputModule } from '@angular/material/input';
   `,
 })
 export class GenerateRobotsDialog {
-  model = signal<{ maxRobots: number; experts: ExpertAdvisor[] }>({
-    maxRobots: 90,
+  model = signal<{ numberOfRobots: number; experts: ExpertAdvisor[] }>({
+    numberOfRobots: 99,
     experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
   });
   form = form(this.model, (path) => {
-    required(path.maxRobots);
-    min(path.maxRobots, 1);
-    max(path.maxRobots, 99);
+    required(path.numberOfRobots);
+    min(path.numberOfRobots, 1);
+    max(path.numberOfRobots, 99);
     required(path.experts);
     minLength(path.experts, 1);
   });
