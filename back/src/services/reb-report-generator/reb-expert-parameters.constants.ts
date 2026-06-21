@@ -1,29 +1,6 @@
-import { TimeUnit } from '@shared/models/time-unit.ts';
-
-export const REB_CONFIG: {
-  shortTermCount: number;
-  shortTermDuration: number;
-  shortTermUnit: TimeUnit;
-  longTermDuration: number;
-  longTermUnit: TimeUnit;
-  startDate: string;
-} = {
-  shortTermCount: 36,
-  shortTermDuration: 2,
-  shortTermUnit: 'month',
-  longTermDuration: 6,
-  longTermUnit: 'year',
-  startDate: '01/05/2020',
-};
-
-export const REB_EXPERTS: Record<
-  'candleSuite' | 'emaBb' | 'rsiBreak',
-  { name: string; path: string; parameters: string }
-> = {
-  candleSuite: {
-    name: 'REB Candle-Suite',
-    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB Candle-Suite.ex5',
-    parameters: `EA_Magic_Number=123||123||1||1230||N
+export const REB_EXPERT_PARAMETERS: Record<'candleSuite' | 'emaBb' | 'rsiBreak', string[]> = {
+  candleSuite: [
+    `EA_Magic_Number=123||123||1||1230||N
 EA_Comment=REB Candle-Suite
 Settings=EA Buy Settings
 Suite=4||4||1||6||Y
@@ -120,12 +97,10 @@ Force_Sell_Word=
 Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`,
-  },
+  ],
 
-  emaBb: {
-    name: 'REB EMA-BB',
-    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB EMA-BB.ex5',
-    parameters: `EA_Magic_Number=123||123||1||1230||N
+  emaBb: [
+    `EA_Magic_Number=123||123||1||1230||N
 EA_Comment=REB EMA-BB
 Settings=EA Buy Settings
 EMA_Slow_Period=200||50||0||200||N
@@ -224,12 +199,10 @@ Force_Sell_Word=
 Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`,
-  },
+  ],
 
-  rsiBreak: {
-    name: 'REB RSI-Break',
-    path: 'C:\\Metatrader\\Terminaux\\Terminal 1\\MQL5\\Experts\\REB RSI-Break.ex5',
-    parameters: `EA_Magic_Number=123||123||1||1230||N
+  rsiBreak: [
+    `EA_Magic_Number=123||123||1||1230||N
 EA_Comment=REB RSI
 Settings=EA Buy Settings
 Extreme_Research=500||50||250||500||Y
@@ -328,12 +301,5 @@ Force_Sell_Word=
 Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`,
-  },
-};
-
-export const TIME_UNIT_LABELS: Record<TimeUnit, string> = {
-  year: 'Années',
-  month: 'Mois',
-  week: 'Semaines',
-  day: 'Jours',
+  ],
 };

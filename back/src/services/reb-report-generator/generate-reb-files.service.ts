@@ -1,11 +1,36 @@
-import { EXPORTS_PATH } from '@src/config.ts';
+import { APP_CONFIG, EXPORTS_PATH } from '@src/config.ts';
 import { fileService } from '../file.service.ts';
 import { robotService } from '../robot.service.ts';
-import { REB_CONFIG, REB_EXPERTS, TIME_UNIT_LABELS } from './reb-report.constants.ts';
 import { Robot } from '@shared/models/robot.ts';
 import path from 'path';
 import { writeFile } from 'fs/promises';
 import { rebReportService } from '../reb-report.service.ts';
+import { TimeUnit } from '@shared/models/time-unit.ts';
+import { EXPERT_NAMES } from '@shared/constants/expert.constants.ts';
+import { REB_EXPERT_PARAMETERS } from './reb-expert-parameters.constants.ts';
+
+const REB_CONFIG: {
+  shortTermCount: number;
+  shortTermDuration: number;
+  shortTermUnit: TimeUnit;
+  longTermDuration: number;
+  longTermUnit: TimeUnit;
+  startDate: string;
+} = {
+  shortTermCount: 36,
+  shortTermDuration: 2,
+  shortTermUnit: 'month',
+  longTermDuration: 6,
+  longTermUnit: 'year',
+  startDate: '01/05/2020',
+};
+
+const TIME_UNIT_LABELS: Record<TimeUnit, string> = {
+  year: 'Années',
+  month: 'Mois',
+  week: 'Semaines',
+  day: 'Jours',
+};
 
 export async function generateRebFilesForAccount(accountId: string): Promise<void> {
   // at first do it only with non SC robots
@@ -29,16 +54,23 @@ export async function generateRebFilesForAccount(accountId: string): Promise<voi
 }
 
 function buildRebFile(robot: Robot, projectName: string): string {
-  const expertConfig =
-    REB_EXPERTS[robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak'];
+  const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+
+  const expertPath = path.join(
+    APP_CONFIG.terminalPath,
+    `MQL5\\Experts\\REB ${EXPERT_NAMES[expert].replace(' ', '-')}.ex5`,
+  );
+  const terminalPath = `${path.join(APP_CONFIG.terminalPath, 'terminal64.exe')} /portable`;
+
+  const parameters = REB_EXPERT_PARAMETERS[expert][0];
 
   return `
 NOM PROJET :
 ${projectName}
 TERMINAL :
-C:\\Metatrader\\Terminaux\\Terminal 1\\terminal64.exe /portable
+${terminalPath}
 NOM EXPERT :
-${expertConfig.path}
+${expertPath}
 SYMBOLE :
 ${robot.strategyContext.symbol}
 UNITE DE TEMPS :
@@ -76,7 +108,7 @@ True
 ::Le drawdown (en %) rencontré en LT;;::Est inférieur à :;;::20;;::100;;
 ==FIN CRITERES OPTIMISATION==
 ==PARAMETRES OPTIMISATION==
-${expertConfig.parameters}
+${parameters}
 ==FIN PARAMETRES OPTIMISATION==
 `.trim();
 }
