@@ -21,5 +21,6 @@ export interface ParsedRebReport {
   shortTermUnit: TimeUnit;
   longTermDuration: number;
   longTermUnit: TimeUnit;
+  selectedPassNumber?: number;
   parsedPasses: ParsedRebPass[];
 }

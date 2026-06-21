@@ -13,15 +13,15 @@ import {
 import { Parameter } from '@shared/models/parameter.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
-import { getAllParameters } from '@src/constants/reb-parameters-definitions.ts';
 import { ParsedRebPassResult } from '@src/models/parsed-reb-pass.ts';
+import { getParameters } from '@src/constants/reb-parameters-definitions.ts';
 
 export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
   const expert = extractExpert(lines);
 
-  const allowedParameters = getAllParameters(expert);
+  const allowedParameters = getParameters(expert);
   const passNumbers = getLinesSection(content, 'SENS DES PASSAGES').map((n) => +n);
   const fixedParameters = parseFixedParameters(content, allowedParameters);
   const passParameters = parsePassParameters(content);
@@ -45,6 +45,7 @@ export async function parseRebReport(filePath: string): Promise<ParsedRebReport>
     shortTermResults: passShortTermResults[index],
     longTermResults: passLongTermResults[index],
   }));
+  const selectedPassNumber = parseSelectedPassNumber(content);
 
   return {
     importStatus,
@@ -61,6 +62,7 @@ export async function parseRebReport(filePath: string): Promise<ParsedRebReport>
     shortTermUnit: parseTimeUnit(requiredValue(lines, 'UNITE COURT TERME :')),
     longTermDuration,
     longTermUnit,
+    selectedPassNumber,
     parsedPasses,
   };
 }
@@ -219,4 +221,21 @@ function mapToPassResults(values: number[]): ParsedRebPassResult[] {
   }
 
   return results;
+}
+
+function parseSelectedPassNumber(content: string): number | undefined {
+  const lines = getLinesSection(content, 'BILAN');
+
+  const lastLine = [...lines].reverse().find((line) => line.trim());
+
+  if (!lastLine) return undefined;
+
+  const values = lastLine
+    .split(';;')
+    .map((part) => part.replace(/^::/, '').trim())
+    .filter(Boolean);
+
+  const lastNumeric = [...values].reverse().find((value) => !isNaN(Number(value)));
+
+  return lastNumeric ? Number(lastNumeric) : undefined;
 }

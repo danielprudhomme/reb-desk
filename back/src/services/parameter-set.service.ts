@@ -2,12 +2,9 @@ import { Parameter } from '@shared/models/parameter.ts';
 import { createHash } from 'crypto';
 import { Tx } from '@src/db/database.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-import {
-  getLotSizeParameters,
-  getStrategyParameters,
-} from '@src/constants/reb-parameters-definitions.ts';
 import { ParameterSetDb, parameterSetsTable } from '@src/db/schema/parameter-set.ts';
 import { ParameterSet } from '@shared/models/parameter-set.ts';
+import { getParameters } from '@src/constants/reb-parameters-definitions.ts';
 
 export const parameterSetService = {
   findOrCreateTx(tx: Tx, expert: ExpertAdvisor, parameters: Parameter[]): ParameterSetDb {
@@ -16,23 +13,11 @@ export const parameterSetService = {
       Object.fromEntries(parameters.map((p) => [p.name, p.value])),
     );
 
-    const lotSizeParams = getLotSizeParameters(expert);
-
-    const getParam = (name: string) => parameters.find((p) => p.name === name)?.value;
-
-    const fixedLotSize = Boolean(
-      (lotSizeParams.fixedLotSize && Number(getParam(lotSizeParams.fixedLotSize)) === 1) ||
-      (lotSizeParams.adaptLotSize && Number(getParam(lotSizeParams.adaptLotSize)) === 0),
-    );
-
     const [created] = tx
       .insert(parameterSetsTable)
       .values({
-        id: crypto.randomUUID(),
+        id: buildParametersHash(parametersString),
         parameters: parametersString,
-        parametersHash: buildParametersHash(parametersString),
-        initLotSize: Number(getParam(lotSizeParams.initLotSize)),
-        fixedLotSize,
       })
       .returning()
       .all();
@@ -51,7 +36,7 @@ export const parameterSetService = {
 };
 
 function buildParametersString(expert: ExpertAdvisor, params: Record<string, unknown>): string {
-  const keys = getStrategyParameters(expert);
+  const keys = getParameters(expert);
   return keys.map((key) => `${key}=${normalizeValue(params[key])}`).join('|');
 }
 

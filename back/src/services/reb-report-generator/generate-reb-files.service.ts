@@ -6,7 +6,7 @@ import path from 'path';
 import { writeFile } from 'fs/promises';
 import { rebReportService } from '../reb-report.service.ts';
 import { TimeUnit } from '@shared/models/time-unit.ts';
-import { EXPERT_NAMES } from '@shared/constants/expert.constants.ts';
+import expertConst from '@shared/constants/expert.constants.ts';
 import { REB_EXPERT_PARAMETERS } from './reb-expert-parameters.constants.ts';
 
 const REB_CONFIG: {
@@ -58,7 +58,7 @@ function buildRebFile(robot: Robot, projectName: string): string {
 
   const expertPath = path.join(
     APP_CONFIG.terminalPath,
-    `MQL5\\Experts\\REB ${EXPERT_NAMES[expert].replace(' ', '-')}.ex5`,
+    `MQL5\\Experts\\REB ${expertConst.EXPERT_NAMES[expert].replace(' ', '-')}.ex5`,
   );
   const terminalPath = `${path.join(APP_CONFIG.terminalPath, 'terminal64.exe')} /portable`;
 

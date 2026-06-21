@@ -1,28 +1,8 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 
-export function getAllParameters(expert: ExpertAdvisor): string[] {
-  const lotSizeParams =
-    expert === 'autoBot' ? AUTOBOT_LOT_SIZE_PARAMETERS : COMMON_LOT_SIZE_PARAMETERS;
-  return [...EXPERT_PARAMETER_DEFINITIONS[expert], ...lotSizeParams];
-}
-
-export function getLotSizeParameters(expert: ExpertAdvisor): {
-  initLotSize: string;
-  fixedLotSize?: string;
-  adaptLotSize?: string;
-} {
-  return expert === 'autoBot'
-    ? { initLotSize: 'Ini_Lot_Size_For_1k', adaptLotSize: 'Adapt_Lot_Size_To_Capital' }
-    : { initLotSize: 'Ini_Lot_Size_For_10k', fixedLotSize: 'Use_Fixed_Lot_Size' };
-}
-
-export function getStrategyParameters(expert: ExpertAdvisor): string[] {
+export function getParameters(expert: ExpertAdvisor): string[] {
   return EXPERT_PARAMETER_DEFINITIONS[expert];
 }
-
-const COMMON_LOT_SIZE_PARAMETERS: string[] = ['Ini_Lot_Size_For_10k', 'Use_Fixed_Lot_Size'];
-
-const AUTOBOT_LOT_SIZE_PARAMETERS: string[] = ['Ini_Lot_Size_For_1k', 'Adapt_Lot_Size_To_Capital'];
 
 const COMMON_PARAMETERS: string[] = [
   'Inversion',
@@ -33,6 +13,9 @@ const COMMON_PARAMETERS: string[] = [
 
   'Grid_Recovery_Factor',
   'Grid_Recovery_Factor_Modifier',
+
+  'Ini_Lot_Size_For_10k',
+  'Use_Fixed_Lot_Size',
 
   'Max_Lot_Size_For_10k',
   'Min_Hours_Between_Trade',
@@ -126,5 +109,7 @@ const EXPERT_PARAMETER_DEFINITIONS: Record<ExpertAdvisor, string[]> = {
     'Max_Lot_Size_Vs_Ini',
     'Min_Distance_Between_Entries',
     'Max_Amount_Of_First_Entries',
+    'Ini_Lot_Size_For_1k',
+    'Adapt_Lot_Size_To_Capital',
   ],
 };
