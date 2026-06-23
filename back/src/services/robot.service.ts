@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { db, Tx } from '@src/db/database.ts';
-import { and, eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
@@ -14,6 +14,7 @@ import {
 import { Robot } from '@shared/models/robot.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
+import { runImport } from './import.service.ts';
 
 export const robotService = {
   async findByAccount(accountId: string): Promise<Robot[]> {
@@ -72,6 +73,34 @@ export const robotService = {
       .get();
 
     return await findOne(updated.id);
+  },
+
+  async importRebReports(accountId: string, folderPath: string): Promise<void> {
+    const updateRobotWithParameterSetId = async (reportId: string, selectedPassNumber: number) => {
+      const report = await db.query.rebReportsTable.findFirst({
+        where: (reports, { eq }) => eq(reports.id, reportId),
+        with: { backtests: true },
+      });
+
+      const parameterSetId = report?.backtests.find(
+        (backtest) => backtest.passNumber === selectedPassNumber,
+      )?.parameterSetId;
+      if (!parameterSetId) return;
+
+      await db
+        .update(robotsTable)
+        .set({ parameterSetId })
+        .where(
+          and(
+            eq(robotsTable.accountId, accountId),
+            isNull(robotsTable.parameterSetId),
+            eq(robotsTable.strategyContextId, report.strategyContextId),
+          ),
+        )
+        .execute();
+    };
+
+    await runImport(folderPath, updateRobotWithParameterSetId);
   },
 };
 

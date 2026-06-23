@@ -6,12 +6,14 @@ import { schema } from './graphql/schema.ts';
 import { importReports } from './controllers/report.controller.ts';
 import { analyze } from './controllers/analysis.controller.ts';
 import { generateRebFiles } from './controllers/generate-reb-files.controller.ts';
+import { importRebReportsToRobots } from './controllers/import-reb-reports-to-robot.controller.ts';
 
 const router = Router();
 
 router.post('/report/import', importReports);
 router.post('/analyze', analyze);
 router.post('/generateRebFiles', generateRebFiles);
+router.post('/importRebReportsToRobots', importRebReportsToRobots);
 
 async function start() {
   const yoga = createYoga({ schema });

@@ -81,6 +81,10 @@ import { RobotDrawer } from './robot-drawer';
             <mat-icon>smart_toy</mat-icon>
             <span>Generate REB files for robots</span>
           </button>
+          <button mat-menu-item (click)="importRebReportsToRobots()">
+            <mat-icon>smart_toy</mat-icon>
+            <span>Import REB reports to robots</span>
+          </button>
           <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
             <mat-icon>delete</mat-icon>
             <span>Delete Account</span>
@@ -167,6 +171,10 @@ export class AccountDetails {
 
   async generateRebFiles() {
     await this.robotService.generateRebFiles(this.accountId!);
+  }
+
+  async importRebReportsToRobots() {
+    await this.robotService.importRebReportsToRobots(this.accountId!, 'C:\\Dev\\testimports');
   }
 
   deleteAccount() {

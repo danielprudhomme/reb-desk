@@ -29,7 +29,10 @@ async function findRebFiles(dir: string): Promise<string[]> {
   return results;
 }
 
-export async function runImport(folderPath: string): Promise<void> {
+export async function runImport(
+  folderPath: string,
+  callback?: (reportId: string, selectedPassNumber: number) => Promise<void>,
+): Promise<void> {
   await fileService.ensureDirectory(IMPORTS_PATH);
 
   const files = await findRebFiles(folderPath);
@@ -69,13 +72,18 @@ export async function runImport(folderPath: string): Promise<void> {
       if (existingReport) {
         results.skipped++;
         logService.info('import', 'File skipped (already imported)');
+
+        if (callback && parsedReport.selectedPassNumber) {
+          await callback(existingReport.id, parsedReport.selectedPassNumber);
+        }
+
         continue;
       }
 
       const newProjectName = rebReportService.generateProjectName(parsedReport);
       const newPath = `${newProjectName}.reb`;
 
-      db.transaction((tx) => {
+      const createdReportId = db.transaction((tx) => {
         const strategyContext = strategyContextService.findOrCreateTx(
           tx,
           parsedReport.expert,
@@ -137,9 +145,15 @@ export async function runImport(folderPath: string): Promise<void> {
             ])
             .execute();
         }
+
+        return rebReport.id;
       });
 
       await moveFileToImportedFolder(filePath, newProjectName);
+
+      if (callback && parsedReport.selectedPassNumber) {
+        await callback(createdReportId, parsedReport.selectedPassNumber);
+      }
 
       logService.info('import', 'File imported succesfully', `File path: : ${newPath}`);
     } catch (err) {

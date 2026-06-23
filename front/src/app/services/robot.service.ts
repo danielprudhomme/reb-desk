@@ -172,4 +172,13 @@ export class RobotService {
       this.httpClient.post<void>(`${environment.apiUrl}/generateRebFiles`, { accountId }),
     );
   }
+
+  async importRebReportsToRobots(accountId: string, folderPath: string): Promise<void> {
+    return await firstValueFrom(
+      this.httpClient.post<void>(`${environment.apiUrl}/importRebReportsToRobots`, {
+        accountId,
+        folderPath,
+      }),
+    );
+  }
 }
