@@ -5,6 +5,7 @@ import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ParameterSetDb, parameterSetsTable } from '@src/db/schema/parameter-set.ts';
 import { ParameterSet } from '@shared/models/parameter-set.ts';
 import { getParameters } from '@src/constants/reb-parameters-definitions.ts';
+import { eq } from 'drizzle-orm';
 
 export const parameterSetService = {
   findOrCreateTx(tx: Tx, expert: ExpertAdvisor, parameters: Parameter[]): ParameterSetDb {
@@ -13,12 +14,21 @@ export const parameterSetService = {
       Object.fromEntries(parameters.map((p) => [p.name, p.value])),
     );
 
+    const id = buildParametersHash(parametersString);
+
+    const existing = tx
+      .select()
+      .from(parameterSetsTable)
+      .where(eq(parameterSetsTable.id, id))
+      .get();
+
+    if (existing) {
+      return existing;
+    }
+
     const [created] = tx
       .insert(parameterSetsTable)
-      .values({
-        id: buildParametersHash(parametersString),
-        parameters: parametersString,
-      })
+      .values({ id, parameters: parametersString })
       .returning()
       .all();
 
