@@ -235,7 +235,11 @@ function parseSelectedPassNumber(content: string): number | undefined {
     .map((part) => part.replace(/^::/, '').trim())
     .filter(Boolean);
 
-  const lastNumeric = [...values].reverse().find((value) => !isNaN(Number(value)));
+  const lastValue = values.at(-1);
 
-  return lastNumeric ? Number(lastNumeric) : undefined;
+  if (!lastValue || isNaN(Number(lastValue))) {
+    return undefined;
+  }
+
+  return Number(lastValue);
 }

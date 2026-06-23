@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { db, Tx } from '@src/db/database.ts';
-import { and, eq, isNull } from 'drizzle-orm';
+import { and, eq } from 'drizzle-orm';
 import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
@@ -76,7 +76,7 @@ export const robotService = {
   },
 
   async importRebReports(accountId: string, folderPath: string): Promise<void> {
-    const updateRobotWithParameterSetId = async (reportId: string, selectedPassNumber: number) => {
+    const updateRobotWithParameterSetId = async (reportId: string, selectedPassNumber?: number) => {
       const report = await db.query.rebReportsTable.findFirst({
         where: (reports, { eq }) => eq(reports.id, reportId),
         with: { backtests: true },
@@ -87,17 +87,32 @@ export const robotService = {
       )?.parameterSetId;
       if (!parameterSetId) return;
 
-      await db
-        .update(robotsTable)
-        .set({ parameterSetId })
-        .where(
+      const existingRobot = await db.query.robotsTable.findFirst({
+        where: (robots, { and, eq }) =>
           and(
-            eq(robotsTable.accountId, accountId),
-            isNull(robotsTable.parameterSetId),
-            eq(robotsTable.strategyContextId, report.strategyContextId),
+            eq(robots.accountId, accountId),
+            eq(robots.strategyContextId, report.strategyContextId),
           ),
-        )
-        .execute();
+      });
+
+      if (existingRobot) {
+        await db
+          .update(robotsTable)
+          .set({ parameterSetId, status: parameterSetId ? 'configured' : 'draft' })
+          .where(eq(robotsTable.id, existingRobot.id))
+          .execute();
+      } else {
+        await db
+          .insert(robotsTable)
+          .values({
+            id: crypto.randomUUID(),
+            accountId,
+            status: parameterSetId ? 'configured' : 'draft',
+            strategyContextId: report.strategyContextId,
+            parameterSetId,
+          })
+          .execute();
+      }
     };
 
     await runImport(folderPath, updateRobotWithParameterSetId);

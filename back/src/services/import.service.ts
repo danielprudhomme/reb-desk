@@ -31,7 +31,7 @@ async function findRebFiles(dir: string): Promise<string[]> {
 
 export async function runImport(
   folderPath: string,
-  callback?: (reportId: string, selectedPassNumber: number) => Promise<void>,
+  callback?: (reportId: string, selectedPassNumber?: number) => Promise<void>,
 ): Promise<void> {
   await fileService.ensureDirectory(IMPORTS_PATH);
 
@@ -73,7 +73,7 @@ export async function runImport(
         results.skipped++;
         logService.info('import', 'File skipped (already imported)');
 
-        if (callback && parsedReport.selectedPassNumber) {
+        if (callback) {
           await callback(existingReport.id, parsedReport.selectedPassNumber);
         }
 
@@ -151,7 +151,7 @@ export async function runImport(
 
       await moveFileToImportedFolder(filePath, newProjectName);
 
-      if (callback && parsedReport.selectedPassNumber) {
+      if (callback) {
         await callback(createdReportId, parsedReport.selectedPassNumber);
       }
 
