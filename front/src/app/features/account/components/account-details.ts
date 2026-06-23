@@ -74,19 +74,22 @@ import { RobotDrawer } from './robot-drawer';
 
         <mat-menu #settingsMenu="matMenu">
           <button mat-menu-item (click)="generateRobots()">
-            <mat-icon>smart_toy</mat-icon>
+            <mat-icon>precision_manufacturing</mat-icon>
             <span>Generate Robots</span>
           </button>
+
           <button mat-menu-item (click)="generateRebFiles()">
-            <mat-icon>smart_toy</mat-icon>
+            <mat-icon>description</mat-icon>
             <span>Generate REB files for robots</span>
           </button>
+
           <button mat-menu-item (click)="importRebReportsToRobots()">
-            <mat-icon>smart_toy</mat-icon>
+            <mat-icon>upload_file</mat-icon>
             <span>Import REB reports to robots</span>
           </button>
+
           <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-            <mat-icon>delete</mat-icon>
+            <mat-icon>delete_forever</mat-icon>
             <span>Delete Account</span>
           </button>
         </mat-menu>
