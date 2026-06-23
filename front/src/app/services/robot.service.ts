@@ -181,4 +181,10 @@ export class RobotService {
       }),
     );
   }
+
+  async generateProfile(accountId: string): Promise<void> {
+    return await firstValueFrom(
+      this.httpClient.post<void>(`${environment.apiUrl}/profile`, { accountId }),
+    );
+  }
 }
