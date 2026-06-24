@@ -1,4 +1,4 @@
-import { index, sqliteTable, text } from 'drizzle-orm/sqlite-core';
+import { index, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { strategyContextsTable } from './strategy-context.ts';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 import { accountsTable, parameterSetsTable } from './index.ts';
@@ -17,6 +17,8 @@ export const robotsTable = sqliteTable(
 
     status: text('status').notNull(),
 
+    magicNumber: text('magic_number'),
+
     strategyContextId: text('strategy_context_id')
       .notNull()
       .references(() => strategyContextsTable.id, {
@@ -33,6 +35,7 @@ export const robotsTable = sqliteTable(
     index('idx_robot_account').on(table.accountId),
     index('idx_robot_context').on(table.strategyContextId),
     index('idx_robot_parameter_set').on(table.parameterSetId),
+    uniqueIndex('uq_robot_account_magic_number').on(table.accountId, table.magicNumber),
   ],
 );
 

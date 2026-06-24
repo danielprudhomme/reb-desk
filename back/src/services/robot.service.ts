@@ -1,20 +1,18 @@
 import crypto from 'node:crypto';
-import { db, Tx } from '@src/db/database.ts';
+import { db } from '@src/db/database.ts';
 import { and, eq } from 'drizzle-orm';
 import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
-import {
-  accountsTable,
-  ParameterSetDb,
-  RobotDb,
-  robotsTable,
-  StrategyContextDb,
-} from '@src/db/schema/index.ts';
+import { ParameterSetDb, RobotDb, robotsTable, StrategyContextDb } from '@src/db/schema/index.ts';
 import { Robot } from '@shared/models/robot.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
 import { runImport } from './import.service.ts';
+import { generateMagicNumber } from './magic-number.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Symbol } from '@shared/models/symbol.ts';
 
 export const robotService = {
   async findByAccount(accountId: string): Promise<Robot[]> {
@@ -36,27 +34,56 @@ export const robotService = {
       throw new Error('Account ID is required');
     }
 
-    const created = db.transaction((tx) => {
-      tx.delete(robotsTable)
-        .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')))
-        .run();
+    await db
+      .delete(robotsTable)
+      .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')))
+      .execute();
 
-      const created: RobotDb[] = [];
+    const created: Robot[] = [];
 
-      for (const input of inputs) {
-        const robot = insertRobotTx(tx, input);
-        created.push(robot);
-      }
-
-      return created;
-    });
+    for (const input of inputs) {
+      const robot = await this.insert(input);
+      created.push(robot);
+    }
 
     const ids = created.map((robot) => robot.id);
     return await findMany(ids);
   },
 
   async insert(input: InsertRobotInput): Promise<Robot> {
-    const created = db.transaction((tx) => insertRobotTx(tx, input));
+    const account = await db.query.accountsTable.findFirst({
+      where: (accounts, { eq }) => eq(accounts.id, input.accountId),
+    });
+
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
+    const strategyContext = db.transaction((tx) => {
+      return strategyContextService.findOrCreateTx(
+        tx,
+        input.expert,
+        input.symbol,
+        input.timeframe,
+        account.leverage,
+        account.capital,
+      );
+    });
+
+    const magicNumber = await generateMagicNumber(input);
+
+    const created = db
+      .insert(robotsTable)
+      .values({
+        id: crypto.randomUUID(),
+        accountId: input.accountId,
+        status: 'draft',
+        strategyContextId: strategyContext.id,
+        parameterSetId: null,
+        magicNumber,
+      })
+      .returning()
+      .get();
 
     return await findOne(created.id);
   },
@@ -117,40 +144,25 @@ export const robotService = {
 
     await runImport(folderPath, updateRobotWithParameterSetId);
   },
+
+  async setMagicNumbers(): Promise<void> {
+    const robotsWithoutMagicNumber = await db.query.robotsTable.findMany({
+      where: (robots, { isNull }) => isNull(robots.magicNumber),
+      with: { strategyContext: true },
+    });
+
+    robotsWithoutMagicNumber.forEach(async (robot) => {
+      const magicNumber = await generateMagicNumber({
+        accountId: robot.accountId,
+        symbol: robot.strategyContext.symbol as Symbol,
+        timeframe: robot.strategyContext.timeframe as Timeframe,
+        expert: robot.strategyContext.expert as ExpertAdvisor,
+      });
+
+      db.update(robotsTable).set({ magicNumber }).where(eq(robotsTable.id, robot.id)).execute();
+    });
+  },
 };
-
-function insertRobotTx(tx: Tx, input: InsertRobotInput): RobotDb {
-  const account = tx
-    .select()
-    .from(accountsTable)
-    .where(eq(accountsTable.id, input.accountId))
-    .get();
-
-  if (!account) {
-    throw new Error('Account not found');
-  }
-
-  const strategyContext = strategyContextService.findOrCreateTx(
-    tx,
-    input.expert,
-    input.symbol,
-    input.timeframe,
-    account.leverage,
-    account.capital,
-  );
-
-  return tx
-    .insert(robotsTable)
-    .values({
-      id: crypto.randomUUID(),
-      accountId: input.accountId,
-      status: 'draft',
-      strategyContextId: strategyContext.id,
-      parameterSetId: null,
-    })
-    .returning()
-    .get();
-}
 
 async function findMany(ids: string[]): Promise<Robot[]> {
   return (
