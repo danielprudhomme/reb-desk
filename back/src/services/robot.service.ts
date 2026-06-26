@@ -192,5 +192,6 @@ function mapQueryToModel(
     parameterSet: robot.parameterSet
       ? parameterSetService.mapDbToModel(robot.parameterSet)
       : undefined,
+    magicNumber: robot.magicNumber ?? undefined,
   };
 }

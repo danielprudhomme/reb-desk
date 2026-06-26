@@ -9,4 +9,5 @@ export interface Robot {
   strategyContext: StrategyContext;
   parameterSetId?: string;
   parameterSet?: ParameterSet;
+  magicNumber?: string;
 }

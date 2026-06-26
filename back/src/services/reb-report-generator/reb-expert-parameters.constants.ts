@@ -1,9 +1,6 @@
 export const REB_EXPERT_PARAMETERS: Record<'candleSuite' | 'emaBb' | 'rsiBreak', string[]> = {
   candleSuite: [
-    `EA_Magic_Number=123||123||1||1230||N
-EA_Comment=REB Candle-Suite
-Settings=EA Buy Settings
-Suite=4||4||1||6||Y
+    `Suite=4||4||1||6||Y
 Extreme_Research=50||100||200||500||Y
 Inversion=true||false||0||true||Y
 Positions=Positions and Money Management Settings
@@ -100,10 +97,7 @@ Max_Amount_Of_First_Entries=1||1||1||10||N`,
   ],
 
   emaBb: [
-    `EA_Magic_Number=123||123||1||1230||N
-EA_Comment=REB EMA-BB
-Settings=EA Buy Settings
-EMA_Slow_Period=200||50||0||200||N
+    `EMA_Slow_Period=200||50||0||200||N
 BB_Period=20||20||0||100||Y
 BB_Deviation=1||2||1||3||Y
 BB_Way=1||0||0||1||Y
@@ -202,10 +196,7 @@ Max_Amount_Of_First_Entries=1||1||1||10||N`,
   ],
 
   rsiBreak: [
-    `EA_Magic_Number=123||123||1||1230||N
-EA_Comment=REB RSI
-Settings=EA Buy Settings
-Extreme_Research=500||50||250||500||Y
+    `Extreme_Research=500||50||250||500||Y
 RSI_Period=14||14||1||140||N
 RSI_Start=30||30||20||50||Y
 Delta_RSI_Buy=20||20||20||40||Y

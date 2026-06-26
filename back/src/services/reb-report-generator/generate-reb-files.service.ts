@@ -54,12 +54,14 @@ export async function generateRebFilesForAccount(accountId: string): Promise<voi
 }
 
 function buildRebFile(robot: Robot, projectName: string): string {
+  if (!robot.magicNumber) {
+    throw new Error('Missing magic number');
+  }
+
   const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
 
-  const expertPath = path.join(
-    APP_CONFIG.terminalPath,
-    `MQL5\\Experts\\REB ${expertConst.EXPERT_NAMES[expert].replace(' ', '-')}.ex5`,
-  );
+  const expertName = expertConst.EXPERT_NAMES[expert].replace(' ', '-');
+  const expertPath = path.join(APP_CONFIG.terminalPath, `MQL5\\Experts\\REB ${expertName}.ex5`);
   const terminalPath = `${path.join(APP_CONFIG.terminalPath, 'terminal64.exe')} /portable`;
 
   const parameters = REB_EXPERT_PARAMETERS[expert][0];
@@ -108,6 +110,9 @@ True
 ::Le drawdown (en %) rencontré en LT;;::Est inférieur à :;;::20;;::100;;
 ==FIN CRITERES OPTIMISATION==
 ==PARAMETRES OPTIMISATION==
+EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
+EA_Comment=${expertName} ${robot.strategyContext.symbol} ${robot.strategyContext.timeframe}
+Settings=EA Buy Settings
 ${parameters}
 ==FIN PARAMETRES OPTIMISATION==
 `.trim();
