@@ -15,6 +15,7 @@ import { Timeframe } from '@shared/models/timeframe.ts';
 import { ParsedRebReport } from '@src/models/parsed-reb-report.ts';
 import { ParsedRebPassResult } from '@src/models/parsed-reb-pass.ts';
 import { getParameters } from '@src/constants/reb-parameters-definitions.ts';
+import { ExpertParameterName } from '@shared/models/expert-parameter-name.ts';
 
 export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
@@ -149,7 +150,7 @@ function parseFixedParameters(content: string, allowed: string[]): Parameter[] {
   for (const line of lines.filter((line) => line.includes('='))) {
     const trimmed = line.trim();
     const parts = trimmed.split('=');
-    const name = parts[0].trim();
+    const name = parts[0].trim() as ExpertParameterName;
 
     if (!allowed.includes(name)) continue;
 
@@ -177,7 +178,7 @@ function parsePassParameters(content: string): Parameter[][] {
       .map((part) => {
         const match = part.match(/^::(\w+)=(.+)$/);
         if (match) {
-          return { name: match[1], value: parseParameterValue(match[2]) };
+          return { name: match[1] as ExpertParameterName, value: parseParameterValue(match[2]) };
         }
         return null;
       })

@@ -1,5 +1,5 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-import { ExpertParameterName } from '@shared/models/expert-parameter.ts';
+import { ExpertParameterName } from '@shared/models/expert-parameter-name.ts';
 
 export function getParameters(expert: ExpertAdvisor): ExpertParameterName[] {
   return EXPERT_PARAMETER_DEFINITIONS[expert];
