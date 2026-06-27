@@ -16,7 +16,7 @@ export async function generateProfileForAccount(accountId: string): Promise<void
   await fileService.ensureDirectory(EXPORTS_PATH);
 
   robots.forEach(async (robot) => {
-    const expertName = expertConst.EXPERT_NAMES[robot.strategyContext.expert].replaceAll(' ', '');
+    const expertName = expertConst.EXPERT_NAMES[robot.strategyContext.expert].replaceAll(' ', '-');
 
     const content = buildChrFile(robot, expertName);
     const filename = `${robot.strategyContext.symbol}-${robot.strategyContext.timeframe}-${expertName}.chr`;

@@ -7,7 +7,7 @@ import { ExpertParameterName } from '@shared/models/expert-parameter-name.ts';
 export function buildParametersInFile(robot: Robot, applyParams: boolean): string {
   const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
 
-  const expertName = expertConst.EXPERT_NAMES[expert].replace(' ', '-');
+  const expertName = expertConst.EXPERT_NAMES[expert];
   const expertParameters = REB_EXPERT_PARAMETERS[expert][0];
 
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
