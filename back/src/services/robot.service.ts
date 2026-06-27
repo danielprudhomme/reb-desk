@@ -103,7 +103,9 @@ export const robotService = {
   },
 
   async importRebReports(accountId: string, folderPath: string): Promise<void> {
-    const updateRobotWithParameterSetId = async (reportId: string, selectedPassNumber?: number) => {
+    const existingRobots = await this.findByAccount(accountId);
+
+    const upsertRobot = async (reportId: string, selectedPassNumber?: number) => {
       const report = await db.query.rebReportsTable.findFirst({
         where: (reports, { eq }) => eq(reports.id, reportId),
         with: { backtests: true },
@@ -114,13 +116,9 @@ export const robotService = {
       )?.parameterSetId;
       if (!parameterSetId) return;
 
-      const existingRobot = await db.query.robotsTable.findFirst({
-        where: (robots, { and, eq }) =>
-          and(
-            eq(robots.accountId, accountId),
-            eq(robots.strategyContextId, report.strategyContextId),
-          ),
-      });
+      const existingRobot = existingRobots.find(
+        (robot) => robot.strategyContext.id == report.strategyContextId,
+      );
 
       if (existingRobot) {
         await db
@@ -142,7 +140,7 @@ export const robotService = {
       }
     };
 
-    await runImport(folderPath, updateRobotWithParameterSetId);
+    await runImport(folderPath, upsertRobot);
   },
 
   async setMagicNumbers(): Promise<void> {

@@ -1,11 +1,11 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
-import { ExpertParameter } from '@shared/models/expert-parameter.ts';
+import { ExpertParameterName } from '@shared/models/expert-parameter.ts';
 
-export function getParameters(expert: ExpertAdvisor): ExpertParameter[] {
+export function getParameters(expert: ExpertAdvisor): ExpertParameterName[] {
   return EXPERT_PARAMETER_DEFINITIONS[expert];
 }
 
-const COMMON_PARAMETERS: ExpertParameter[] = [
+const COMMON_PARAMETERS: ExpertParameterName[] = [
   'Inversion',
   'Base_Unit',
   'ATR_Period',
@@ -92,7 +92,7 @@ const COMMON_PARAMETERS: ExpertParameter[] = [
   'Max_Amount_Of_First_Entries',
 ];
 
-export const OTHER_PARAMETERS: ExpertParameter[] = [
+export const OTHER_PARAMETERS: ExpertParameterName[] = [
   'Non_Trading_DD',
   'Stop_EA',
   'Force_Buy_Word',
@@ -101,7 +101,7 @@ export const OTHER_PARAMETERS: ExpertParameter[] = [
   'Force_Non_Trading_If_Nothing_Word',
 ];
 
-const EXPERT_PARAMETER_DEFINITIONS: Record<ExpertAdvisor, ExpertParameter[]> = {
+const EXPERT_PARAMETER_DEFINITIONS: Record<ExpertAdvisor, ExpertParameterName[]> = {
   candleSuite: ['Suite', 'Extreme_Research', ...COMMON_PARAMETERS],
 
   rsiBreak: ['Extreme_Research', 'RSI_Period', 'RSI_Start', 'Delta_RSI_Buy', ...COMMON_PARAMETERS],

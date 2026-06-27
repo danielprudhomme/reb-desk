@@ -1,9 +1,11 @@
+import { ExpertParameterName } from './expert-parameter-name';
+
 export interface Parameter {
-  name: string;
+  name: ExpertParameterName;
   value: number;
 }
 
 export interface GroupedParameter {
-  name: string;
+  name: ExpertParameterName;
   values: number[];
 }

@@ -1,4 +1,4 @@
-export const EXPERT_PARAMETERS = [
+export const EXPERT_PARAMETER_NAMES = [
   'Inversion',
   'Base_Unit',
   'ATR_Period',
@@ -207,4 +207,4 @@ export const EXPERT_PARAMETERS = [
   'Adapt_Lot_Size_To_Capital',
 ] as const satisfies readonly string[];
 
-export type ExpertParameter = (typeof EXPERT_PARAMETERS)[number];
+export type ExpertParameterName = (typeof EXPERT_PARAMETER_NAMES)[number];
