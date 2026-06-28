@@ -1,7 +1,7 @@
 import { deleteById } from '@src/db/crud.ts';
 import { db } from '@src/db/database.ts';
 import { AccountInsertDb, accountsTable } from '@src/db/schema/account.ts';
-import { accountService } from '@src/services/account.service.ts';
+import { accountService } from '@src/services/account/account.service.ts';
 
 export const accountResolvers = {
   Mutation: {

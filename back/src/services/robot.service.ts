@@ -8,7 +8,6 @@ import { ParameterSetDb, RobotDb, robotsTable, StrategyContextDb } from '@src/db
 import { Robot } from '@shared/models/robot.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
-import { runImport } from './import.service.ts';
 import { generateMagicNumber } from './magic-number.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
@@ -100,47 +99,6 @@ export const robotService = {
       .get();
 
     return await findOne(updated.id);
-  },
-
-  async importRebReports(accountId: string, folderPath: string): Promise<void> {
-    const existingRobots = await this.findByAccount(accountId);
-
-    const upsertRobot = async (reportId: string, selectedPassNumber?: number) => {
-      const report = await db.query.rebReportsTable.findFirst({
-        where: (reports, { eq }) => eq(reports.id, reportId),
-        with: { backtests: true },
-      });
-
-      const parameterSetId = report?.backtests.find(
-        (backtest) => backtest.passNumber === selectedPassNumber,
-      )?.parameterSetId;
-      if (!parameterSetId) return;
-
-      const existingRobot = existingRobots.find(
-        (robot) => robot.strategyContext.id == report.strategyContextId,
-      );
-
-      if (existingRobot) {
-        await db
-          .update(robotsTable)
-          .set({ parameterSetId, status: parameterSetId ? 'configured' : 'draft' })
-          .where(eq(robotsTable.id, existingRobot.id))
-          .execute();
-      } else {
-        await db
-          .insert(robotsTable)
-          .values({
-            id: crypto.randomUUID(),
-            accountId,
-            status: parameterSetId ? 'configured' : 'draft',
-            strategyContextId: report.strategyContextId,
-            parameterSetId,
-          })
-          .execute();
-      }
-    };
-
-    await runImport(folderPath, upsertRobot);
   },
 
   async setMagicNumbers(): Promise<void> {

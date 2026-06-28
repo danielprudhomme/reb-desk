@@ -1,18 +1,143 @@
 import { Robot } from '@shared/models/robot.ts';
 import expertConst from '@shared/constants/expert.constants.ts';
-import { REB_EXPERT_PARAMETERS } from './reb-expert-parameters.constants.ts';
 import { Parameter } from '@shared/models/parameter.ts';
 import { ExpertParameterName } from '@shared/models/expert-parameter-name.ts';
+import { APP_CONFIG, EXPORTS_PATH } from '@src/config.ts';
+import { fileService } from '../file.service.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
+import { TimeUnit } from '@shared/models/time-unit.ts';
+import { Symbol } from '@shared/models/symbol.ts';
+import path from 'path';
+import { writeFile } from 'fs/promises';
+
+const REB_CONFIG: {
+  shortTermCount: number;
+  shortTermDuration: number;
+  shortTermUnit: TimeUnit;
+  longTermDuration: number;
+  longTermUnit: TimeUnit;
+  startDate: string;
+} = {
+  shortTermCount: 36,
+  shortTermDuration: 2,
+  shortTermUnit: 'month',
+  longTermDuration: 6,
+  longTermUnit: 'year',
+  startDate: '01/05/2020',
+};
+
+const TIME_UNIT_LABELS: Record<TimeUnit, string> = {
+  year: 'Années',
+  month: 'Mois',
+  week: 'Semaines',
+  day: 'Jours',
+};
+
+export const rebReportGenerator = {
+  async createRebReport(robot: Robot): Promise<void> {
+    await fileService.ensureDirectory(EXPORTS_PATH);
+    const projectName = this.generateProjectName({
+      ...REB_CONFIG,
+      ...robot.strategyContext,
+    });
+
+    const content = buildRebFile(robot, projectName);
+
+    const filePath = path.join(EXPORTS_PATH, `${projectName}.reb`);
+    await writeFile(filePath, content, 'utf-8');
+  },
+  generateProjectName(params: {
+    expert: ExpertAdvisor;
+    symbol: Symbol;
+    timeframe: Timeframe;
+    capital: number;
+    startDate: string;
+    shortTermCount: number;
+    shortTermDuration: number;
+    shortTermUnit: TimeUnit;
+    longTermDuration: number;
+    longTermUnit: TimeUnit;
+  }): string {
+    const expertName = expertConst.EXPERT_NAMES[params.expert].replaceAll(' ', '');
+    const startDate = normalizeDate(params.startDate);
+    const shortTerm = `${params.shortTermCount}x${params.shortTermDuration}${params.shortTermUnit.toString()[0]}`;
+    const longTerm = `${params.longTermDuration}${params.longTermUnit.toString()[0]}`;
+    const currentDate = normalizeDate();
+    return `${params.symbol}-${params.timeframe}-${expertName}-${params.capital}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
+  },
+};
+
+function buildRebFile(robot: Robot, projectName: string): string {
+  if (!robot.magicNumber) {
+    throw new Error('Missing magic number');
+  }
+
+  const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+
+  const expertName = expertConst.EXPERT_NAMES[expert].replace(' ', '-');
+  const expertPath = path.join(APP_CONFIG.terminalPath, `MQL5\\Experts\\REB ${expertName}.ex5`);
+  const terminalPath = `${path.join(APP_CONFIG.terminalPath, 'terminal64.exe')} /portable`;
+
+  const parameters = buildParametersInFile(robot, false);
+
+  return `NOM PROJET :
+${projectName}
+TERMINAL :
+${terminalPath}
+NOM EXPERT :
+${expertPath}
+SYMBOLE :
+${robot.strategyContext.symbol}
+UNITE DE TEMPS :
+${robot.strategyContext.timeframe}
+SPREAD :
+${robot.strategyContext.leverage}
+CAPITAL :
+${robot.strategyContext.capital}
+DEVISE :
+EUR
+MODELE D'OPTIMISATION :
+Prix d'ouverture uniquement
+DATE DE DEBUT TESTS :
+${REB_CONFIG.startDate}
+NOMBRE DE COURT TERME :
+${REB_CONFIG.shortTermCount}
+DUREE COURT TERME :
+${REB_CONFIG.shortTermDuration}
+UNITE COURT TERME :
+${TIME_UNIT_LABELS[REB_CONFIG.shortTermUnit]}
+DUREE LONG TERME :
+${REB_CONFIG.longTermDuration}
+UNITE LONG TERME :
+${TIME_UNIT_LABELS[REB_CONFIG.longTermUnit]}
+UTILISATION SMART CHOICE :
+True
+UTILISATION DONNEES PASSEES :
+True
+==CRITERES OPTIMISATION==
+::Le résultat (en %) du LT;;::Est supérieur à :;;::0;;::100;;
+::Le ratio gain/chute des passages LT;;::Est supérieur à :;;::1;;::100;;
+::Le résultat (en %) des passages CT;;::Est supérieur à :;;::0;;::90;;
+::Le drawdown (en %) rencontré en CT;;::Est inférieur à :;;::5;;::80;;
+::Le résultat (en %) du LT;;::Est inférieur à :;;::15;;::100;;
+::Le drawdown (en %) rencontré en LT;;::Est inférieur à :;;::20;;::100;;
+==FIN CRITERES OPTIMISATION==
+==PARAMETRES OPTIMISATION==
+${parameters}
+==FIN PARAMETRES OPTIMISATION==
+`.trim();
+}
 
 export function buildParametersInFile(robot: Robot, applyParams: boolean): string {
   const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
 
   const expertName = expertConst.EXPERT_NAMES[expert];
-  const expertParameters = REB_EXPERT_PARAMETERS[expert][0];
+  const parametersOfExpert = expertParameters[expert][0];
 
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
 EA_Comment=${expertName} ${robot.strategyContext.symbol} ${robot.strategyContext.timeframe}
-${expertParameters}
+${parametersOfExpert}
 ${baseParameters}`;
 
   return applyParams && robot.parameterSet
@@ -92,7 +217,7 @@ Max_Daily_DD_In_Percent=0||0.0||0.000000||0.000000||N
 Max_Daily_Loss=0||0.0||0.000000||0.000000||N
 Max_Daily_Profit_In_Percent=0||0.0||0.000000||0.000000||N
 Restart_Hour=0||0||0||86100||N
-Non_Trading_DD=5||0.0||0.000000||0.000000||N
+Non_Trading_DD=10||0.0||0.000000||0.000000||N
 Stop_EA=false||false||0||true||N
 Old_Orders_Close_On_DD=0||0.0||0.000000||0.000000||N
 Max_Equity_Stop=0||0.0||0.000000||0.000000||N
@@ -139,3 +264,37 @@ Force_Sell_Word=
 Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`;
+
+export const expertParameters: Record<'candleSuite' | 'emaBb' | 'rsiBreak', string[]> = {
+  candleSuite: [
+    `Suite=4||4||1||6||Y
+Extreme_Research=50||100||200||500||Y`,
+  ],
+
+  emaBb: [
+    `EMA_Slow_Period=200||50||0||200||N
+BB_Period=20||20||0||100||Y
+BB_Deviation=1||2||1||3||Y
+BB_Way=1||0||0||1||Y`,
+  ],
+
+  rsiBreak: [
+    `Extreme_Research=500||50||250||500||Y
+RSI_Period=14||14||1||140||N
+RSI_Start=30||30||20||50||Y
+Delta_RSI_Buy=20||20||20||40||Y`,
+  ],
+};
+
+function normalizeDate(date?: string): string {
+  const input = date ?? new Date().toLocaleDateString('fr-FR'); // ex: 19/06/2026
+
+  const digitsOnly = input.replace(/\D/g, ''); // 19062026
+
+  const result =
+    digitsOnly.substring(0, 2) + // jour
+    digitsOnly.substring(2, 4) + // mois
+    digitsOnly.substring(6, 8); // année (2 derniers chiffres)
+
+  return result;
+}

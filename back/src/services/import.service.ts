@@ -1,7 +1,7 @@
 import { readdir, readFile, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { IMPORTS_PATH } from '../config.ts';
-import { parseRebReport } from './parser/reb-report.parser.ts';
+import { parseRebReport } from './reb-report/reb-report.parser.ts';
 import { db } from '@src/db/database.ts';
 import { rebReportService } from './reb-report.service.ts';
 import { logService } from './log.service.ts';
@@ -10,6 +10,7 @@ import { parameterSetService } from './parameter-set.service.ts';
 import { backtestsTable } from '@src/db/schema/backtest.ts';
 import { backtestResultsTable } from '@src/db/schema/backtest-result.ts';
 import { fileService } from './file.service.ts';
+import { rebReportGenerator } from './reb-report/reb-report.generator.ts';
 
 async function findRebFiles(dir: string): Promise<string[]> {
   const entries = await readdir(dir, { withFileTypes: true });
@@ -80,7 +81,7 @@ export async function runImport(
         continue;
       }
 
-      const newProjectName = rebReportService.generateProjectName(parsedReport);
+      const newProjectName = rebReportGenerator.generateProjectName(parsedReport);
       const newPath = `${newProjectName}.reb`;
 
       const createdReportId = db.transaction((tx) => {
