@@ -78,12 +78,12 @@ import { RobotDrawer } from './robot-drawer';
             <span>Generate Robots</span>
           </button>
 
-          <button mat-menu-item (click)="generateRebFiles()">
+          <button mat-menu-item (click)="createRebReports()">
             <mat-icon>description</mat-icon>
             <span>Generate REB files for robots</span>
           </button>
 
-          <button mat-menu-item (click)="importRebReportsToRobots()">
+          <button mat-menu-item (click)="syncRebReportsToRobots()">
             <mat-icon>upload_file</mat-icon>
             <span>Import REB reports to robots</span>
           </button>
@@ -177,16 +177,16 @@ export class AccountDetails {
       });
   }
 
-  async generateRebFiles() {
-    await this.robotService.generateRebFiles(this.accountId!);
+  async createRebReports() {
+    await this.accountService.createRebReports(this.accountId!);
   }
 
-  async importRebReportsToRobots() {
-    await this.robotService.importRebReportsToRobots(this.accountId!, 'C:\\Dev\\testimports');
+  async syncRebReportsToRobots() {
+    await this.accountService.syncRebReportsToRobots(this.accountId!, 'C:\\Dev\\testimports');
   }
 
   async generateProfile() {
-    await this.robotService.generateProfile(this.accountId!);
+    await this.accountService.generateProfile(this.accountId!);
   }
 
   deleteAccount() {

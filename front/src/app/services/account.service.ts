@@ -5,10 +5,13 @@ import { Apollo } from 'apollo-angular';
 import { toSignal } from '@angular/core/rxjs-interop';
 import { firstValueFrom, map } from 'rxjs';
 import { Reference } from '@apollo/client';
+import { HttpClient } from '@angular/common/http';
+import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
 export class AccountService {
   private apollo = inject(Apollo);
+  private httpClient = inject(HttpClient);
 
   // ---------------------------
   // QUERY
@@ -85,5 +88,25 @@ export class AccountService {
     );
 
     return result.data?.upsertAccount.id;
+  }
+
+  async createRebReports(accountId: string): Promise<void> {
+    return await firstValueFrom(
+      this.httpClient.post<void>(`${environment.apiUrl}/account/${accountId}/reb-reports`, {}),
+    );
+  }
+
+  async syncRebReportsToRobots(accountId: string, folderPath: string): Promise<void> {
+    return await firstValueFrom(
+      this.httpClient.post<void>(`${environment.apiUrl}/account/${accountId}/reb-reports/sync`, {
+        folderPath,
+      }),
+    );
+  }
+
+  async generateProfile(accountId: string): Promise<void> {
+    return await firstValueFrom(
+      this.httpClient.post<void>(`${environment.apiUrl}/account/${accountId}/profile`, {}),
+    );
   }
 }

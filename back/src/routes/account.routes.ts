@@ -7,8 +7,8 @@ import { Router } from 'express';
 
 const router = Router();
 
-router.post('/createRebReports', createRebReports);
-router.post('/importRebReportsToRobots', syncRebReportsToRobots);
-router.post('/profile', generateProfile);
+router.post('/:accountId/reb-reports', createRebReports);
+router.post('/:accountId/reb-reports/sync', syncRebReportsToRobots);
+router.post('/:accountId/profile', generateProfile);
 
 export default router;

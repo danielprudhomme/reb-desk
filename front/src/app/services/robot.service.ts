@@ -14,13 +14,10 @@ import {
   INSERT_ROBOTS,
   UPDATE_ROBOT,
 } from './robot.graphql';
-import { HttpClient } from '@angular/common/http';
-import { environment } from '@env';
 
 @Injectable({ providedIn: 'root' })
 export class RobotService {
   private apollo = inject(Apollo);
-  private httpClient = inject(HttpClient);
 
   robotsByAccount: Signal<Robot[]> = signal([]);
 
@@ -164,27 +161,6 @@ export class RobotService {
         mutation: UPDATE_ROBOT,
         variables: { input },
       }),
-    );
-  }
-
-  async generateRebFiles(accountId: string): Promise<void> {
-    return await firstValueFrom(
-      this.httpClient.post<void>(`${environment.apiUrl}/generateRebFiles`, { accountId }),
-    );
-  }
-
-  async importRebReportsToRobots(accountId: string, folderPath: string): Promise<void> {
-    return await firstValueFrom(
-      this.httpClient.post<void>(`${environment.apiUrl}/importRebReportsToRobots`, {
-        accountId,
-        folderPath,
-      }),
-    );
-  }
-
-  async generateProfile(accountId: string): Promise<void> {
-    return await firstValueFrom(
-      this.httpClient.post<void>(`${environment.apiUrl}/profile`, { accountId }),
     );
   }
 }
