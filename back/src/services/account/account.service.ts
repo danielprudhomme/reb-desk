@@ -7,6 +7,10 @@ import { eq } from 'drizzle-orm';
 import { runImport } from '../import.service.ts';
 import { rebReportGenerator } from '../reb-report/reb-report.generator.ts';
 import { profileGenerator } from './profile.generator.ts';
+import { generateMagicNumber } from '../magic-number.ts';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
+import { Symbol } from '@shared/models/symbol.ts';
 
 export const accountService = {
   async createRebReports(accountId: string): Promise<void> {
@@ -63,6 +67,13 @@ export const accountService = {
           .where(eq(robotsTable.id, existingRobot.id))
           .execute();
       } else {
+        const magicNumber = await generateMagicNumber({
+          accountId,
+          expert: report.expert as ExpertAdvisor,
+          symbol: report.symbol as Symbol,
+          timeframe: report.timeframe as Timeframe,
+        });
+
         await db
           .insert(robotsTable)
           .values({
@@ -73,6 +84,7 @@ export const accountService = {
             symbol: report.symbol,
             timeframe: report.timeframe,
             parameterSetId,
+            magicNumber,
           })
           .execute();
       }
