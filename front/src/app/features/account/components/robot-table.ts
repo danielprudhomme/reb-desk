@@ -31,7 +31,7 @@ import { Robot } from '@shared/models/robot';
 
       @for (timeframe of timeframes(); let index = $index; track timeframe) {
         <ng-container [matColumnDef]="timeframe">
-          @let count = robots().filter((r) => r.strategyContext.timeframe === timeframe).length;
+          @let count = robots().filter((r) => r.timeframe === timeframe).length;
 
           <th mat-header-cell *matHeaderCellDef [matTooltip]="count + ' robots'">
             {{ timeframe }}
@@ -81,7 +81,7 @@ export class RobotTable {
 
       for (const timeframe of this.timeframes()) {
         const robotsOnTimeframe = robots.filter(
-          (r) => r.strategyContext.symbol === symbol && r.strategyContext.timeframe === timeframe,
+          (r) => r.symbol === symbol && r.timeframe === timeframe,
         );
         row[timeframe.toLowerCase()] = robotsOnTimeframe;
       }

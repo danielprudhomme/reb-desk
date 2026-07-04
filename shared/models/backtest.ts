@@ -1,8 +1,10 @@
 import { GroupedParameterSet, ParameterSet } from './parameter-set';
 import { BacktestResult } from './backtest-result';
-import { StrategyContext } from './strategy-context';
 import { BacktestThresholdCheck } from './backtest-threshold-check';
 import { TimeUnit } from './time-unit';
+import { ExpertAdvisor } from '@shared/models/expert-advisor';
+import { Timeframe } from '@shared/models/timeframe';
+import { Symbol } from '@shared/models/symbol';
 
 export interface Backtest {
   reportId: string;
@@ -10,7 +12,11 @@ export interface Backtest {
   parameterSetId: string;
   passNumber: number;
   parameterSet: ParameterSet;
-  strategyContext: StrategyContext;
+  expert: ExpertAdvisor;
+  symbol: Symbol;
+  timeframe: Timeframe;
+  leverage: number;
+  capital: number;
   longTermUnit: TimeUnit;
   longTermDuration: number;
   shortTermResults: BacktestResult[];
@@ -23,7 +29,11 @@ export interface GroupedBacktest {
   passNumbers: number[];
   parameterSets: ParameterSet[];
   groupedParameterSet: GroupedParameterSet;
-  strategyContext: StrategyContext;
+  expert: ExpertAdvisor;
+  symbol: Symbol;
+  timeframe: Timeframe;
+  leverage: number;
+  capital: number;
   longTermUnit: TimeUnit;
   longTermDuration: number;
   shortTermResults: BacktestResult[];

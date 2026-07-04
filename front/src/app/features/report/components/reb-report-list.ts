@@ -17,23 +17,23 @@
 //         <ng-container matColumnDef="expert">
 //           <th mat-header-cell *matHeaderCellDef mat-sort-header>Expert</th>
 //           <td mat-cell *matCellDef="let report">
-//             <app-expert-badge [expert]="report.strategyContext.expert" />
+//             <app-expert-badge [expert]="report.expert" />
 //           </td>
 //         </ng-container>
 
 //         <ng-container matColumnDef="symbol">
 //           <th mat-header-cell *matHeaderCellDef mat-sort-header>Symbol</th>
-//           <td mat-cell *matCellDef="let report">{{ report.strategyContext.symbol }}</td>
+//           <td mat-cell *matCellDef="let report">{{ report.symbol }}</td>
 //         </ng-container>
 
 //         <ng-container matColumnDef="timeframe">
 //           <th mat-header-cell *matHeaderCellDef mat-sort-header>Timeframe</th>
-//           <td mat-cell *matCellDef="let report">{{ report.strategyContext.timeframe }}</td>
+//           <td mat-cell *matCellDef="let report">{{ report.timeframe }}</td>
 //         </ng-container>
 
 //         <ng-container matColumnDef="capital">
 //           <th mat-header-cell *matHeaderCellDef mat-sort-header>Capital</th>
-//           <td mat-cell *matCellDef="let report">{{ report.strategyContext.capital }}</td>
+//           <td mat-cell *matCellDef="let report">{{ report.capital }}</td>
 //         </ng-container>
 
 //         <ng-container matColumnDef="startDate">
@@ -79,10 +79,10 @@
 //   //     .reports()
 //   //     ?.filter(
 //   //       (report) =>
-//   //         (symbols.length === 0 || symbols.includes(report.strategyContext.symbol)) &&
-//   //         (timeframes.length === 0 || timeframes.includes(report.strategyContext.timeframe)) &&
-//   //         (experts.length === 0 || experts.includes(report.strategyContext.expert)) &&
-//   //         (capital === null || report.strategyContext.capital === capital),
+//   //         (symbols.length === 0 || symbols.includes(report.symbol)) &&
+//   //         (timeframes.length === 0 || timeframes.includes(report.timeframe)) &&
+//   //         (experts.length === 0 || experts.includes(report.expert)) &&
+//   //         (capital === null || report.capital === capital),
 //   //     );
 //   //   const dataSource = new MatTableDataSource<RebReport>(reports);
 //   //   dataSource.sort = this.sort();

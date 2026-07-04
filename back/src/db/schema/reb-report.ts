@@ -1,5 +1,4 @@
-import { index, integer, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
-import { strategyContextsTable } from './strategy-context.ts';
+import { integer, real, sqliteTable, text, uniqueIndex } from 'drizzle-orm/sqlite-core';
 import { InferInsertModel, InferSelectModel, relations } from 'drizzle-orm';
 import { backtestsTable } from './index.ts';
 
@@ -8,12 +7,12 @@ export const rebReportsTable = sqliteTable(
   {
     id: text('id').primaryKey(),
 
-    strategyContextId: text('strategy_context_id')
-      .notNull()
-      .references(() => strategyContextsTable.id, {
-        onDelete: 'cascade',
-        onUpdate: 'cascade',
-      }),
+    expert: text('expert').notNull(),
+    symbol: text('symbol').notNull(),
+    timeframe: text('timeframe').notNull(),
+
+    leverage: integer('leverage').notNull(),
+    capital: real('capital').notNull(),
 
     fingerprint: text('fingerprint').notNull(),
 
@@ -37,19 +36,10 @@ export const rebReportsTable = sqliteTable(
 
     longTermUnit: text('long_term_unit').notNull(),
   },
-  (table) => [
-    uniqueIndex('idx_reb_report_fingerprint').on(table.fingerprint),
-
-    index('idx_reb_report_strategy_context').on(table.strategyContextId),
-  ],
+  (table) => [uniqueIndex('idx_reb_report_fingerprint').on(table.fingerprint)],
 );
 
-export const rebReportsRelations = relations(rebReportsTable, ({ one, many }) => ({
-  strategyContext: one(strategyContextsTable, {
-    fields: [rebReportsTable.strategyContextId],
-    references: [strategyContextsTable.id],
-  }),
-
+export const rebReportsRelations = relations(rebReportsTable, ({ many }) => ({
   backtests: many(backtestsTable),
 }));
 

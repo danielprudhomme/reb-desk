@@ -10,12 +10,23 @@ import { profileGenerator } from './profile.generator.ts';
 
 export const accountService = {
   async createRebReports(accountId: string): Promise<void> {
+    const account = await db.query.accountsTable.findFirst({
+      where: (accounts, { eq }) => eq(accounts.id, accountId),
+    });
+
+    if (!account) {
+      throw new Error('Account not found');
+    }
+
     // at first do it only with non SC robots
     const robots = (await robotService.findByAccount(accountId)).filter((robot) =>
-      ['candleSuite', 'emaBb', 'rsiBreak'].includes(robot.strategyContext.expert),
+      ['candleSuite', 'emaBb', 'rsiBreak'].includes(robot.expert),
     );
 
-    robots.forEach(async (robot) => await rebReportGenerator.createRebReport(robot));
+    robots.forEach(
+      async (robot) =>
+        await rebReportGenerator.createRebReport(robot, account.capital, account.leverage),
+    );
   },
   async generateProfile(accountId: string): Promise<void> {
     const robots = (await robotService.findByAccount(accountId)).filter(
@@ -39,7 +50,10 @@ export const accountService = {
       if (!parameterSetId) return;
 
       const existingRobot = existingRobots.find(
-        (robot) => robot.strategyContext.id == report.strategyContextId,
+        (robot) =>
+          robot.expert === report.expert &&
+          robot.symbol === report.symbol &&
+          robot.timeframe === report.timeframe,
       );
 
       if (existingRobot) {
@@ -55,7 +69,9 @@ export const accountService = {
             id: crypto.randomUUID(),
             accountId,
             status: parameterSetId ? 'configured' : 'draft',
-            strategyContextId: report.strategyContextId,
+            expert: report.expert,
+            symbol: report.symbol,
+            timeframe: report.timeframe,
             parameterSetId,
           })
           .execute();

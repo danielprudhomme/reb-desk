@@ -11,13 +11,13 @@ export const profileGenerator = {
   async generateProfile(robot: Robot): Promise<void> {
     await fileService.ensureDirectory(EXPORTS_PATH);
 
-    const expertName = expertConst.EXPERT_NAMES[robot.strategyContext.expert].replaceAll(' ', '-');
+    const expertName = expertConst.EXPERT_NAMES[robot.expert].replaceAll(' ', '-');
 
-    const { periodType, periodSize } = getPeriodConfig(robot.strategyContext.timeframe);
+    const { periodType, periodSize } = getPeriodConfig(robot.timeframe);
     const parameters = buildParametersInFile(robot, true);
 
     const content = `<chart>
-symbol=${robot.strategyContext.symbol}
+symbol=${robot.symbol}
 period_type=${periodType}
 period_size=${periodSize}
 <expert>
@@ -30,7 +30,7 @@ ${parameters}
 </chart>
 `;
 
-    const filename = `${robot.strategyContext.symbol}-${robot.strategyContext.timeframe}-${expertName}.chr`;
+    const filename = `${robot.symbol}-${robot.timeframe}-${expertName}.chr`;
 
     const filePath = path.join(EXPORTS_PATH, filename);
     await writeFile(filePath, content, 'utf-8');

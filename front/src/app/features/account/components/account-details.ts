@@ -167,7 +167,7 @@ export class AccountDetails {
         const { numberOfRobots, experts } = result;
 
         const robots = diversifyRobots(
-          this.robots().map((r) => r.strategyContext),
+          this.robots(),
           experts,
           this.timeframes,
           this.symbols,

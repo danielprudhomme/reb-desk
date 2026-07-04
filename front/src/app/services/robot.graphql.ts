@@ -4,14 +4,9 @@ const ROBOT_FIELDS = `
   id
   accountId
   status
-  strategyContext {
-    id
-    expert
-    symbol
-    timeframe
-    leverage
-    capital
-  }
+  expert
+  symbol
+  timeframe
   parameterSet {
     id
     parameters {

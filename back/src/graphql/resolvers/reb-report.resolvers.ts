@@ -5,7 +5,6 @@ export const rebReportResolvers = {
     rebReports: () =>
       db.query.rebReportsTable.findMany({
         with: {
-          strategyContext: true,
           backtests: true,
         },
       }),

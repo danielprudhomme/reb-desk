@@ -1,10 +1,9 @@
 import crypto from 'node:crypto';
 import { db } from '@src/db/database.ts';
 import { and, eq } from 'drizzle-orm';
-import { strategyContextService } from './strategy-context.service.ts';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
-import { ParameterSetDb, RobotDb, robotsTable, StrategyContextDb } from '@src/db/schema/index.ts';
+import { ParameterSetDb, RobotDb, robotsTable } from '@src/db/schema/index.ts';
 import { Robot } from '@shared/models/robot.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
@@ -20,7 +19,6 @@ export const robotService = {
         where: (robots, { eq }) => eq(robots.accountId, accountId),
         with: {
           parameterSet: true,
-          strategyContext: true,
         },
       })
     ).map((robot) => mapQueryToModel(robot));
@@ -58,17 +56,6 @@ export const robotService = {
       throw new Error('Account not found');
     }
 
-    const strategyContext = db.transaction((tx) => {
-      return strategyContextService.findOrCreateTx(
-        tx,
-        input.expert,
-        input.symbol,
-        input.timeframe,
-        account.leverage,
-        account.capital,
-      );
-    });
-
     const magicNumber = await generateMagicNumber(input);
 
     const created = db
@@ -77,7 +64,9 @@ export const robotService = {
         id: crypto.randomUUID(),
         accountId: input.accountId,
         status: 'draft',
-        strategyContextId: strategyContext.id,
+        expert: input.expert,
+        timeframe: input.timeframe,
+        symbol: input.symbol,
         parameterSetId: null,
         magicNumber,
       })
@@ -104,15 +93,14 @@ export const robotService = {
   async setMagicNumbers(): Promise<void> {
     const robotsWithoutMagicNumber = await db.query.robotsTable.findMany({
       where: (robots, { isNull }) => isNull(robots.magicNumber),
-      with: { strategyContext: true },
     });
 
     robotsWithoutMagicNumber.forEach(async (robot) => {
       const magicNumber = await generateMagicNumber({
         accountId: robot.accountId,
-        symbol: robot.strategyContext.symbol as Symbol,
-        timeframe: robot.strategyContext.timeframe as Timeframe,
-        expert: robot.strategyContext.expert as ExpertAdvisor,
+        symbol: robot.symbol as Symbol,
+        timeframe: robot.timeframe as Timeframe,
+        expert: robot.expert as ExpertAdvisor,
       });
 
       db.update(robotsTable).set({ magicNumber }).where(eq(robotsTable.id, robot.id)).execute();
@@ -126,7 +114,6 @@ async function findMany(ids: string[]): Promise<Robot[]> {
       where: (robots, { inArray }) => inArray(robots.id, ids),
       with: {
         parameterSet: true,
-        strategyContext: true,
       },
     })
   ).map((robot) => mapQueryToModel(robot));
@@ -136,14 +123,14 @@ async function findOne(id: string): Promise<Robot> {
   return (await findMany([id]))[0];
 }
 
-function mapQueryToModel(
-  robot: RobotDb & { strategyContext: StrategyContextDb } & { parameterSet: ParameterSetDb | null },
-): Robot {
+function mapQueryToModel(robot: RobotDb & { parameterSet: ParameterSetDb | null }): Robot {
   return {
     id: robot.id,
     accountId: robot.accountId,
     status: robot.status as RobotStatus,
-    strategyContext: strategyContextService.mapDbToModel(robot.strategyContext),
+    expert: robot.expert as ExpertAdvisor,
+    timeframe: robot.timeframe as Timeframe,
+    symbol: robot.symbol as Symbol,
     parameterSetId: robot.parameterSetId ?? undefined,
     parameterSet: robot.parameterSet
       ? parameterSetService.mapDbToModel(robot.parameterSet)

@@ -5,7 +5,6 @@ import { parseRebReport } from './reb-report/reb-report.parser.ts';
 import { db } from '@src/db/database.ts';
 import { rebReportService } from './reb-report.service.ts';
 import { logService } from './log.service.ts';
-import { strategyContextService } from './strategy-context.service.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { backtestsTable } from '@src/db/schema/backtest.ts';
 import { backtestResultsTable } from '@src/db/schema/backtest-result.ts';
@@ -85,18 +84,13 @@ export async function runImport(
       const newPath = `${newProjectName}.reb`;
 
       const createdReportId = db.transaction((tx) => {
-        const strategyContext = strategyContextService.findOrCreateTx(
-          tx,
-          parsedReport.expert,
-          parsedReport.symbol,
-          parsedReport.timeframe,
-          parsedReport.leverage,
-          parsedReport.capital,
-        );
-
         const rebReport = rebReportService.insertTx(tx, {
           id: crypto.randomUUID(),
-          strategyContextId: strategyContext.id,
+          timeframe: parsedReport.timeframe,
+          symbol: parsedReport.symbol,
+          expert: parsedReport.expert,
+          capital: parsedReport.capital,
+          leverage: parsedReport.leverage,
           fingerprint,
           importStatus: parsedReport.importStatus,
           path: newPath,

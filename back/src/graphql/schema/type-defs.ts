@@ -1,6 +1,5 @@
 import enums from './enums.ts';
 import common from './common.ts';
-import strategyContextQuery from './strategy-context.query.ts';
 import backtestQuery from './backtest.query.ts';
 import parameterSetQuery from './parameter-set.query.ts';
 import rebReportQuery from './reb-report.query.ts';
@@ -15,8 +14,6 @@ export const typeDefs = /* GraphQL */ `
 
   ${enums}
   ${common}
-
-  ${strategyContextQuery}
 
   ${parameterSetQuery}
 

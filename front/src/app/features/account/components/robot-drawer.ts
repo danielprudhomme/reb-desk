@@ -5,7 +5,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { MatTabsModule } from '@angular/material/tabs';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
-// import { PassAnalysisTable } from '@app/features/report/components/pass-analysis-table';
 import { AnalysisRequest } from '@shared/models/analysis-request';
 import { Robot } from '@shared/models/robot';
 import { AnalyzedBacktestsTable } from '@app/features/backtest/analyzed-backtests-table';
@@ -36,10 +35,8 @@ import { AnalyzedBacktestsTable } from '@app/features/backtest/analyzed-backtest
         </div>
 
         <div class="flex items-center gap-4">
-          <app-expert-badge [expert]="robot().strategyContext.expert" />
-          <div class="text-sm font-medium">
-            {{ robot().strategyContext.symbol }} · {{ robot().strategyContext.timeframe }}
-          </div>
+          <app-expert-badge [expert]="robot().expert" />
+          <div class="text-sm font-medium">{{ robot().symbol }} · {{ robot().timeframe }}</div>
           <app-robot-status-badge [status]="robot().status" />
         </div>
       </div>
@@ -75,7 +72,13 @@ export class RobotDrawer {
   close = output<void>();
   delete = output<Robot>();
   analysisRequest = computed<AnalysisRequest>(() => ({
-    strategyContextId: this.robot().strategyContext.id,
+    strategyContext: {
+      expert: this.robot().expert,
+      symbol: this.robot().symbol,
+      timeframe: this.robot().timeframe,
+      leverage: 500,
+      capital: this.capital(),
+    },
     thresholds: [
       {
         type: 'longTermResultPercent',

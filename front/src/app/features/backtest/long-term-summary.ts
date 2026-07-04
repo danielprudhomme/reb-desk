@@ -48,11 +48,7 @@ export class LongTermSummary {
   averageMonthlyPerformance = computed(() =>
     avg(
       this.backtest().longTermResults.map(
-        (r) =>
-          r.result /
-          this.backtest().strategyContext.capital /
-          this.backtest().longTermDuration /
-          12,
+        (r) => r.result / this.backtest().capital / this.backtest().longTermDuration / 12,
       ),
     ),
   );

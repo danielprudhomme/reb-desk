@@ -18,7 +18,7 @@ import { RobotStatusBadge } from './robot-status-badge';
 
       <!-- Expert -->
       <div class="pr-14">
-        <app-expert-badge [expert]="robot().strategyContext.expert" />
+        <app-expert-badge [expert]="robot().expert" />
       </div>
 
       <!-- Metrics -->

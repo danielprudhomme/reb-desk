@@ -6,7 +6,11 @@ export default /* GraphQL */ `
 
     status: RobotStatus!
 
-    strategyContext: StrategyContext!
+    expert: ExpertAdvisor!
+
+    timeframe: Timeframe!
+
+    symbol: Symbol!
 
     parameterSet: ParameterSet
   }

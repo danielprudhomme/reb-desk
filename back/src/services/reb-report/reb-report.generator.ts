@@ -35,14 +35,16 @@ const TIME_UNIT_LABELS: Record<TimeUnit, string> = {
 };
 
 export const rebReportGenerator = {
-  async createRebReport(robot: Robot): Promise<void> {
+  async createRebReport(robot: Robot, capital: number, leverage: number): Promise<void> {
     await fileService.ensureDirectory(EXPORTS_PATH);
     const projectName = this.generateProjectName({
       ...REB_CONFIG,
-      ...robot.strategyContext,
+      ...robot,
+      capital,
+      leverage,
     });
 
-    const content = buildRebFile(robot, projectName);
+    const content = buildRebFile(robot, capital, leverage, projectName);
 
     const filePath = path.join(EXPORTS_PATH, `${projectName}.reb`);
     await writeFile(filePath, content, 'utf-8');
@@ -52,6 +54,7 @@ export const rebReportGenerator = {
     symbol: Symbol;
     timeframe: Timeframe;
     capital: number;
+    leverage: number;
     startDate: string;
     shortTermCount: number;
     shortTermDuration: number;
@@ -64,16 +67,21 @@ export const rebReportGenerator = {
     const shortTerm = `${params.shortTermCount}x${params.shortTermDuration}${params.shortTermUnit.toString()[0]}`;
     const longTerm = `${params.longTermDuration}${params.longTermUnit.toString()[0]}`;
     const currentDate = normalizeDate();
-    return `${params.symbol}-${params.timeframe}-${expertName}-${params.capital}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
+    return `${params.symbol}-${params.timeframe}-${expertName}-${params.capital}-${params.leverage}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
   },
 };
 
-function buildRebFile(robot: Robot, projectName: string): string {
+function buildRebFile(
+  robot: Robot,
+  capital: number,
+  leverage: number,
+  projectName: string,
+): string {
   if (!robot.magicNumber) {
     throw new Error('Missing magic number');
   }
 
-  const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+  const expert = robot.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
 
   const expertName = expertConst.EXPERT_NAMES[expert].replace(' ', '-');
   const expertPath = path.join(APP_CONFIG.terminalPath, `MQL5\\Experts\\REB ${expertName}.ex5`);
@@ -88,13 +96,13 @@ ${terminalPath}
 NOM EXPERT :
 ${expertPath}
 SYMBOLE :
-${robot.strategyContext.symbol}
+${robot.symbol}
 UNITE DE TEMPS :
-${robot.strategyContext.timeframe}
+${robot.timeframe}
 SPREAD :
-${robot.strategyContext.leverage}
+${leverage}
 CAPITAL :
-${robot.strategyContext.capital}
+${capital}
 DEVISE :
 EUR
 MODELE D'OPTIMISATION :
@@ -130,13 +138,13 @@ ${parameters}
 }
 
 export function buildParametersInFile(robot: Robot, applyParams: boolean): string {
-  const expert = robot.strategyContext.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+  const expert = robot.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
 
   const expertName = expertConst.EXPERT_NAMES[expert];
   const parametersOfExpert = expertParameters[expert][0];
 
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
-EA_Comment=${expertName} ${robot.strategyContext.symbol} ${robot.strategyContext.timeframe}
+EA_Comment=${expertName} ${robot.symbol} ${robot.timeframe}
 ${parametersOfExpert}
 ${baseParameters}`;
 

@@ -2,9 +2,15 @@ export default /* GraphQL */ `
   type RebReport {
     id: ID!
 
-    strategyContextId: ID!
+    expert: ExpertAdvisor!
 
-    strategyContext: StrategyContext!
+    timeframe: Timeframe!
+
+    symbol: Symbol!
+
+    leverage: Int!
+
+    capital: Float!
 
     startDate: String!
 

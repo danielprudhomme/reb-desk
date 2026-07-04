@@ -13,7 +13,7 @@ export async function runAnalysis(request: AnalysisRequest): Promise<AnalyzedGro
   const valuesByType: { worstValues: number[]; min: number; max: number }[] = [];
   const analyzedGroupedPasses = runChecks(
     groupedBacktests,
-    backtests[0]?.strategyContext.capital || 0,
+    backtests[0]?.capital || 0,
     request.thresholds,
     valuesByType,
   );
