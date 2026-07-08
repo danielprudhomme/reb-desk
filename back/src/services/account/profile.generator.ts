@@ -11,7 +11,7 @@ export const profileGenerator = {
   async generateProfile(robot: Robot): Promise<void> {
     await fileService.ensureDirectory(EXPORTS_PATH);
 
-    const expertName = expertConst.EXPERT_NAMES[robot.expert].replaceAll(' ', '-');
+    const { name: expertName, ex5Name } = expertConst.EXPERT_CONSTANTS[robot.expert];
 
     const { periodType, periodSize } = getPeriodConfig(robot.timeframe);
     const parameters = buildParametersInFile(robot, true);
@@ -21,8 +21,8 @@ symbol=${robot.symbol}
 period_type=${periodType}
 period_size=${periodSize}
 <expert>
-name=REB ${expertName}
-path=Experts\\REB ${expertName}.ex5
+name=${ex5Name}
+path=Experts\\${ex5Name}.ex5
 expertmode=1
 <inputs>
 ${parameters}
@@ -30,7 +30,7 @@ ${parameters}
 </chart>
 `;
 
-    const filename = `${robot.symbol}-${robot.timeframe}-${expertName}.chr`;
+    const filename = `${robot.symbol}-${robot.timeframe}-${expertName.replaceAll(' ', '-')}.chr`;
 
     const filePath = path.join(EXPORTS_PATH, filename);
     await writeFile(filePath, content, 'utf-8');

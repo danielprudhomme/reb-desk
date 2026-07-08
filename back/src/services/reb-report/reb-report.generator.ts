@@ -62,7 +62,7 @@ export const rebReportGenerator = {
     longTermDuration: number;
     longTermUnit: TimeUnit;
   }): string {
-    const expertName = expertConst.EXPERT_NAMES[params.expert].replaceAll(' ', '');
+    const expertName = expertConst.EXPERT_CONSTANTS[params.expert].name.replaceAll(' ', '');
     const startDate = normalizeDate(params.startDate);
     const shortTerm = `${params.shortTermCount}x${params.shortTermDuration}${params.shortTermUnit.toString()[0]}`;
     const longTerm = `${params.longTermDuration}${params.longTermUnit.toString()[0]}`;
@@ -81,10 +81,10 @@ function buildRebFile(
     throw new Error('Missing magic number');
   }
 
-  const expert = robot.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+  const expert = robot.expert;
 
-  const expertName = expertConst.EXPERT_NAMES[expert].replace(' ', '-');
-  const expertPath = path.join(APP_CONFIG.terminalPath, `MQL5\\Experts\\REB ${expertName}.ex5`);
+  const ex5Name = expertConst.EXPERT_CONSTANTS[expert].ex5Name;
+  const expertPath = path.join(APP_CONFIG.terminalPath, `MQL5\\Experts\\${ex5Name}.ex5`);
   const terminalPath = `${path.join(APP_CONFIG.terminalPath, 'terminal64.exe')} /portable`;
 
   const parameters = buildParametersInFile(robot, false);
@@ -138,9 +138,9 @@ ${parameters}
 }
 
 export function buildParametersInFile(robot: Robot, applyParams: boolean): string {
-  const expert = robot.expert as 'candleSuite' | 'emaBb' | 'rsiBreak';
+  const expert = robot.expert;
 
-  const expertName = expertConst.EXPERT_NAMES[expert];
+  const expertName = expertConst.EXPERT_CONSTANTS[expert].name;
   const parametersOfExpert = expertParameters[expert][0];
 
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
@@ -273,7 +273,7 @@ Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`;
 
-export const expertParameters: Record<'candleSuite' | 'emaBb' | 'rsiBreak', string[]> = {
+export const expertParameters: Record<ExpertAdvisor, string[]> = {
   candleSuite: [
     `Suite=4||4||1||6||Y
 Extreme_Research=50||100||200||500||Y`,
@@ -292,6 +292,137 @@ RSI_Period=14||14||1||140||N
 RSI_Start=30||30||20||50||Y
 Delta_RSI_Buy=20||20||20||40||Y`,
   ],
+
+  ichimoku: [''],
+
+  scBbEngulfing: [
+    `Engulfing_Candle_Score=1||0.0||0.000000||0.000000||N
+BB_Period=200||50||50||200||Y
+BB_Deviation=2||2||1||3||Y
+Under_Lower_BB_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scIchiSar: [
+    `Tenkan_Sen=9||9||1||90||N
+Kijun_Sen=26||26||1||260||N
+Senkou_Span_B=52||52||1||520||N
+Ichi_Cloud_Pos_Score=1||0.0||0.000000||0.000000||N
+SAR_Step=0.02||0.01||0.01||0.03||Y
+SAR_Max=0.2||0.1||0.1||0.3||Y
+SAR_Score=0||0.0||0.000000||0.000000||N
+SAR_Change_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scRsiBb: [
+    `RSI_Period=42||14||28||42||Y
+RSI_Min_Level=40||40||10||60||Y
+RSI_Min_Score=1||0.0||0.000000||0.000000||N
+BB_Period=20||20||30||50||Y
+BB_Deviation=1.5||2||1||3||Y
+Above_Lower_BB_Change_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scEmaRsi: [
+    `MA_Slow_Period=200||100||100||200||N
+MA_Fast_Period=50||20||30||50||N
+MA_Method=1||0||0||3||N
+MA_Score=0||0.0||0.000000||0.000000||N
+MA_Change_Score=0||0.0||0.000000||0.000000||N
+MA_Trend_Period=200||50||150||200||Y
+MA_Trend_Method=1||0||0||3||N
+MA_Trend_TF=0||0||0||49153||N
+MA_Trend_Score=1||0.0||0.000000||0.000000||N
+RSI_Period=14||7||7||14||Y
+RSI_TF=0||0||0||49153||N
+RSI_Min_Level=70||30||1||300||N
+RSI_Min_Score=0||0.0||0.000000||0.000000||N
+RSI_Min_Change_Score=0||0.0||0.000000||0.000000||N
+RSI_Max_Level=30||30||10||60||Y
+RSI_Max_Score=0||0.0||0.000000||0.000000||N
+RSI_Max_Change_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+`,
+  ],
+
+  scEmaMacd: [
+    `MA_Slow_Period=200||100||100||200||Y
+MA_Fast_Period=50||20||30||50||Y
+MA_Method=1||0||0||3||N
+MA_Score=1||0.0||0.000000||0.000000||N
+MACD_Fast=12||12||1||120||N
+MACD_Slow=26||26||1||260||N
+MACD_Signal=26||26||1||260||N
+MACD_Way_Score=0||0.0||0.000000||0.000000||N
+MACD_Way_Change_Score=1||0.0||0.000000||0.000000||N
+MACD_Min_Level=0||0.0||0.000000||0.000000||N
+MACD_Min_Level_Score=0||0.0||0.000000||0.000000||N
+MACD_Max_Level=0||0.0||0.000000||0.000000||N
+MACD_Max_Level_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=3||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scRsiEngulfing: [
+    `RSI_Period=14||14||14||42||N
+RSI_Min_Level=30||40||10||60||N
+RSI_Min_Score=0||0.0||0.000000||0.000000||N
+RSI_Min_Change_Score=0||0.0||0.000000||0.000000||N
+RSI_Max_Level=30||20||10||50||Y
+RSI_Max_Score=1||0.0||0.000000||0.000000||N
+Engulfing_Candle_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scEmaSar: [
+    `MA_Slow_Period=200||100||100||200||N
+MA_Fast_Period=50||20||30||50||N
+MA_Method=1||0||0||3||N
+MA_Score=0||0.0||0.000000||0.000000||N
+MA_Change_Score=0||0.0||0.000000||0.000000||N
+MA_Trend_Period=50||50||50||200||Y
+MA_Trend_Method=1||0||0||3||N
+MA_Trend_Score=1||0.0||0.000000||0.000000||N
+SAR_Step=0.02||0.01||0.01||0.02||Y
+SAR_Max=0.1||0.1||0.1||0.2||Y
+SAR_Change_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N
+    `,
+  ],
+
+  scRsiOnly: [
+    `RSI_Period=28||14||14||42||Y
+RSI_Min_Level=30||40||10||60||N
+RSI_Min_Score=0||0.0||0.000000||0.000000||N
+RSI_Min_Change_Score=0||0.0||0.000000||0.000000||N
+RSI_Max_Level=60||60||10||90||Y
+RSI_Max_Score=0||0.0||0.000000||0.000000||N
+RSI_Max_Change_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=1||1.0||0.100000||10.000000||N`,
+  ],
+
+  scStochOnly: [
+    `Stoch_K_Period=25||5||10||25||Y
+Stoch_D_Period=3||3||5||12||Y
+Stoch_Slowing=3||3||1||30||N
+Stoch_Average_Methode=0||0||0||3||N
+Stoch_TF=0||0||0||49153||N
+Stoch_Way_Score=0||0.0||0.000000||0.000000||N
+Stoch_Way_Change_Score=1||0.0||0.000000||0.000000||N
+Stoch_Min_Level=20||20||1||200||N
+Stoch_Min_Level_Score=0||0.0||0.000000||0.000000||N
+Stoch_Max_Level=20||80||1||800||N
+Stoch_Max_Level_Score=1||0.0||0.000000||0.000000||N
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
+  ],
+
+  autoBot: [''],
 };
 
 function normalizeDate(date?: string): string {

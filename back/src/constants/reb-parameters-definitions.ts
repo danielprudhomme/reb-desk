@@ -2,7 +2,137 @@ import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { ExpertParameterName } from '@shared/models/expert-parameter-name.ts';
 
 export function getParameters(expert: ExpertAdvisor): ExpertParameterName[] {
-  return EXPERT_PARAMETER_DEFINITIONS[expert];
+  switch (expert) {
+    case 'candleSuite':
+      return ['Suite', 'Extreme_Research', ...COMMON_PARAMETERS];
+    case 'rsiBreak':
+      return ['Extreme_Research', 'RSI_Period', 'RSI_Start', 'Delta_RSI_Buy', ...COMMON_PARAMETERS];
+    case 'emaBb':
+      return ['EMA_Slow_Period', 'BB_Period', 'BB_Deviation', 'BB_Way', ...COMMON_PARAMETERS];
+    case 'ichimoku':
+      return ['Tenkan_Sen', 'Kijun_Sen', 'Senkou_Span_B', 'Sup_Trend', ...COMMON_PARAMETERS];
+    case 'autoBot':
+      return [
+        'Trade_Direction',
+        'Entry_Agressivity',
+        'Win_Level',
+        'Win_Factor',
+        'Recovery_Level',
+        'Recovery_Factor',
+        'Max_Lot_Size_Vs_Ini',
+        'Min_Distance_Between_Entries',
+        'Max_Amount_Of_First_Entries',
+        'Ini_Lot_Size_For_1k',
+        'Adapt_Lot_Size_To_Capital',
+      ];
+    case 'scBbEngulfing':
+    case 'scIchiSar':
+    case 'scRsiBb':
+    case 'scEmaRsi':
+    case 'scEmaMacd':
+    case 'scRsiEngulfing':
+    case 'scEmaSar':
+    case 'scRsiOnly':
+    case 'scStochOnly':
+      return [
+        'MA_Slow_Period',
+        'MA_Fast_Period',
+        'MA_Method',
+        'MA_TF',
+        'MA_Score',
+        'MA_Change_Score',
+        'MA_Trend_Period',
+        'MA_Trend_Method',
+        'MA_Trend_TF',
+        'MA_Trend_Score',
+        'MA_Trend_Change_Score',
+
+        'RSI_Period',
+        'RSI_TF',
+        'RSI_Min_Level',
+        'RSI_Min_Score',
+        'RSI_Min_Change_Score',
+        'RSI_Max_Level',
+        'RSI_Max_Score',
+        'RSI_Max_Change_Score',
+
+        'Tenkan_Sen',
+        'Kijun_Sen',
+        'Senkou_Span_B',
+        'Ichi_TF',
+        'Ichi_Cloud_Pos_Score',
+        'Ichi_Cloud_Pos_Change_Score',
+        'Ichi_Cloud_Way_Score',
+        'Ichi_Cloud_Way_Change_Score',
+        'Ichi_Tenkan_vs_Kijun_Score',
+        'Ichi_Tenkan_vs_Kijun_Change_Score',
+        'Ichi_Kijun_vs_Cloud_Score',
+        'Ichi_Chiku_vs_All_Score',
+
+        'Engulfing_Candle_Score',
+
+        'BB_Period',
+        'BB_Deviation',
+        'BB_TF',
+        'Under_Lower_BB_Score',
+        'Under_Lower_BB_Change_Score',
+        'Above_Upper_BB_Score',
+        'Above_Upper_BB_Change_Score',
+        'Under_Upper_BB_Score',
+        'Under_Upper_BB_Change_Score',
+        'Above_Lower_BB_Score',
+        'Above_Lower_BB_Change_Score',
+
+        'SAR_Step',
+        'SAR_Max',
+        'SAR_TF',
+        'SAR_Score',
+        'SAR_Change_Score',
+
+        'Stoch_K_Period',
+        'Stoch_D_Period',
+        'Stoch_Slowing',
+        'Stoch_Average_Methode',
+        'Stoch_TF',
+        'Stoch_Way_Score',
+        'Stoch_Way_Change_Score',
+        'Stoch_Min_Level',
+        'Stoch_Min_Level_Score',
+        'Stoch_Max_Level',
+        'Stoch_Max_Level_Score',
+
+        'MACD_TF',
+        'MACD_Fast',
+        'MACD_Slow',
+        'MACD_Signal',
+        'MACD_Way_Score',
+        'MACD_Way_Change_Score',
+        'MACD_Min_Level',
+        'MACD_Min_Level_Score',
+        'MACD_Max_Level',
+        'MACD_Max_Level_Score',
+
+        'Aleatory_Score',
+        'Aleatory_Frequency_In_Percent',
+        'Aleatory_TP_Variation_In_Percent',
+        'Aleatory_SL_Variation_In_Percent',
+        'Aleatory_Ini_Lot_For_10k_Variation_In_Percent',
+        'Aleatory_Max_Daily_Profit_In_Percent_Variation_In_Percent',
+        'Aleatory_Trade_Max_Profit_In_Percent_Variation_In_Percent',
+
+        'Min_Buy_Score',
+        'Close_Score',
+
+        'Use_Open_Hour1',
+        'Open_Hour1',
+        'Use_Open_Hour2',
+        'Open_Hour2',
+        'Use_Close_Hour',
+        'Close_Hour',
+
+        ...COMMON_PARAMETERS,
+      ];
+  }
 }
 
 const COMMON_PARAMETERS: ExpertParameterName[] = [
@@ -92,126 +222,3 @@ export const OTHER_PARAMETERS: ExpertParameterName[] = [
   'Force_Pause_Word',
   'Force_Non_Trading_If_Nothing_Word',
 ];
-
-const EXPERT_PARAMETER_DEFINITIONS: Record<ExpertAdvisor, ExpertParameterName[]> = {
-  candleSuite: ['Suite', 'Extreme_Research', ...COMMON_PARAMETERS],
-
-  rsiBreak: ['Extreme_Research', 'RSI_Period', 'RSI_Start', 'Delta_RSI_Buy', ...COMMON_PARAMETERS],
-
-  emaBb: ['EMA_Slow_Period', 'BB_Period', 'BB_Deviation', 'BB_Way', ...COMMON_PARAMETERS],
-
-  ichimoku: ['Tenkan_Sen', 'Kijun_Sen', 'Senkou_Span_B', 'Sup_Trend', ...COMMON_PARAMETERS],
-
-  strategyCreator: [
-    'MA_Slow_Period',
-    'MA_Fast_Period',
-    'MA_Method',
-    'MA_TF',
-    'MA_Score',
-    'MA_Change_Score',
-    'MA_Trend_Period',
-    'MA_Trend_Method',
-    'MA_Trend_TF',
-    'MA_Trend_Score',
-    'MA_Trend_Change_Score',
-
-    'RSI_Period',
-    'RSI_TF',
-    'RSI_Min_Level',
-    'RSI_Min_Score',
-    'RSI_Min_Change_Score',
-    'RSI_Max_Level',
-    'RSI_Max_Score',
-    'RSI_Max_Change_Score',
-
-    'Tenkan_Sen',
-    'Kijun_Sen',
-    'Senkou_Span_B',
-    'Ichi_TF',
-    'Ichi_Cloud_Pos_Score',
-    'Ichi_Cloud_Pos_Change_Score',
-    'Ichi_Cloud_Way_Score',
-    'Ichi_Cloud_Way_Change_Score',
-    'Ichi_Tenkan_vs_Kijun_Score',
-    'Ichi_Tenkan_vs_Kijun_Change_Score',
-    'Ichi_Kijun_vs_Cloud_Score',
-    'Ichi_Chiku_vs_All_Score',
-
-    'Engulfing_Candle_Score',
-
-    'BB_Period',
-    'BB_Deviation',
-    'BB_TF',
-    'Under_Lower_BB_Score',
-    'Under_Lower_BB_Change_Score',
-    'Above_Upper_BB_Score',
-    'Above_Upper_BB_Change_Score',
-    'Under_Upper_BB_Score',
-    'Under_Upper_BB_Change_Score',
-    'Above_Lower_BB_Score',
-    'Above_Lower_BB_Change_Score',
-
-    'SAR_Step',
-    'SAR_Max',
-    'SAR_TF',
-    'SAR_Score',
-    'SAR_Change_Score',
-
-    'Stoch_K_Period',
-    'Stoch_D_Period',
-    'Stoch_Slowing',
-    'Stoch_Average_Methode',
-    'Stoch_TF',
-    'Stoch_Way_Score',
-    'Stoch_Way_Change_Score',
-    'Stoch_Min_Level',
-    'Stoch_Min_Level_Score',
-    'Stoch_Max_Level',
-    'Stoch_Max_Level_Score',
-
-    'MACD_TF',
-    'MACD_Fast',
-    'MACD_Slow',
-    'MACD_Signal',
-    'MACD_Way_Score',
-    'MACD_Way_Change_Score',
-    'MACD_Min_Level',
-    'MACD_Min_Level_Score',
-    'MACD_Max_Level',
-    'MACD_Max_Level_Score',
-
-    'Aleatory_Score',
-    'Aleatory_Frequency_In_Percent',
-    'Aleatory_TP_Variation_In_Percent',
-    'Aleatory_SL_Variation_In_Percent',
-    'Aleatory_Ini_Lot_For_10k_Variation_In_Percent',
-    'Aleatory_Max_Daily_Profit_In_Percent_Variation_In_Percent',
-    'Aleatory_Trade_Max_Profit_In_Percent_Variation_In_Percent',
-
-    'Min_Buy_Score',
-    'Close_Score',
-
-    'Use_Open_Hour1',
-    'Open_Hour1',
-    'Use_Open_Hour2',
-    'Open_Hour2',
-    'Use_Close_Hour',
-    'Close_Hour',
-
-    ...COMMON_PARAMETERS,
-  ],
-
-  autoBot: [
-    'Trade_Direction',
-    'Entry_Agressivity',
-    'Win_Level',
-    'Win_Factor',
-    'Recovery_Level',
-    'Recovery_Factor',
-    'Max_Lot_Size_Vs_Ini',
-    'Min_Distance_Between_Entries',
-    'Max_Amount_Of_First_Entries',
-    'Ini_Lot_Size_For_1k',
-    'Adapt_Lot_Size_To_Capital',
-  ],
-};

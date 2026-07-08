@@ -14,13 +14,13 @@ export function requiredValue(lines: string[], key: string): string {
   return value;
 }
 
-export function extractExpert(lines: string[]): ExpertAdvisor {
+export function extractExpert(lines: string[]): ExpertAdvisor | 'strategyCreator' {
   const expertName = requiredValue(lines, 'NOM EXPERT :');
   const file = basename(expertName)
     .replace(/\.ex5$/i, '')
     .replace(/\.ex4$/i, '');
 
-  const map: Record<string, ExpertAdvisor> = {
+  const map: Record<string, ExpertAdvisor | 'strategyCreator'> = {
     'REB Candle-Suite': 'candleSuite',
     'REB EMA-BB': 'emaBb',
     'REB Ichimoku-Bot': 'ichimoku',

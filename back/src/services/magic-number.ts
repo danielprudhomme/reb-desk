@@ -3,38 +3,40 @@ import { Symbol } from '@shared/models/symbol.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { db } from '@src/db/database.ts';
 
+// Forex symbols : 3 digits
 export const SYMBOL_CODE: Record<Symbol, string> = {
-  AUDCAD: '0102',
-  AUDCHF: '0108',
-  AUDJPY: '0105',
-  AUDNZD: '0106',
-  AUDUSD: '0103',
-  CADCHF: '0208',
-  CADJPY: '0205',
-  CHFJPY: '0805',
-  EURAUD: '0401',
-  EURCAD: '0402',
-  EURCHF: '0408',
-  EURGBP: '0407',
-  EURJPY: '0405',
-  EURNZD: '0406',
-  EURUSD: '0403',
-  GBPAUD: '0701',
-  GBPCAD: '0702',
-  GBPCHF: '0708',
-  GBPJPY: '0705',
-  GBPNZD: '0706',
-  GBPUSD: '0703',
-  NZDCAD: '0602',
-  NZDCHF: '0608',
-  NZDJPY: '0605',
-  NZDUSD: '0603',
-  USDCAD: '0302',
-  USDCHF: '0308',
-  USDJPY: '0305',
-  XAUUSD: '0903',
+  AUDCAD: '102',
+  AUDCHF: '108',
+  AUDJPY: '105',
+  AUDNZD: '106',
+  AUDUSD: '103',
+  CADCHF: '208',
+  CADJPY: '205',
+  CHFJPY: '805',
+  EURAUD: '401',
+  EURCAD: '402',
+  EURCHF: '408',
+  EURGBP: '407',
+  EURJPY: '405',
+  EURNZD: '406',
+  EURUSD: '403',
+  GBPAUD: '701',
+  GBPCAD: '702',
+  GBPCHF: '708',
+  GBPJPY: '705',
+  GBPNZD: '706',
+  GBPUSD: '703',
+  NZDCAD: '602',
+  NZDCHF: '608',
+  NZDJPY: '605',
+  NZDUSD: '603',
+  USDCAD: '302',
+  USDCHF: '308',
+  USDJPY: '305',
+  XAUUSD: '903',
 } as const;
 
+// Timeframes : 2 digits
 export const TIMEFRAME_CODE: Record<Timeframe, string> = {
   M1: '01',
   M2: '02',
@@ -57,13 +59,23 @@ export const TIMEFRAME_CODE: Record<Timeframe, string> = {
   D: '19',
 } as const;
 
+// Expert Advisors : 2 digits
 export const EA_CODE: Record<ExpertAdvisor, string> = {
-  candleSuite: '1',
-  rsiBreak: '2',
-  emaBb: '3',
-  strategyCreator: '4',
-  autoBot: '5',
-  ichimoku: '6',
+  candleSuite: '01',
+  rsiBreak: '02',
+  emaBb: '03',
+  autoBot: '04',
+  ichimoku: '05',
+
+  scBbEngulfing: '10',
+  scIchiSar: '11',
+  scRsiBb: '12',
+  scEmaRsi: '13',
+  scEmaMacd: '14',
+  scRsiEngulfing: '15',
+  scEmaSar: '16',
+  scRsiOnly: '17',
+  scStochOnly: '18',
 } as const;
 
 const TYPE_FOREX = '1';
@@ -92,6 +104,7 @@ function getNextRobotIndex(existing: number[]): number {
   return candidate;
 }
 
+// Unique number 10 digits: 1 digit for type, 3 digits for symbol, 2 digits for timeframe, 2 digits for EA, 2 digits for index
 export async function generateMagicNumber(params: {
   accountId: string;
   symbol: Symbol;
