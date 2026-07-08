@@ -15,11 +15,19 @@ export default /* GraphQL */ `
   }
 
   enum ExpertAdvisor {
-    candleSuite
-    emaBb
-    ichimoku
-    rsiBreak
-    strategyCreator
+    candleSuite,
+    emaBb,
+    ichimoku,
+    rsiBreak,
+    scBbEngulfing,
+    scIchiSar,
+    scRsiBb,
+    scEmaRsi,
+    scEmaMacd,
+    scRsiEngulfing,
+    scEmaSar,
+    scRsiOnly,
+    scStochOnly,
     autoBot
   }
 

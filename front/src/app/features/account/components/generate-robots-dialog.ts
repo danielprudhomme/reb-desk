@@ -39,7 +39,7 @@ import { MatInputModule } from '@angular/material/input';
 export class GenerateRobotsDialog {
   model = signal<{ numberOfRobots: number; experts: ExpertAdvisor[] }>({
     numberOfRobots: 99,
-    experts: ['candleSuite', 'emaBb', 'rsiBreak', 'strategyCreator'],
+    experts: ['candleSuite', 'emaBb', 'rsiBreak'],
   });
   form = form(this.model, (path) => {
     required(path.numberOfRobots);
