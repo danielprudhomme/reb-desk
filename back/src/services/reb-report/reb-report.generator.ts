@@ -144,7 +144,7 @@ export function buildParametersInFile(robot: Robot, applyParams: boolean): strin
   const parametersOfExpert = expertParameters[expert][0];
 
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
-EA_Comment=${expertName} ${robot.symbol} ${robot.timeframe}
+EA_Comment=${robot.symbol} ${robot.timeframe} ${expertName}
 ${parametersOfExpert}
 ${baseParameters}`;
 
@@ -300,8 +300,7 @@ Delta_RSI_Buy=20||20||20||40||Y`,
 BB_Period=200||50||50||200||Y
 BB_Deviation=2||2||1||3||Y
 Under_Lower_BB_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scIchiSar: [
@@ -313,8 +312,7 @@ SAR_Step=0.02||0.01||0.01||0.03||Y
 SAR_Max=0.2||0.1||0.1||0.3||Y
 SAR_Score=0||0.0||0.000000||0.000000||N
 SAR_Change_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scRsiBb: [
@@ -324,8 +322,7 @@ RSI_Min_Score=1||0.0||0.000000||0.000000||N
 BB_Period=20||20||30||50||Y
 BB_Deviation=1.5||2||1||3||Y
 Above_Lower_BB_Change_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scEmaRsi: [
@@ -346,8 +343,7 @@ RSI_Min_Change_Score=0||0.0||0.000000||0.000000||N
 RSI_Max_Level=30||30||10||60||Y
 RSI_Max_Score=0||0.0||0.000000||0.000000||N
 RSI_Max_Change_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-`,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scEmaMacd: [
@@ -364,8 +360,7 @@ MACD_Min_Level=0||0.0||0.000000||0.000000||N
 MACD_Min_Level_Score=0||0.0||0.000000||0.000000||N
 MACD_Max_Level=0||0.0||0.000000||0.000000||N
 MACD_Max_Level_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=3||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=3||1.0||0.100000||10.000000||N`,
   ],
 
   scRsiEngulfing: [
@@ -376,8 +371,7 @@ RSI_Min_Change_Score=0||0.0||0.000000||0.000000||N
 RSI_Max_Level=30||20||10||50||Y
 RSI_Max_Score=1||0.0||0.000000||0.000000||N
 Engulfing_Candle_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scEmaSar: [
@@ -392,8 +386,7 @@ MA_Trend_Score=1||0.0||0.000000||0.000000||N
 SAR_Step=0.02||0.01||0.01||0.02||Y
 SAR_Max=0.1||0.1||0.1||0.2||Y
 SAR_Change_Score=1||0.0||0.000000||0.000000||N
-Min_Buy_Score=2||1.0||0.100000||10.000000||N
-    `,
+Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   ],
 
   scRsiOnly: [

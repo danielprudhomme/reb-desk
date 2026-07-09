@@ -22,9 +22,9 @@ export const accountService = {
       throw new Error('Account not found');
     }
 
-    // at first do it only with non SC robots
-    const robots = (await robotService.findByAccount(accountId)).filter((robot) =>
-      ['candleSuite', 'emaBb', 'rsiBreak'].includes(robot.expert),
+    // Generate reb reports for all robots without parameterSetId
+    const robots = (await robotService.findByAccount(accountId)).filter(
+      (robot) => !robot.parameterSetId,
     );
 
     robots.forEach(
