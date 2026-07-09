@@ -18,7 +18,7 @@ import { MatDialog } from '@angular/material/dialog';
 import { GenerateRobotsDialog } from './generate-robots-dialog';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol, symbols } from '@shared/models/symbol';
-import { diversifyRobots } from '../helpers/diversify-robots';
+import { diversifyRobots, ExpertDistribution } from '../helpers/diversify-robots';
 import { Robot } from '@shared/models/robot';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RobotDrawer } from './robot-drawer';
@@ -164,14 +164,30 @@ export class AccountDetails {
       .afterClosed()
       .subscribe((result) => {
         if (!result) return;
-        const { numberOfRobots, experts } = result;
+        const { numberOfRobots } = result;
+
+        const distribution: ExpertDistribution = {
+          candleSuite: 16,
+          emaBb: 15,
+          rsiBreak: 15,
+
+          scBbEngulfing: 6,
+          scIchiSar: 6,
+          scRsiBb: 6,
+          scEmaRsi: 6,
+          scEmaMacd: 6,
+          scRsiEngulfing: 6,
+          scEmaSar: 6,
+          scRsiOnly: 6,
+          scStochOnly: 6,
+        };
 
         const robots = diversifyRobots(
           this.robots(),
-          experts,
           this.timeframes,
           this.symbols,
           numberOfRobots,
+          distribution,
         );
         this.robotService.insertRobots(this.accountId!, robots);
       });
