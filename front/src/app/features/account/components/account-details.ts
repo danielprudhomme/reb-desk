@@ -164,29 +164,28 @@ export class AccountDetails {
       .afterClosed()
       .subscribe((result) => {
         if (!result) return;
-        const { numberOfRobots } = result;
 
         const distribution: ExpertDistribution = {
-          candleSuite: 16,
-          emaBb: 15,
-          rsiBreak: 15,
+          candleSuite: 30,
+          emaBb: 30,
+          rsiBreak: 30,
 
-          scBbEngulfing: 6,
-          scIchiSar: 6,
-          scRsiBb: 6,
-          scEmaRsi: 6,
-          scEmaMacd: 6,
-          scRsiEngulfing: 6,
-          scEmaSar: 6,
-          scRsiOnly: 6,
-          scStochOnly: 6,
+          scBbEngulfing: 1,
+          scIchiSar: 1,
+          scRsiBb: 1,
+          scEmaRsi: 1,
+          scEmaMacd: 1,
+          scRsiEngulfing: 1,
+          scEmaSar: 1,
+          scRsiOnly: 1,
+          scStochOnly: 1,
         };
 
         const robots = diversifyRobots(
           this.robots(),
+          this.robots(),
           this.timeframes,
           this.symbols,
-          numberOfRobots,
           distribution,
         );
         this.robotService.insertRobots(this.accountId!, robots);

@@ -9,10 +9,6 @@ function extractCurrencies(symbol: Symbol): [string, string] {
   return [symbol.slice(0, 3), symbol.slice(3, 6)];
 }
 
-function increment<K>(map: Map<K, number>, key: K, value = 1): void {
-  map.set(key, (map.get(key) ?? 0) + value);
-}
-
 function get<K>(map: Map<K, number>, key: K): number {
   return map.get(key) ?? 0;
 }
@@ -26,11 +22,9 @@ interface DiversificationStats {
   timeframeCount: Map<Timeframe, number>;
   symbolCount: Map<Symbol, number>;
   currencyCount: Map<string, number>;
-
   expertSymbolCount: Map<string, number>;
   expertTimeframeCount: Map<string, number>;
   symbolTimeframeCount: Map<string, number>;
-
   comboCount: Map<string, number>;
 }
 
@@ -52,6 +46,10 @@ function createStats(): DiversificationStats {
 function registerRobot(stats: DiversificationStats, robot: RobotConfiguration): void {
   const [base, quote] = extractCurrencies(robot.symbol);
 
+  const increment = <K>(map: Map<K, number>, key: K, value = 1): void => {
+    map.set(key, (map.get(key) ?? 0) + value);
+  };
+
   increment(stats.expertCount, robot.expert);
   increment(stats.timeframeCount, robot.timeframe);
   increment(stats.symbolCount, robot.symbol);
@@ -70,37 +68,46 @@ function registerRobot(stats: DiversificationStats, robot: RobotConfiguration): 
   increment(stats.comboCount, createKey(robot.expert, robot.timeframe, quote));
 }
 
+function computeScore(stats: DiversificationStats, candidate: RobotConfiguration): number {
+  const [base, quote] = extractCurrencies(candidate.symbol);
+
+  const expertSymbolKey = createKey(candidate.expert, candidate.symbol);
+  const expertTimeframeKey = createKey(candidate.expert, candidate.timeframe);
+  const symbolTimeframeKey = createKey(candidate.symbol, candidate.timeframe);
+  const comboBaseKey = createKey(candidate.expert, candidate.timeframe, base);
+  const comboQuoteKey = createKey(candidate.expert, candidate.timeframe, quote);
+
+  return (
+    get(stats.expertCount, candidate.expert) * 10 +
+    get(stats.timeframeCount, candidate.timeframe) * 8 +
+    get(stats.symbolCount, candidate.symbol) * 6 +
+    get(stats.currencyCount, base) * 5 +
+    get(stats.currencyCount, quote) * 5 +
+    get(stats.expertSymbolCount, expertSymbolKey) * 20 +
+    get(stats.expertTimeframeCount, expertTimeframeKey) * 30 +
+    get(stats.symbolTimeframeCount, symbolTimeframeKey) * 15 +
+    get(stats.comboCount, comboBaseKey) * 50 +
+    get(stats.comboCount, comboQuoteKey) * 50
+  );
+}
+
 function buildExpertTargets(
-  numberOfRobots: number,
   existingRobots: RobotConfiguration[],
   distribution: ExpertDistribution,
 ): Map<ExpertAdvisor, number> {
   const targets = new Map<ExpertAdvisor, number>();
 
-  let allocated = 0;
-
-  for (const [expert, percent] of Object.entries(distribution)) {
-    const count = Math.floor((numberOfRobots * percent) / 100);
+  // nombre exact demandé
+  for (const [expert, count] of Object.entries(distribution)) {
     targets.set(expert as ExpertAdvisor, count);
-    allocated += count;
   }
 
-  // distribute remaining robots caused by rounding
-  const remaining = numberOfRobots - allocated;
-
-  const experts = Object.keys(distribution) as ExpertAdvisor[];
-
-  for (let i = 0; i < remaining; i++) {
-    const expert = experts[i % experts.length];
-    targets.set(expert, (targets.get(expert) ?? 0) + 1);
-  }
-
-  // remove already existing robots from quota
+  // on retire les robots déjà présents sur le compte
   for (const robot of existingRobots) {
-    const current = targets.get(robot.expert);
+    const remaining = targets.get(robot.expert);
 
-    if (current !== undefined && current > 0) {
-      targets.set(robot.expert, current - 1);
+    if (remaining !== undefined && remaining > 0) {
+      targets.set(robot.expert, remaining - 1);
     }
   }
 
@@ -108,10 +115,10 @@ function buildExpertTargets(
 }
 
 export function diversifyRobots(
-  existingRobots: RobotConfiguration[],
+  currentAccountRobots: RobotConfiguration[],
+  allAccountsRobots: RobotConfiguration[],
   timeframes: Timeframe[],
   symbols: Symbol[],
-  numberOfRobots: number,
   distribution: ExpertDistribution,
 ): RobotConfiguration[] {
   const candidates: RobotConfiguration[] = [];
@@ -134,19 +141,21 @@ export function diversifyRobots(
 
   candidates.sort(() => Math.random() - 0.5);
 
-  const selected: RobotConfiguration[] = [...existingRobots];
-
+  const selected: RobotConfiguration[] = [...currentAccountRobots];
   const newRobots: RobotConfiguration[] = [];
+  const localStats = createStats();
+  currentAccountRobots.forEach((r) => registerRobot(localStats, r));
 
-  const stats = createStats();
+  const globalStats = createStats();
+  allAccountsRobots.forEach((r) => registerRobot(globalStats, r));
 
-  for (const robot of existingRobots) {
-    registerRobot(stats, robot);
-  }
+  const expertTargets = buildExpertTargets(currentAccountRobots, distribution);
+  const targetRobotCount = Object.values(distribution).reduce(
+    (sum, count) => sum + (count ?? 0),
+    0,
+  );
 
-  const expertTargets = buildExpertTargets(numberOfRobots, existingRobots, distribution);
-
-  while (selected.length < numberOfRobots) {
+  while (selected.length < targetRobotCount) {
     let bestIndex = -1;
     let bestScore = Number.POSITIVE_INFINITY;
 
@@ -159,14 +168,17 @@ export function diversifyRobots(
           continue;
         }
 
-        const [base, quote] = extractCurrencies(candidate.symbol);
-
         const expertSymbolKey = createKey(candidate.expert, candidate.symbol);
-
         const exactKey = createKey(candidate.expert, candidate.timeframe, candidate.symbol);
+        const symbolTimeframeKey = createKey(candidate.symbol, candidate.timeframe);
 
-        // avoid same expert + symbol first
-        if (level === 1 && get(stats.expertSymbolCount, expertSymbolKey) >= 1) {
+        // Tant qu'il reste des cases (symbol,timeframe) vides,
+        // on refuse d'ajouter un 2e robot dans une case déjà occupée.
+        if (
+          level === 1 &&
+          (get(localStats.symbolTimeframeCount, symbolTimeframeKey) > 0 ||
+            get(localStats.expertSymbolCount, expertSymbolKey) >= 1)
+        ) {
           continue;
         }
 
@@ -178,16 +190,9 @@ export function diversifyRobots(
           continue;
         }
 
-        const score =
-          get(stats.expertCount, candidate.expert) * 10 +
-          get(stats.timeframeCount, candidate.timeframe) * 8 +
-          get(stats.symbolCount, candidate.symbol) * 6 +
-          get(stats.currencyCount, base) * 5 +
-          get(stats.currencyCount, quote) * 5 +
-          get(stats.expertTimeframeCount, createKey(candidate.expert, candidate.timeframe)) * 30 +
-          get(stats.symbolTimeframeCount, createKey(candidate.symbol, candidate.timeframe)) * 15 +
-          get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, base)) * 50 +
-          get(stats.comboCount, createKey(candidate.expert, candidate.timeframe, quote)) * 50;
+        const localScore = computeScore(localStats, candidate);
+        const globalScore = computeScore(globalStats, candidate);
+        const score = localScore * 5 + globalScore;
 
         if (score < bestScore) {
           bestScore = score;
@@ -207,7 +212,8 @@ export function diversifyRobots(
     selected.push(chosen);
     newRobots.push(chosen);
 
-    registerRobot(stats, chosen);
+    registerRobot(localStats, chosen);
+    registerRobot(globalStats, chosen);
 
     // consume expert quota
     expertTargets.set(chosen.expert, (expertTargets.get(chosen.expert) ?? 1) - 1);
