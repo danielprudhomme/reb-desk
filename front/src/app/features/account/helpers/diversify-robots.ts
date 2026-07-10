@@ -159,52 +159,27 @@ export function diversifyRobots(
     let bestIndex = -1;
     let bestScore = Number.POSITIVE_INFINITY;
 
-    for (let level = 1; level <= 3 && bestIndex === -1; level++) {
-      for (let i = 0; i < candidates.length; i++) {
-        const candidate = candidates[i];
+    // On pourrait faire plusieurs tours (si par exemple le check sur symbolTimeframeKey est toujours faux)
+    for (let i = 0; i < candidates.length; i++) {
+      const candidate = candidates[i];
 
-        // Expert quota reached
-        if ((expertTargets.get(candidate.expert) ?? 0) <= 0) {
-          continue;
-        }
-
-        const expertSymbolKey = createKey(candidate.expert, candidate.symbol);
-        const exactKey = createKey(candidate.expert, candidate.timeframe, candidate.symbol);
-        const symbolTimeframeKey = createKey(candidate.symbol, candidate.timeframe);
-
-        // Tant qu'il reste des cases (symbol,timeframe) vides,
-        // on refuse d'ajouter un 2e robot dans une case déjà occupée.
-        if (
-          level === 1 &&
-          (get(localStats.symbolTimeframeCount, symbolTimeframeKey) > 0 ||
-            get(localStats.expertSymbolCount, expertSymbolKey) >= 1)
-        ) {
-          continue;
-        }
-
-        // avoid exact duplicate
-        if (
-          level === 2 &&
-          selected.some((r) => createKey(r.expert, r.timeframe, r.symbol) === exactKey)
-        ) {
-          continue;
-        }
-
-        const localScore = computeScore(localStats, candidate);
-        const globalScore = computeScore(globalStats, candidate);
-        const score = localScore * 5 + globalScore;
-
-        if (score < bestScore) {
-          bestScore = score;
-          bestIndex = i;
-        }
+      if ((expertTargets.get(candidate.expert) ?? 0) <= 0) {
+        continue;
       }
-    }
 
-    // fallback if everything is saturated
-    if (bestIndex === -1) {
-      candidates.push(...selected);
-      continue;
+      const symbolTimeframeKey = createKey(candidate.symbol, candidate.timeframe);
+      if (get(localStats.symbolTimeframeCount, symbolTimeframeKey) >= 1) {
+        continue;
+      }
+
+      const localScore = computeScore(localStats, candidate);
+      const globalScore = computeScore(globalStats, candidate);
+      const score = localScore * 5 + globalScore;
+
+      if (score < bestScore) {
+        bestScore = score;
+        bestIndex = i;
+      }
     }
 
     const chosen = candidates[bestIndex];
