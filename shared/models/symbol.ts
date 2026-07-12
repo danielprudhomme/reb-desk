@@ -31,3 +31,7 @@ export const symbols = [
 ] as const;
 
 export type Symbol = (typeof symbols)[number];
+
+export function extractCurrencies(symbol: Symbol): [string, string] {
+  return [symbol.slice(0, 3), symbol.slice(3, 6)];
+}

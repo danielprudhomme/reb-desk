@@ -1,13 +1,9 @@
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { Timeframe } from '@shared/models/timeframe';
-import { Symbol } from '@shared/models/symbol';
+import { extractCurrencies, Symbol } from '@shared/models/symbol';
 import { RobotConfiguration } from '@shared/models/robot-configuration';
 
 export type ExpertDistribution = Partial<Record<ExpertAdvisor, number>>;
-
-function extractCurrencies(symbol: Symbol): [string, string] {
-  return [symbol.slice(0, 3), symbol.slice(3, 6)];
-}
 
 function get<K>(map: Map<K, number>, key: K): number {
   return map.get(key) ?? 0;

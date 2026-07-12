@@ -5,9 +5,8 @@ import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
-import { form, FormField, required } from '@angular/forms/signals';
+import { form, required } from '@angular/forms/signals';
 import { MatIcon } from '@angular/material/icon';
-import { AccountForm } from './account-form';
 import { debounceTime, skip } from 'rxjs';
 import { toObservable } from '@angular/core/rxjs-interop';
 import { AccountInput } from '@app/core/models/account';
@@ -22,12 +21,14 @@ import { diversifyRobots, ExpertDistribution } from '../helpers/diversify-robots
 import { Robot } from '@shared/models/robot';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RobotDrawer } from './robot-drawer';
+import { MatTabsModule } from '@angular/material/tabs';
+import { Diversification } from './diversification';
 
 @Component({
   selector: 'app-account-details',
   imports: [
-    FormField,
     RobotTable,
+    Diversification,
     RobotDrawer,
     MatButtonModule,
     MatMenuModule,
@@ -35,8 +36,8 @@ import { RobotDrawer } from './robot-drawer';
     MatInputModule,
     MatIcon,
     RouterLink,
-    AccountForm,
     MatSidenavModule,
+    MatTabsModule,
   ],
   template: `
     <mat-sidenav-container class="h-full" (backdropClick)="closeDrawer()">
@@ -55,49 +56,53 @@ import { RobotDrawer } from './robot-drawer';
             >
               <mat-icon>settings</mat-icon>
             </button>
+
+            <mat-menu #settingsMenu="matMenu">
+              <button mat-menu-item (click)="generateRobots()">
+                <mat-icon>precision_manufacturing</mat-icon>
+                <span>Generate Robots</span>
+              </button>
+
+              <button mat-menu-item (click)="createRebReports()">
+                <mat-icon>description</mat-icon>
+                <span>Generate REB files for robots</span>
+              </button>
+
+              <button mat-menu-item (click)="syncRebReportsToRobots()">
+                <mat-icon>upload_file</mat-icon>
+                <span>Import REB reports to robots</span>
+              </button>
+
+              <button mat-menu-item (click)="generateProfile()">
+                <mat-icon>badge</mat-icon>
+                <span>Generate Profile</span>
+              </button>
+
+              <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
+                <mat-icon>delete_forever</mat-icon>
+                <span>Delete Account</span>
+              </button>
+            </mat-menu>
           </div>
-
-          <app-account-form [formField]="accountForm" />
-
-          <div>{{ robots().length }} robot{{ robots().length !== 1 ? 's' : '' }}</div>
 
           <div class="flex-1 overflow-auto border border-gray-100 rounded-lg">
-            <app-robot-table
-              [accountId]="accountId!"
-              [robots]="robots()"
-              [timeframes]="timeframes"
-              [symbols]="symbols"
-              (robotClicked)="onRobotClicked($event)"
-            />
+            <mat-tab-group class="h-full">
+              <mat-tab label="Robot Table">
+                <app-robot-table
+                  [accountId]="accountId!"
+                  [robots]="robots()"
+                  [timeframes]="timeframes"
+                  [symbols]="symbols"
+                  (robotClicked)="onRobotClicked($event)"
+                />
+              </mat-tab>
+
+              <mat-tab label="Diversification">
+                <app-diversification [robots]="robots()" />
+              </mat-tab>
+            </mat-tab-group>
           </div>
         </div>
-
-        <mat-menu #settingsMenu="matMenu">
-          <button mat-menu-item (click)="generateRobots()">
-            <mat-icon>precision_manufacturing</mat-icon>
-            <span>Generate Robots</span>
-          </button>
-
-          <button mat-menu-item (click)="createRebReports()">
-            <mat-icon>description</mat-icon>
-            <span>Generate REB files for robots</span>
-          </button>
-
-          <button mat-menu-item (click)="syncRebReportsToRobots()">
-            <mat-icon>upload_file</mat-icon>
-            <span>Import REB reports to robots</span>
-          </button>
-
-          <button mat-menu-item (click)="generateProfile()">
-            <mat-icon>badge</mat-icon>
-            <span>Generate Profile</span>
-          </button>
-
-          <button mat-menu-item (click)="deleteAccount()" [routerLink]="['..']">
-            <mat-icon>delete_forever</mat-icon>
-            <span>Delete Account</span>
-          </button>
-        </mat-menu>
       </mat-sidenav-content>
 
       <!-- RIGHT DRAWER -->
@@ -165,19 +170,20 @@ export class AccountDetails {
       .subscribe((result) => {
         if (!result) return;
 
+        // 99 robots
         const distribution: ExpertDistribution = {
-          candleSuite: 30,
-          emaBb: 30,
-          rsiBreak: 30,
+          candleSuite: 25,
+          emaBb: 25,
+          rsiBreak: 25,
 
-          scBbEngulfing: 1,
-          scIchiSar: 1,
-          scRsiBb: 1,
-          scEmaRsi: 1,
-          scEmaMacd: 1,
-          scRsiEngulfing: 1,
-          scEmaSar: 1,
-          scRsiOnly: 1,
+          scBbEngulfing: 3,
+          scIchiSar: 3,
+          scRsiBb: 3,
+          scEmaRsi: 3,
+          scEmaMacd: 3,
+          scRsiEngulfing: 3,
+          scEmaSar: 3,
+          scRsiOnly: 2,
           scStochOnly: 1,
         };
 
