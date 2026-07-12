@@ -172,19 +172,9 @@ export class AccountDetails {
 
         // 99 robots
         const distribution: ExpertDistribution = {
-          candleSuite: 25,
-          emaBb: 25,
-          rsiBreak: 25,
-
-          scBbEngulfing: 3,
-          scIchiSar: 3,
-          scRsiBb: 3,
-          scEmaRsi: 3,
-          scEmaMacd: 3,
-          scRsiEngulfing: 3,
-          scEmaSar: 3,
-          scRsiOnly: 2,
-          scStochOnly: 1,
+          candleSuite: 33,
+          emaBb: 33,
+          rsiBreak: 33,
         };
 
         const robots = diversifyRobots(
