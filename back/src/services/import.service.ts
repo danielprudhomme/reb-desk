@@ -1,5 +1,5 @@
-import { readdir, readFile, writeFile } from 'node:fs/promises';
-import { join } from 'node:path';
+import { readdir, readFile, unlink, writeFile } from 'node:fs/promises';
+import { basename, join } from 'node:path';
 import { IMPORTS_PATH } from '../config.ts';
 import { parseRebReport } from './reb-report/reb-report.parser.ts';
 import { db } from '@src/db/database.ts';
@@ -177,4 +177,28 @@ async function moveFileToImportedFolder(filePath: string, newProjectName: string
   const newPath = join(IMPORTS_PATH, `${newProjectName}.reb`);
 
   await writeFile(newPath, newContent, 'utf-8');
+}
+
+export async function deleteOrphanRebFiles(): Promise<void> {
+  const rebReports = await db.query.rebReportsTable.findMany({
+    columns: { path: true },
+  });
+  const existingFiles = new Set(rebReports.map((r) => r.path.toLowerCase()));
+
+  const files = await findRebFiles(IMPORTS_PATH);
+
+  let deleted = 0;
+
+  for (const file of files) {
+    const fileName = basename(file).toLowerCase();
+
+    if (!existingFiles.has(fileName)) {
+      console.log(`Deleting orphan file: ${file}`);
+
+      await unlink(file);
+      deleted++;
+    }
+  }
+
+  console.log(`Deleted ${deleted} orphan .reb files`);
 }
