@@ -1,9 +1,12 @@
-import { ExpertAdvisor } from '@shared/models/expert-advisor';
-import { Timeframe } from '@shared/models/timeframe';
-import { extractCurrencies, Symbol } from '@shared/models/symbol';
-import { RobotConfiguration } from '@shared/models/robot-configuration';
+import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
+import { Timeframe } from '@shared/models/timeframe.ts';
+import { Symbol } from '@shared/models/symbol.ts';
+import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
+import { ExpertDistribution } from '@shared/models/expert-distribution.ts';
 
-export type ExpertDistribution = Partial<Record<ExpertAdvisor, number>>;
+function extractCurrencies(symbol: Symbol): [string, string] {
+  return [symbol.slice(0, 3), symbol.slice(3, 6)];
+}
 
 function get<K>(map: Map<K, number>, key: K): number {
   return map.get(key) ?? 0;
@@ -94,7 +97,7 @@ function buildExpertTargets(
   const targets = new Map<ExpertAdvisor, number>();
 
   // nombre exact demandé
-  for (const [expert, count] of Object.entries(distribution)) {
+  for (const { expert, count } of distribution) {
     targets.set(expert as ExpertAdvisor, count);
   }
 
@@ -118,10 +121,7 @@ export function diversifyRobots(
   distribution: ExpertDistribution,
 ): RobotConfiguration[] {
   const candidates: RobotConfiguration[] = [];
-
-  const experts = Object.entries(distribution)
-    .filter(([, percentage]) => percentage > 0)
-    .map(([expert]) => expert as ExpertAdvisor);
+  const experts = distribution.filter(({ count }) => count > 0).map(({ expert }) => expert);
 
   for (const expert of experts) {
     for (const timeframe of timeframes) {
@@ -146,10 +146,7 @@ export function diversifyRobots(
   allAccountsRobots.forEach((r) => registerRobot(globalStats, r));
 
   const expertTargets = buildExpertTargets(currentAccountRobots, distribution);
-  const targetRobotCount = Object.values(distribution).reduce(
-    (sum, count) => sum + (count ?? 0),
-    0,
-  );
+  const targetRobotCount = distribution.reduce((sum, { count }) => sum + (count ?? 0), 0);
 
   while (selected.length < targetRobotCount) {
     let bestIndex = -1;

@@ -14,15 +14,14 @@ import { RobotService } from '@app/services/robot.service';
 import { RobotTable } from './robot-table';
 import { ConfirmationService } from '@app/core/services/confirmation.service';
 import { MatDialog } from '@angular/material/dialog';
-import { GenerateRobotsDialog } from './generate-robots-dialog';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol, symbols } from '@shared/models/symbol';
-import { diversifyRobots, ExpertDistribution } from '../helpers/diversify-robots';
 import { Robot } from '@shared/models/robot';
 import { MatSidenav, MatSidenavModule } from '@angular/material/sidenav';
 import { RobotDrawer } from './robot-drawer';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Diversification } from './diversification';
+import { ExpertDistribution } from '@shared/models/expert-distribution';
 
 @Component({
   selector: 'app-account-details',
@@ -164,28 +163,13 @@ export class AccountDetails {
   }
 
   generateRobots() {
-    this.dialog
-      .open(GenerateRobotsDialog, { disableClose: true })
-      .afterClosed()
-      .subscribe((result) => {
-        if (!result) return;
+    const distribution: ExpertDistribution = [
+      { expert: 'candleSuite', count: 33 },
+      { expert: 'emaBb', count: 33 },
+      { expert: 'rsiBreak', count: 33 },
+    ];
 
-        // 99 robots
-        const distribution: ExpertDistribution = {
-          candleSuite: 33,
-          emaBb: 33,
-          rsiBreak: 33,
-        };
-
-        const robots = diversifyRobots(
-          this.robots(),
-          this.robots(),
-          this.timeframes,
-          this.symbols,
-          distribution,
-        );
-        this.robotService.insertRobots(this.accountId!, robots);
-      });
+    this.robotService.diversifyRobots(this.accountId!, distribution);
   }
 
   async createRebReports() {

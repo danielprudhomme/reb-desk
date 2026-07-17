@@ -1,6 +1,6 @@
 import crypto from 'node:crypto';
 import { db } from '@src/db/database.ts';
-import { and, eq } from 'drizzle-orm';
+import { eq } from 'drizzle-orm';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
 import { ParameterSetDb, RobotDb, robotsTable } from '@src/db/schema/index.ts';
@@ -11,40 +11,18 @@ import { generateMagicNumber } from './magic-number.ts';
 import { Timeframe } from '@shared/models/timeframe.ts';
 import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 import { Symbol } from '@shared/models/symbol.ts';
+import { DiversifyRobotsInput } from '@src/models/diversify-robots-input.ts';
+import { diversifyRobots } from './diversify-robots.ts';
+import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
 
 export const robotService = {
   async findByAccount(accountId: string): Promise<Robot[]> {
     return (
       await db.query.robotsTable.findMany({
         where: (robots, { eq }) => eq(robots.accountId, accountId),
-        with: {
-          parameterSet: true,
-        },
+        with: { parameterSet: true },
       })
     ).map((robot) => mapQueryToModel(robot));
-  },
-
-  async insertMany(inputs: InsertRobotInput[]): Promise<Robot[]> {
-    const accountId = inputs[0]?.accountId;
-
-    if (!accountId) {
-      throw new Error('Account ID is required');
-    }
-
-    await db
-      .delete(robotsTable)
-      .where(and(eq(robotsTable.accountId, accountId), eq(robotsTable.status, 'draft')))
-      .execute();
-
-    const created: Robot[] = [];
-
-    for (const input of inputs) {
-      const robot = await this.insert(input);
-      created.push(robot);
-    }
-
-    const ids = created.map((robot) => robot.id);
-    return await findMany(ids);
   },
 
   async insert(input: InsertRobotInput): Promise<Robot> {
@@ -90,37 +68,37 @@ export const robotService = {
     return await findOne(updated.id);
   },
 
-  async setMagicNumbers(): Promise<void> {
-    const robotsWithoutMagicNumber = await db.query.robotsTable.findMany({
-      where: (robots, { isNull }) => isNull(robots.magicNumber),
-    });
+  async diversify(input: DiversifyRobotsInput): Promise<Robot[]> {
+    const currentAccountRobots = (await db.query.robotsTable.findMany({
+      where: (robots, { eq }) => eq(robots.accountId, input.accountId),
+    })) as RobotConfiguration[];
+    const allAccountsRobots = (await db.query.robotsTable.findMany({})) as RobotConfiguration[];
 
-    robotsWithoutMagicNumber.forEach(async (robot) => {
-      const magicNumber = await generateMagicNumber({
-        accountId: robot.accountId,
-        symbol: robot.symbol as Symbol,
-        timeframe: robot.timeframe as Timeframe,
-        expert: robot.expert as ExpertAdvisor,
-      });
+    const newRobots = diversifyRobots(
+      currentAccountRobots,
+      allAccountsRobots,
+      input.timeframes,
+      input.symbols,
+      input.distribution,
+    );
 
-      db.update(robotsTable).set({ magicNumber }).where(eq(robotsTable.id, robot.id)).execute();
-    });
+    const created: Robot[] = [];
+
+    for (const newRobot of newRobots) {
+      const robot = await this.insert({ ...newRobot, accountId: input.accountId });
+      created.push(robot);
+    }
+
+    return created;
   },
 };
 
-async function findMany(ids: string[]): Promise<Robot[]> {
-  return (
-    await db.query.robotsTable.findMany({
-      where: (robots, { inArray }) => inArray(robots.id, ids),
-      with: {
-        parameterSet: true,
-      },
-    })
-  ).map((robot) => mapQueryToModel(robot));
-}
-
 async function findOne(id: string): Promise<Robot> {
-  return (await findMany([id]))[0];
+  const robot = await db.query.robotsTable.findFirst({
+    where: (robots, { eq }) => eq(robots.id, id),
+    with: { parameterSet: true },
+  });
+  return mapQueryToModel(robot!);
 }
 
 function mapQueryToModel(robot: RobotDb & { parameterSet: ParameterSetDb | null }): Robot {

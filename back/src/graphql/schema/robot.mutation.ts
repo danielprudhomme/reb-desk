@@ -12,10 +12,22 @@ export default /* GraphQL */ `
     parameterSetId: ID
   }
 
+  input ExpertDistributionInput {
+    expert: ExpertAdvisor!
+    count: Int!
+  }
+
+  input DiversifyRobotsInput {
+    accountId: ID!
+    timeframes: [Timeframe!]!
+    symbols: [Symbol!]!
+    distribution: [ExpertDistributionInput!]!
+  }
+
   extend type Mutation {
-    insertRobots(inputs: [InsertRobotInput!]!): [Robot!]!
+    deleteRobot(id: ID!): Boolean!
     insertRobot(input: InsertRobotInput!): Robot!
     updateRobot(input: UpdateRobotInput!): Robot!
-    deleteRobot(id: ID!): Boolean!
+    diversifyRobots(input: DiversifyRobotsInput!): [Robot!]!
   }
 `;

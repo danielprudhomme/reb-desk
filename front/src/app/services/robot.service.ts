@@ -9,11 +9,13 @@ import { RobotConfiguration } from '@shared/models/robot-configuration';
 import { Robot } from '@shared/models/robot';
 import {
   DELETE_ROBOT,
+  DIVERSIFY_ROBOTS,
   GET_ROBOTS_BY_ACCOUNT,
   INSERT_ROBOT,
-  INSERT_ROBOTS,
   UPDATE_ROBOT,
 } from './robot.graphql';
+import { symbols } from '@shared/models/symbol';
+import { ExpertDistribution } from '@shared/models/expert-distribution';
 
 @Injectable({ providedIn: 'root' })
 export class RobotService {
@@ -62,48 +64,6 @@ export class RobotService {
           });
 
           cache.gc();
-        },
-      }),
-    );
-  }
-
-  // ---------------------------
-  // BULK CREATE (draft robots)
-  // ---------------------------
-  async insertRobots(accountId: string, inputs: RobotConfiguration[]) {
-    const cleanInputs = (inputs as any[]).map(({ __typename, ...input }: any) => ({
-      ...input,
-      accountId,
-    }));
-
-    await firstValueFrom(
-      this.apollo.mutate<{ insertRobots: Robot[] }>({
-        mutation: INSERT_ROBOTS,
-        variables: {
-          inputs: cleanInputs,
-        },
-
-        update: (cache, { data }) => {
-          const robots = data?.insertRobots;
-          if (!robots?.length) return;
-
-          cache.modify({
-            fields: {
-              robotsByAccount(existingRefs: readonly Reference[] = [], { readField, toReference }) {
-                // Remove existing draft robots
-                const filteredRefs = existingRefs.filter(
-                  (ref) => readField('status', ref) !== 'draft',
-                );
-
-                // Add newly created draft robots
-                const newRefs = robots
-                  .map((robot) => toReference({ __typename: 'Robot', id: robot.id }))
-                  .filter((ref): ref is Reference => ref !== null && ref !== undefined);
-
-                return [...filteredRefs, ...newRefs];
-              },
-            },
-          });
         },
       }),
     );
@@ -159,6 +119,23 @@ export class RobotService {
     await firstValueFrom(
       this.apollo.mutate<{ updateRobot: Robot }>({
         mutation: UPDATE_ROBOT,
+        variables: { input },
+      }),
+    );
+  }
+
+  async diversifyRobots(accountId: string, distribution: ExpertDistribution) {
+    const selectedSymbols = symbols.filter((symbol) => symbol !== 'XAUUSD');
+
+    const input = {
+      accountId,
+      timeframes: ['M15', 'M20', 'M30', 'H1'],
+      symbols: selectedSymbols,
+      distribution,
+    };
+    await firstValueFrom(
+      this.apollo.mutate<{ diversifyRobots: Robot[] }>({
+        mutation: DIVERSIFY_ROBOTS,
         variables: { input },
       }),
     );

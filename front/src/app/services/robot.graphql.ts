@@ -24,14 +24,6 @@ export const GET_ROBOTS_BY_ACCOUNT = gql`
   }
 `;
 
-export const INSERT_ROBOTS = gql`
-  mutation InsertRobots($inputs: [InsertRobotInput!]!) {
-    insertRobots(inputs: $inputs) {
-      ${ROBOT_FIELDS}
-    }
-  }
-`;
-
 export const INSERT_ROBOT = gql`
   mutation InsertRobot($input: InsertRobotInput!) {
     insertRobot(input: $input) {
@@ -51,5 +43,13 @@ export const UPDATE_ROBOT = gql`
 export const DELETE_ROBOT = gql`
   mutation DeleteRobot($id: ID!) {
     deleteRobot(id: $id)
+  }
+`;
+
+export const DIVERSIFY_ROBOTS = gql`
+  mutation DiversifyRobots($input: DiversifyRobotsInput!) {
+    diversifyRobots(input: $input) {
+      ${ROBOT_FIELDS}
+    }
   }
 `;

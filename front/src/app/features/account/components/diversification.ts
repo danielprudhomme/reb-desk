@@ -1,7 +1,7 @@
 import { Component, computed, input } from '@angular/core';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { RobotConfiguration } from '@shared/models/robot-configuration';
-import { Symbol, extractCurrencies } from '@shared/models/symbol';
+import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
 
 @Component({
@@ -84,6 +84,10 @@ function createStats(): DiversificationStats {
 
     comboCount: new Map(),
   };
+}
+
+function extractCurrencies(symbol: Symbol): [string, string] {
+  return [symbol.slice(0, 3), symbol.slice(3, 6)];
 }
 
 function registerRobot(stats: DiversificationStats, robot: RobotConfiguration): void {
