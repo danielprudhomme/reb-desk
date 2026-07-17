@@ -1,9 +1,15 @@
 import crypto from 'node:crypto';
 import { db } from '@src/db/database.ts';
-import { eq } from 'drizzle-orm';
+import { and, eq, isNull } from 'drizzle-orm';
 import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
-import { ParameterSetDb, RobotDb, robotsTable } from '@src/db/schema/index.ts';
+import {
+  accountsTable,
+  ParameterSetDb,
+  rebReportsTable,
+  RobotDb,
+  robotsTable,
+} from '@src/db/schema/index.ts';
 import { Robot } from '@shared/models/robot.ts';
 import { parameterSetService } from './parameter-set.service.ts';
 import { RobotStatus } from '@shared/models/robot-status.ts';
@@ -23,6 +29,36 @@ export const robotService = {
         with: { parameterSet: true },
       })
     ).map((robot) => mapQueryToModel(robot));
+  },
+
+  async findRobotsWithoutReport(accountId: string): Promise<Robot[]> {
+    const rows = await db
+      .select({
+        robot: robotsTable,
+      })
+      .from(robotsTable)
+      .innerJoin(accountsTable, eq(accountsTable.id, robotsTable.accountId))
+      .leftJoin(
+        rebReportsTable,
+        and(
+          eq(rebReportsTable.expert, robotsTable.expert),
+          eq(rebReportsTable.timeframe, robotsTable.timeframe),
+          eq(rebReportsTable.symbol, robotsTable.symbol),
+          eq(rebReportsTable.leverage, accountsTable.leverage),
+          eq(rebReportsTable.capital, accountsTable.capital),
+        ),
+      )
+      .where(
+        and(
+          eq(accountsTable.id, accountId),
+          isNull(robotsTable.parameterSetId),
+          isNull(rebReportsTable.id),
+        ),
+      );
+
+    return rows.map(({ robot }) =>
+      mapQueryToModel(robot as RobotDb & { parameterSet: ParameterSetDb | null }),
+    );
   },
 
   async insert(input: InsertRobotInput): Promise<Robot> {
