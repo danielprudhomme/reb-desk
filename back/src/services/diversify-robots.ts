@@ -16,6 +16,10 @@ function createKey(...parts: (string | number)[]): string {
   return parts.join('|');
 }
 
+function robotKey(robot: RobotConfiguration): string {
+  return createKey(robot.expert, robot.symbol, robot.timeframe);
+}
+
 interface DiversificationStats {
   expertCount: Map<ExpertAdvisor, number>;
   timeframeCount: Map<Timeframe, number>;
@@ -139,6 +143,10 @@ export function diversifyRobots(
 
   const selected: RobotConfiguration[] = [...currentAccountRobots];
   const newRobots: RobotConfiguration[] = [];
+
+  const usedCombinations = new Set(allAccountsRobots.map(robotKey));
+  currentAccountRobots.forEach((r) => usedCombinations.add(robotKey(r)));
+
   const localStats = createStats();
   currentAccountRobots.forEach((r) => registerRobot(localStats, r));
 
@@ -165,6 +173,10 @@ export function diversifyRobots(
         continue;
       }
 
+      if (usedCombinations.has(robotKey(candidate))) {
+        continue;
+      }
+
       const localScore = computeScore(localStats, candidate);
       const globalScore = computeScore(globalStats, candidate);
       const score = localScore * 5 + globalScore;
@@ -175,10 +187,15 @@ export function diversifyRobots(
       }
     }
 
+    if (bestIndex === -1) {
+      throw new Error('Not possible to diversify more (it will create duplicates)');
+    }
+
     const chosen = candidates[bestIndex];
 
     selected.push(chosen);
     newRobots.push(chosen);
+    usedCombinations.add(robotKey(chosen));
 
     registerRobot(localStats, chosen);
     registerRobot(globalStats, chosen);

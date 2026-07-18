@@ -33,9 +33,7 @@ export const robotService = {
 
   async findRobotsWithoutReport(accountId: string): Promise<Robot[]> {
     const rows = await db
-      .select({
-        robot: robotsTable,
-      })
+      .select({ robot: robotsTable })
       .from(robotsTable)
       .innerJoin(accountsTable, eq(accountsTable.id, robotsTable.accountId))
       .leftJoin(
