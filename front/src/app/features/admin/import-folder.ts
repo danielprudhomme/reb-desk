@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, ChangeDetectionStrategy } from '@angular/core';
 import { MatInputModule } from '@angular/material/input';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatButtonModule } from '@angular/material/button';
@@ -9,6 +9,7 @@ import { firstValueFrom, map } from 'rxjs';
 @Component({
   selector: 'app-import-folder',
   imports: [MatInputModule, MatFormFieldModule, MatButtonModule, FormField, FormRoot],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form [formRoot]="form" class="flex items-center gap-4">
       <mat-form-field class="w-100">

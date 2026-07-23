@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterLink } from '@angular/router';
 
 @Component({
@@ -11,6 +11,7 @@ import { RouterLink } from '@angular/router';
       <a [routerLink]="['account']">Accounts</a>
     </div>
   `,
+  changeDetection: ChangeDetectionStrategy.Eager,
   imports: [RouterLink],
 })
 export class Header {}

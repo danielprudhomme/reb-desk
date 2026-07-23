@@ -1,4 +1,4 @@
-import { Component, model } from '@angular/core';
+import { Component, model, ChangeDetectionStrategy } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatSelectModule } from '@angular/material/select';
 import { expertAdvisors, ExpertAdvisor } from '@shared/models/expert-advisor';
@@ -9,6 +9,7 @@ import { FormValueControl } from '@angular/forms/signals';
   selector: 'app-expert-select',
   standalone: true,
   imports: [MatFormFieldModule, MatSelectModule, ExpertBadge],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field>
       <mat-label>Experts</mat-label>

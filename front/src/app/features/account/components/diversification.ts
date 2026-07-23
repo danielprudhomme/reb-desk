@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { RobotConfiguration } from '@shared/models/robot-configuration';
 import { Symbol } from '@shared/models/symbol';
@@ -7,6 +7,7 @@ import { Timeframe } from '@shared/models/timeframe';
 @Component({
   selector: 'app-diversification',
   imports: [],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="grid grid-cols-2 gap-4">
       @for (currencyStat of currencyStats(); track currencyStat.currency) {

@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RobotStatus } from '@shared/models/robot-status';
@@ -7,6 +7,7 @@ import { RobotStatus } from '@shared/models/robot-status';
   selector: 'app-robot-status-badge',
   standalone: true,
   imports: [NgClass, MatTooltipModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="w-4 h-4 rounded-full" [ngClass]="bgColor()" [matTooltip]="tooltip()"></div>
   `,

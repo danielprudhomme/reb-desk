@@ -1,4 +1,4 @@
-import { Component, computed, input, output } from '@angular/core';
+import { Component, computed, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
 import { MatMenuModule } from '@angular/material/menu';
@@ -20,6 +20,7 @@ import { AnalyzedBacktestsTable } from '@app/features/backtest/analyzed-backtest
     RobotStatusBadge,
     AnalyzedBacktestsTable,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="h-full flex flex-col p-4">
       <!-- HEADER -->

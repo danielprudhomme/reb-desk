@@ -1,10 +1,11 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, ChangeDetectionStrategy } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 import { AnalysisRequest } from '@shared/models/analysis-request';
 
 @Component({
   selector: 'app-report-analysis',
   // imports: [PassAnalysisTable],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="h-full overflow-auto">
       <!-- <app-pass-analysis-table [request]="this.request" /> -->

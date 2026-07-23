@@ -1,4 +1,4 @@
-import { Component, model } from '@angular/core';
+import { Component, model, ChangeDetectionStrategy } from '@angular/core';
 import { MatFormFieldModule } from '@angular/material/form-field';
 import { MatInputModule } from '@angular/material/input';
 import { form, FormField, FormValueControl } from '@angular/forms/signals';
@@ -7,6 +7,7 @@ import { AccountInput } from '@app/core/models/account';
 @Component({
   selector: 'app-account-form',
   imports: [FormField, MatFormFieldModule, MatInputModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <form class="grid grid-cols-1 md:grid-cols-3 gap-4">
       <mat-form-field appearance="outline" class="w-full">

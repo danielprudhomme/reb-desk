@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
 import { EXPERT_CONSTANTS } from '@shared/constants/expert.constants';
 
@@ -24,6 +24,7 @@ const expertColors: Record<ExpertAdvisor, string> = {
 
 @Component({
   selector: 'app-expert-badge',
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     @let config = expertConfigs[expert()];
     <div

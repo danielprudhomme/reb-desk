@@ -1,4 +1,4 @@
-import { Component, input } from '@angular/core';
+import { Component, input, ChangeDetectionStrategy } from '@angular/core';
 import { Robot } from '@shared/models/robot';
 import { ExpertBadge } from '@app/shared/components/expert-badge';
 import { RobotStatusBadge } from './robot-status-badge';
@@ -7,6 +7,7 @@ import { RobotStatusBadge } from './robot-status-badge';
   selector: 'app-robot-tile',
   standalone: true,
   imports: [ExpertBadge, RobotStatusBadge],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="relative rounded-xl border border-white/10 bg-white/5

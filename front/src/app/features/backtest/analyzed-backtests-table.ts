@@ -1,4 +1,12 @@
-import { Component, computed, inject, input, resource, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  inject,
+  input,
+  resource,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { MatSort, MatSortModule } from '@angular/material/sort';
 import { DecimalPipe, NgClass } from '@angular/common';
@@ -25,6 +33,7 @@ import { AnalysisService } from '@app/services/analysis.service';
     LongTermSummary,
     FormatPipe,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <table
       mat-table
@@ -77,7 +86,8 @@ import { AnalysisService } from '@app/services/analysis.service';
                 [class.text-yellow-300]="check.score > 0 && check.score < 0.5"
                 [class.text-red-300]="check.score === 0"
               >
-                @let displayPipe = $any(displayConfig)[thresholdType]?.pipe;
+                @let displayPipe =
+                  $safeNavigationMigration($any(displayConfig)[thresholdType]?.pipe);
 
                 @if (thresholdValueType[thresholdType] === 'rate') {
                   <div class="font-medium">

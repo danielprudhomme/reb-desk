@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output } from '@angular/core';
+import { Component, computed, inject, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
 import { Symbol } from '@shared/models/symbol';
 import { Timeframe } from '@shared/models/timeframe';
@@ -22,6 +22,7 @@ import { Robot } from '@shared/models/robot';
     RobotTile,
     RobotCreateTile,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <table mat-table [dataSource]="dataSource()">
       <ng-container matColumnDef="symbol" [sticky]="true">

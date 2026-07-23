@@ -1,4 +1,4 @@
-import { Component, input, output } from '@angular/core';
+import { Component, input, output, ChangeDetectionStrategy } from '@angular/core';
 import { Timeframe } from '@shared/models/timeframe';
 import { Symbol } from '@shared/models/symbol';
 import { MatMenuModule } from '@angular/material/menu';
@@ -8,6 +8,7 @@ import { ExpertAdvisor, expertAdvisors } from '@shared/models/expert-advisor';
 @Component({
   selector: 'app-robot-create-tile',
   imports: [MatMenuModule, ExpertBadge],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div
       class="relative rounded-xl border border-dashed border-white/15

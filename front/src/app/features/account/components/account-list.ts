@@ -1,4 +1,4 @@
-import { Component, computed, inject, viewChild } from '@angular/core';
+import { Component, computed, inject, viewChild, ChangeDetectionStrategy } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatTableDataSource, MatTableModule } from '@angular/material/table';
@@ -9,6 +9,7 @@ import { Account } from '../../../core/models/account';
 @Component({
   selector: 'app-account-list',
   imports: [RouterLink, MatButtonModule, MatTableModule, MatSortModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="h-full overflow-auto">
       <table mat-table [dataSource]="dataSource()" matSort>

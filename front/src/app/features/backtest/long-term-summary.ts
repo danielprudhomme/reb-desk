@@ -1,4 +1,4 @@
-import { Component, computed, input } from '@angular/core';
+import { Component, computed, input, ChangeDetectionStrategy } from '@angular/core';
 import { DecimalPipe, NgClass, PercentPipe } from '@angular/common';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { Backtest } from '@shared/models/backtest';
@@ -6,6 +6,7 @@ import { Backtest } from '@shared/models/backtest';
 @Component({
   selector: 'app-long-term-summary',
   imports: [NgClass, DecimalPipe, PercentPipe, MatTooltipModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <div class="flex flex-col gap-1 text-sm">
       <div class="flex items-baseline gap-2">

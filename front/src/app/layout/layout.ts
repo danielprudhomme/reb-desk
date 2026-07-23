@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, ChangeDetectionStrategy } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 
 @Component({
@@ -13,6 +13,7 @@ import { RouterOutlet } from '@angular/router';
     </div>
   `,
   imports: [RouterOutlet],
+  changeDetection: ChangeDetectionStrategy.Eager,
   styles: `
     :host {
       display: block;

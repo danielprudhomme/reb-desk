@@ -1,4 +1,12 @@
-import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  computed,
+  effect,
+  inject,
+  signal,
+  viewChild,
+  ChangeDetectionStrategy,
+} from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -38,6 +46,7 @@ import { ExpertDistribution } from '@shared/models/expert-distribution';
     MatSidenavModule,
     MatTabsModule,
   ],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-sidenav-container class="h-full" (backdropClick)="closeDrawer()">
       <!-- MAIN CONTENT -->

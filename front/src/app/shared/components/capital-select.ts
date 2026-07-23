@@ -1,4 +1,4 @@
-import { Component, model } from '@angular/core';
+import { Component, model, ChangeDetectionStrategy } from '@angular/core';
 import { FormValueControl } from '@angular/forms/signals';
 import { MatSelectModule } from '@angular/material/select';
 import { MatFormFieldModule } from '@angular/material/form-field';
@@ -7,6 +7,7 @@ import { Capital, capitals } from '@shared/models/capital';
 @Component({
   selector: 'app-capital-select',
   imports: [MatFormFieldModule, MatSelectModule],
+  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-form-field>
       <mat-label>Capital</mat-label>
