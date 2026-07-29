@@ -38,7 +38,8 @@ export const accountService = {
       (robot) => robot.parameterSetId,
     );
 
-    robots.forEach(async (robot) => await profileGenerator.generateProfile(robot));
+    robots.forEach(async (robot) => await profileGenerator.generateChr(robot));
+    await profileGenerator.generateOpenOrderAlertChr(20);
   },
   async syncRebReportsToRobots(accountId: string, folderPath: string): Promise<void> {
     const existingRobots = await robotService.findByAccount(accountId);
