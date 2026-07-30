@@ -25,15 +25,7 @@ export function getParameters(expert: ExpertAdvisor): ExpertParameterName[] {
         'Ini_Lot_Size_For_1k',
         'Adapt_Lot_Size_To_Capital',
       ];
-    case 'scBbEngulfing':
-    case 'scIchiSar':
-    case 'scRsiBb':
-    case 'scEmaRsi':
-    case 'scEmaMacd':
-    case 'scRsiEngulfing':
-    case 'scEmaSar':
-    case 'scRsiOnly':
-    case 'scStochOnly':
+    case 'strategyCreator':
       return [
         'MA_Slow_Period',
         'MA_Fast_Period',

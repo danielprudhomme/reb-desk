@@ -19,15 +19,7 @@ export default /* GraphQL */ `
     emaBb,
     ichimoku,
     rsiBreak,
-    scBbEngulfing,
-    scIchiSar,
-    scRsiBb,
-    scEmaRsi,
-    scEmaMacd,
-    scRsiEngulfing,
-    scEmaSar,
-    scRsiOnly,
-    scStochOnly,
+    strategyCreator,
     autoBot
   }
 

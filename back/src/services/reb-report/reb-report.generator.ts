@@ -295,15 +295,12 @@ Delta_RSI_Buy=20||20||20||40||Y`,
 
   ichimoku: [''],
 
-  scBbEngulfing: [
+  strategyCreator: [
     `Engulfing_Candle_Score=1||0.0||0.000000||0.000000||N
 BB_Period=200||50||50||200||Y
 BB_Deviation=2||2||1||3||Y
 Under_Lower_BB_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scIchiSar: [
     `Tenkan_Sen=9||9||1||90||N
 Kijun_Sen=26||26||1||260||N
 Senkou_Span_B=52||52||1||520||N
@@ -313,9 +310,6 @@ SAR_Max=0.2||0.1||0.1||0.3||Y
 SAR_Score=0||0.0||0.000000||0.000000||N
 SAR_Change_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scRsiBb: [
     `RSI_Period=42||14||28||42||Y
 RSI_Min_Level=40||40||10||60||Y
 RSI_Min_Score=1||0.0||0.000000||0.000000||N
@@ -323,9 +317,6 @@ BB_Period=20||20||30||50||Y
 BB_Deviation=1.5||2||1||3||Y
 Above_Lower_BB_Change_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scEmaRsi: [
     `MA_Slow_Period=200||100||100||200||N
 MA_Fast_Period=50||20||30||50||N
 MA_Method=1||0||0||3||N
@@ -344,9 +335,6 @@ RSI_Max_Level=30||30||10||60||Y
 RSI_Max_Score=0||0.0||0.000000||0.000000||N
 RSI_Max_Change_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scEmaMacd: [
     `MA_Slow_Period=200||100||100||200||Y
 MA_Fast_Period=50||20||30||50||Y
 MA_Method=1||0||0||3||N
@@ -361,9 +349,6 @@ MACD_Min_Level_Score=0||0.0||0.000000||0.000000||N
 MACD_Max_Level=0||0.0||0.000000||0.000000||N
 MACD_Max_Level_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=3||1.0||0.100000||10.000000||N`,
-  ],
-
-  scRsiEngulfing: [
     `RSI_Period=14||14||14||42||N
 RSI_Min_Level=30||40||10||60||N
 RSI_Min_Score=0||0.0||0.000000||0.000000||N
@@ -372,9 +357,6 @@ RSI_Max_Level=30||20||10||50||Y
 RSI_Max_Score=1||0.0||0.000000||0.000000||N
 Engulfing_Candle_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scEmaSar: [
     `MA_Slow_Period=200||100||100||200||N
 MA_Fast_Period=50||20||30||50||N
 MA_Method=1||0||0||3||N
@@ -387,9 +369,6 @@ SAR_Step=0.02||0.01||0.01||0.02||Y
 SAR_Max=0.1||0.1||0.1||0.2||Y
 SAR_Change_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
-  ],
-
-  scRsiOnly: [
     `RSI_Period=28||14||14||42||Y
 RSI_Min_Level=30||40||10||60||N
 RSI_Min_Score=0||0.0||0.000000||0.000000||N
@@ -398,9 +377,6 @@ RSI_Max_Level=60||60||10||90||Y
 RSI_Max_Score=0||0.0||0.000000||0.000000||N
 RSI_Max_Change_Score=1||0.0||0.000000||0.000000||N
 Min_Buy_Score=1||1.0||0.100000||10.000000||N`,
-  ],
-
-  scStochOnly: [
     `Stoch_K_Period=25||5||10||25||Y
 Stoch_D_Period=3||3||5||12||Y
 Stoch_Slowing=3||3||1||30||N

@@ -3,15 +3,7 @@ export const expertAdvisors = [
   'emaBb',
   'ichimoku',
   'rsiBreak',
-  'scBbEngulfing',
-  'scIchiSar',
-  'scRsiBb',
-  'scEmaRsi',
-  'scEmaMacd',
-  'scRsiEngulfing',
-  'scEmaSar',
-  'scRsiOnly',
-  'scStochOnly',
+  'strategyCreator',
   'autoBot',
 ] as const;
 

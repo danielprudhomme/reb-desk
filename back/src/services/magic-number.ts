@@ -66,16 +66,7 @@ export const EA_CODE: Record<ExpertAdvisor, string> = {
   emaBb: '03',
   autoBot: '04',
   ichimoku: '05',
-
-  scBbEngulfing: '10',
-  scIchiSar: '11',
-  scRsiBb: '12',
-  scEmaRsi: '13',
-  scEmaMacd: '14',
-  scRsiEngulfing: '15',
-  scEmaSar: '16',
-  scRsiOnly: '17',
-  scStochOnly: '18',
+  strategyCreator: '13',
 } as const;
 
 const TYPE_FOREX = '1';

@@ -21,9 +21,9 @@ import { ExpertAdvisor } from '@shared/models/expert-advisor.ts';
 export async function parseRebReport(filePath: string): Promise<ParsedRebReport> {
   const content = await readFile(filePath, { encoding: 'utf-8' });
   const lines = content.split(/\r?\n/);
-  let expert = extractExpert(lines);
+  const expert = extractExpert(lines);
 
-  const allowedParameters = getParameters(expert === 'strategyCreator' ? 'scBbEngulfing' : expert);
+  const allowedParameters = getParameters(expert);
   const passNumbers = getLinesSection(content, 'SENS DES PASSAGES').map((n) => +n);
   const fixedParameters = parseFixedParameters(content, allowedParameters);
   const passParameters = parsePassParameters(content);
@@ -47,31 +47,6 @@ export async function parseRebReport(filePath: string): Promise<ParsedRebReport>
     shortTermResults: passShortTermResults[index],
     longTermResults: passLongTermResults[index],
   }));
-
-  const firstPass = parsedPasses[0]!;
-
-  const hasScores = (...names: string[]) =>
-    names.every((name) => firstPass.parameters.find((p) => p.name === name)?.value === 1);
-
-  if (hasScores('Engulfing_Candle_Score', 'Under_Lower_BB_Score')) {
-    expert = 'scBbEngulfing';
-  } else if (hasScores('Ichi_Cloud_Pos_Score', 'SAR_Change_Score')) {
-    expert = 'scIchiSar';
-  } else if (hasScores('RSI_Min_Score', 'Above_Lower_BB_Change_Score')) {
-    expert = 'scRsiBb';
-  } else if (hasScores('MA_Trend_Score', 'RSI_Max_Change_Score')) {
-    expert = 'scEmaRsi';
-  } else if (hasScores('MA_Score', 'MACD_Way_Change_Score', 'MACD_Max_Level_Score')) {
-    expert = 'scEmaMacd';
-  } else if (hasScores('RSI_Max_Score', 'Engulfing_Candle_Score')) {
-    expert = 'scRsiEngulfing';
-  } else if (hasScores('MA_Trend_Score', 'SAR_Change_Score')) {
-    expert = 'scEmaSar';
-  } else if (hasScores('RSI_Max_Change_Score')) {
-    expert = 'scRsiOnly';
-  } else if (hasScores('Stoch_Way_Change_Score', 'Stoch_Max_Level_Score')) {
-    expert = 'scStochOnly';
-  }
 
   const selectedPassNumber = parseSelectedPassNumber(content);
 
@@ -117,6 +92,7 @@ function parseDate(value: string): string {
   return `${year}-${month}-${day}`;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function computeImportStatus(params: {
   content: string;
   startDate: string;
@@ -147,6 +123,7 @@ function computeImportStatus(params: {
   // return 'ongoing';
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 function addDuration(date: Date, duration: number, unit: TimeUnit): Date {
   const d = new Date(date);
 
