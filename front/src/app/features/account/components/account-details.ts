@@ -173,9 +173,10 @@ export class AccountDetails {
 
   generateRobots() {
     const distribution: ExpertDistribution = [
-      { expert: 'candleSuite', count: 33 },
-      { expert: 'emaBb', count: 33 },
-      { expert: 'rsiBreak', count: 33 },
+      { expert: 'candleSuite', count: 20 },
+      { expert: 'emaBb', count: 20 },
+      { expert: 'rsiBreak', count: 20 },
+      { expert: 'strategyCreator', count: 39 },
     ];
 
     this.robotService.diversifyRobots(this.accountId!, distribution);

@@ -273,7 +273,7 @@ Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
 Max_Amount_Of_First_Entries=1||1||1||10||N`;
 
-export const expertParameters: Record<ExpertAdvisor, string[]> = {
+const expertParameters: Record<ExpertAdvisor, string[]> = {
   candleSuite: [
     `Suite=4||4||1||6||Y
 Extreme_Research=50||100||200||500||Y`,
