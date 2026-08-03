@@ -201,14 +201,25 @@ const COMMON_PARAMETERS: ExpertParameterName[] = [
   'Trade_Saturday',
   'Trade_Sunday',
   'GMT_Zone',
-  'ATR_Max_Research',
-  'Pause_On_High_Volatity_In_Candles',
   'Max_Amount_Of_First_Entries',
 ];
 
 export const OTHER_PARAMETERS: ExpertParameterName[] = [
   'Non_Trading_DD',
   'Stop_EA',
+
+  'Stop_Before_News_In_Min',
+  'Start_After_News_In_Min',
+  'Low_News_Filter',
+  'Medium_News_Filter',
+  'High_News_Filter',
+  'NewsSymb',
+  'Stop_Trading_If_News',
+  'Close_All_Orders_If_News',
+
+  'ATR_Max_Research',
+  'Pause_On_High_Volatity_In_Candles',
+
   'Force_Buy_Word',
   'Force_Sell_Word',
   'Force_Pause_Word',

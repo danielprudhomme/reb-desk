@@ -78,6 +78,16 @@ export const EXPERT_PARAMETER_NAMES = [
 
   'Non_Trading_DD',
   'Stop_EA',
+
+  'Stop_Before_News_In_Min',
+  'Start_After_News_In_Min',
+  'Low_News_Filter',
+  'Medium_News_Filter',
+  'High_News_Filter',
+  'NewsSymb',
+  'Stop_Trading_If_News',
+  'Close_All_Orders_If_News',
+
   'Force_Buy_Word',
   'Force_Sell_Word',
   'Force_Pause_Word',

@@ -10,6 +10,8 @@ import { TimeUnit } from '@shared/models/time-unit.ts';
 import { Symbol } from '@shared/models/symbol.ts';
 import path from 'path';
 import { writeFile } from 'fs/promises';
+import { ExpertParameterConfig } from '@src/models/expert-parameter-config.ts';
+import { BASE_PARAMETERS } from './base-parameters.ts';
 
 const REB_CONFIG: {
   shortTermCount: number;
@@ -143,10 +145,13 @@ export function buildParametersInFile(robot: Robot, applyParams: boolean): strin
   const expertName = expertConst.EXPERT_CONSTANTS[expert].name;
   const parametersOfExpert = expertParameters[expert][0];
 
+  const baseParameters = expertParametersToString(BASE_PARAMETERS);
+
   const base = `EA_Magic_Number=${robot.magicNumber}||123||1||1230||N
 EA_Comment=${robot.symbol} ${robot.timeframe} ${expertName}
 ${parametersOfExpert}
-${baseParameters}`;
+${baseParameters}
+${otherParameters}`;
 
   return applyParams && robot.parameterSet
     ? applyParameters(base, robot.parameterSet.parameters)
@@ -181,82 +186,21 @@ function applyParameters(template: string, params: Parameter[]) {
     .join('\n');
 }
 
-const baseParameters = `Inversion=true||false||0||true||Y
-Base_Unit=1||0||0||1||N
-ATR_Period=200||200||1||2000||N
-TP_Distance=3||1.0||1||3||Y
-SL_Ratio=0||2.0||0.200000||20.000000||N
-Break_Even_In_Percent=0||0.0||0.000000||0.000000||N
-TS_Start_In_Percent=0||0.0||0.000000||0.000000||N
-TS_Distance=0||0.0||0.000000||0.000000||N
-TS_Step=1||1.0||0.100000||10.000000||N
-SL_Move=0||0||0||1||N
-Distance_Between_Orders=4||4||2||8||Y
-Distance_Between_Orders_Factor=1||1.0||0.100000||10.000000||N
-Trade_Direction=3||1||0||3||N
-Ini_Lot_Size_For_10k=0.03||0.02||0.02||0.06||Y
-Use_Fixed_Lot_Size=false||false||0||true||N
-Ini_Risk_In_Percent=0||0.0||0.000000||0.000000||N
-Fixed_Grid_Size=true||false||0||true||N
-Recovery_Factor=0||0.0||0.000000||0.000000||N
-Grid_Recovery_Factor=2||1.3||0.7||2||N
-Grid_Recovery_Factor_Modifier=1||1.0||0.100000||10.000000||N
-Grid_Lot_Sum=0||0.0||0.000000||0.000000||N
-Grid_Special_Reaction=0||0||1||10||N
-Grid_Pause_Until_GSR=false||false||0||true||N
-Grid_Lot_Boost_On_GSR=0||0.0||0.000000||0.000000||N
-Grid_Result_Boost_On_GSR=0||0.0||0.000000||0.000000||N
-Smart_Loss_Management_On_DD=0||0.0||0.000000||0.000000||N
-Smart_Loss_Management_Mode=0||0||0||2||N
-Smart_Account_Protection_On_DD=0||0.0||0.000000||0.000000||N
-Close_All_Orders_On_DD=0||0.0||0.000000||0.000000||N
-Close_All_Orders_When_Profit_In_Percent=0||0.0||0.000000||0.000000||N
-Close_On_Common_TP=true||false||0||true||N
-Use_Common_SL=false||false||0||true||N
-Ajust_First_TP=false||false||0||true||N
-Min_TP_Move_In_Point=10||10||1||100||N
-Max_Risk_In_Percent=0||0.0||0.000000||0.000000||N
-Max_Lot_Size_For_10k=0.3||0.0||0.000000||0.000000||N
-Max_Opened_Orders_By_EA_Per_Size=0||0||1||10||N
-Max_Opened_Orders_By_EA=0||0||1||10||N
-Max_Opened_Orders=0||0||1||10||N
-Max_Symbols_In_Same_Time=0||0||1||10||N
-Max_Daily_DD_In_Percent=0||0.0||0.000000||0.000000||N
-Max_Daily_Loss=0||0.0||0.000000||0.000000||N
-Max_Daily_Profit_In_Percent=0||0.0||0.000000||0.000000||N
-Restart_Hour=0||0||0||86100||N
-Non_Trading_DD=10||0.0||0.000000||0.000000||N
-Stop_EA=false||false||0||true||N
-Old_Orders_Close_On_DD=0||0.0||0.000000||0.000000||N
-Max_Equity_Stop=0||0.0||0.000000||0.000000||N
-Min_Equity_Stop=0||0.0||0.000000||0.000000||N
-EA_Max_Win=0||0.0||0.000000||0.000000||N
-EA_Max_Loss=0||0.0||0.000000||0.000000||N
-EA_Monthly_Max_Win=0||0.0||0.000000||0.000000||N
-Trade_Max_Profit_In_Percent=0||0.0||0.000000||0.000000||N
-Trade_Max_Loss_In_Percent=0||0.0||0.000000||0.000000||N
-Slippage=50||50||1||500||N
-Time_Filters=Time Filters
-Max_Hours_Before_Break_Even=0||0.0||0.000000||0.000000||N
-Max_Hours_Before_Closing=0||0.0||0.000000||0.000000||N
-Min_Hours_Between_Trade=0||0.0||0.000000||0.000000||N
-Min_Hours_After_Loss=0||0.0||0.000000||0.000000||N
-Pause_Orders_On_Friday=false||false||0||true||N
-Pausing_Hour=57600||0||0||86100||N
-Close_Orders_On_Friday=false||false||0||true||N
-Closing_Hour=57600||0||0||86100||N
-Apply_Hour_Filter=false||false||0||true||N
-Start=28800||0||0||86100||N
-Stop=57600||0||0||86100||N
-Apply_Hour_Filter_Action=1||1||0||2||N
-Trade_Monday=true||false||0||true||N
-Trade_Tuesday=true||false||0||true||N
-Trade_Wednesday=true||false||0||true||N
-Trade_Thursday=true||false||0||true||N
-Trade_Friday=true||false||0||true||N
-Trade_Saturday=true||false||0||true||N
-Trade_Sunday=true||false||0||true||N
-Stop_Before_News_In_Min=5||5||1||50||N
+function expertParametersToString(parameters: ExpertParameterConfig[]): string {
+  return parameters
+    .map((parameter) => {
+      const value = parameter.value;
+      const min = parameter.min ?? '0';
+      const step = parameter.step ?? '0';
+      const max = parameter.max ?? '0';
+      const variable = parameter.variable ? 'Y' : 'N';
+
+      return `${parameter.name}=${value}||${min}||${step}||${max}||${variable}`;
+    })
+    .join('\n');
+}
+
+const otherParameters = `Stop_Before_News_In_Min=5||5||1||50||N
 Start_After_News_In_Min=5||5||1||50||N
 Low_News_Filter=false||false||0||true||N
 Medium_News_Filter=false||false||0||true||N
@@ -271,7 +215,7 @@ Force_Buy_Word=
 Force_Sell_Word=
 Force_Pause_Word=PAUSE
 Force_Non_Trading_If_Nothing_Word=NONTRADE
-Max_Amount_Of_First_Entries=1||1||1||10||N`;
+`;
 
 const expertParameters: Record<ExpertAdvisor, string[]> = {
   candleSuite: [
