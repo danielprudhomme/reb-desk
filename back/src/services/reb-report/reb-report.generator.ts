@@ -65,10 +65,10 @@ export const rebReportGenerator = {
     longTermUnit: TimeUnit;
   }): string {
     const expertName = expertConst.EXPERT_CONSTANTS[params.expert].name.replaceAll(' ', '');
-    const startDate = normalizeDate(params.startDate);
+    const startDate = normalizeDate({ date: params.startDate });
     const shortTerm = `${params.shortTermCount}x${params.shortTermDuration}${params.shortTermUnit.toString()[0]}`;
     const longTerm = `${params.longTermDuration}${params.longTermUnit.toString()[0]}`;
-    const currentDate = normalizeDate();
+    const currentDate = normalizeDate({ precise: true });
     return `${params.symbol}-${params.timeframe}-${expertName}-${params.capital}-${params.leverage}-${startDate}-${shortTerm}-${longTerm}-${currentDate}`;
   },
 };
@@ -338,15 +338,30 @@ Min_Buy_Score=2||1.0||0.100000||10.000000||N`,
   autoBot: [''],
 };
 
-function normalizeDate(date?: string): string {
-  const input = date ?? new Date().toLocaleDateString('fr-FR'); // ex: 19/06/2026
+function normalizeDate(params: { date?: string; precise?: boolean }): string {
+  const now = new Date();
+  const { date, precise } = params;
 
-  const digitsOnly = input.replace(/\D/g, ''); // 19062026
+  if (precise) {
+    const pad = (value: number, length = 2) => value.toString().padStart(length, '0');
 
-  const result =
-    digitsOnly.substring(0, 2) + // jour
-    digitsOnly.substring(2, 4) + // mois
-    digitsOnly.substring(6, 8); // année (2 derniers chiffres)
+    return (
+      pad(now.getDate()) +
+      pad(now.getMonth() + 1) +
+      pad(now.getFullYear() % 100) +
+      pad(now.getHours()) +
+      pad(now.getMinutes()) +
+      pad(now.getSeconds()) +
+      pad(now.getMilliseconds(), 3)
+    );
+  }
 
-  return result;
+  const input = date ?? now.toLocaleDateString('fr-FR'); // ex: 19/06/2026
+  const digitsOnly = input.replace(/\D/g, '');
+
+  return (
+    digitsOnly.substring(0, 2) + // day
+    digitsOnly.substring(2, 4) + // month
+    digitsOnly.substring(6, 8) // year (last 2 digits)
+  );
 }
