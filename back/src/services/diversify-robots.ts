@@ -157,41 +157,33 @@ export function diversifyRobots(
   const targetRobotCount = distribution.reduce((sum, { count }) => sum + (count ?? 0), 0);
 
   while (selected.length < targetRobotCount) {
-    let bestIndex = -1;
-    let bestScore = Number.POSITIVE_INFINITY;
+    let chosenIndex = findBestCandidate({
+      candidates,
+      expertTargets,
+      localStats,
+      globalStats,
+      usedCombinations,
+      allowDuplicateSymbolTimeframe: false,
+    });
 
-    // On pourrait faire plusieurs tours (si par exemple le check sur symbolTimeframeKey est toujours faux)
-    for (let i = 0; i < candidates.length; i++) {
-      const candidate = candidates[i];
-
-      if ((expertTargets.get(candidate.expert) ?? 0) <= 0) {
-        continue;
-      }
-
-      const symbolTimeframeKey = createKey(candidate.symbol, candidate.timeframe);
-      if (get(localStats.symbolTimeframeCount, symbolTimeframeKey) >= 1) {
-        continue;
-      }
-
-      if (usedCombinations.has(robotKey(candidate))) {
-        continue;
-      }
-
-      const localScore = computeScore(localStats, candidate);
-      const globalScore = computeScore(globalStats, candidate);
-      const score = localScore * 5 + globalScore;
-
-      if (score < bestScore) {
-        bestScore = score;
-        bestIndex = i;
-      }
+    // If impossible, relax the symbol/timeframe constraint
+    if (chosenIndex === -1) {
+      chosenIndex = findBestCandidate({
+        candidates,
+        expertTargets,
+        localStats,
+        globalStats,
+        usedCombinations,
+        allowDuplicateSymbolTimeframe: true,
+      });
     }
 
-    if (bestIndex === -1) {
-      throw new Error('Not possible to diversify more (it will create duplicates)');
+    // Still impossible? Then we really cannot create more robots
+    if (chosenIndex === -1) {
+      break;
     }
 
-    const chosen = candidates[bestIndex];
+    const chosen = candidates[chosenIndex];
 
     selected.push(chosen);
     newRobots.push(chosen);
@@ -200,9 +192,51 @@ export function diversifyRobots(
     registerRobot(localStats, chosen);
     registerRobot(globalStats, chosen);
 
-    // consume expert quota
     expertTargets.set(chosen.expert, (expertTargets.get(chosen.expert) ?? 1) - 1);
   }
 
   return newRobots;
+}
+
+function findBestCandidate(options: {
+  candidates: RobotConfiguration[];
+  expertTargets: Map<ExpertAdvisor, number>;
+  localStats: DiversificationStats;
+  globalStats: DiversificationStats;
+  usedCombinations: Set<string>;
+  allowDuplicateSymbolTimeframe: boolean;
+}): number {
+  let bestIndex = -1;
+  let bestScore = Number.POSITIVE_INFINITY;
+
+  for (let i = 0; i < options.candidates.length; i++) {
+    const candidate = options.candidates[i];
+
+    if ((options.expertTargets.get(candidate.expert) ?? 0) <= 0) {
+      continue;
+    }
+
+    if (!options.allowDuplicateSymbolTimeframe) {
+      const key = createKey(candidate.symbol, candidate.timeframe);
+
+      if (get(options.localStats.symbolTimeframeCount, key) >= 1) {
+        continue;
+      }
+    }
+
+    if (options.usedCombinations.has(robotKey(candidate))) {
+      continue;
+    }
+
+    const score =
+      computeScore(options.localStats, candidate) * 5 +
+      computeScore(options.globalStats, candidate);
+
+    if (score < bestScore) {
+      bestScore = score;
+      bestIndex = i;
+    }
+  }
+
+  return bestIndex;
 }
