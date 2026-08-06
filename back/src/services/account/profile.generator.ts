@@ -6,6 +6,7 @@ import { writeFile } from 'fs/promises';
 import path from 'path';
 import { buildParametersInFile } from '../reb-report/reb-report.generator.ts';
 import { fileService } from '../file.service.ts';
+import { ExpertParameterConfig } from '@src/models/expert-parameter-config.ts';
 
 export const profileGenerator = {
   async generateChr(robot: Robot): Promise<void> {
@@ -14,7 +15,19 @@ export const profileGenerator = {
     const { name: expertName, ex5Name } = expertConst.EXPERT_CONSTANTS[robot.expert];
 
     const { periodType, periodSize } = getPeriodConfig(robot.timeframe);
-    const parameters = buildParametersInFile(robot, true);
+
+    const parameters =
+      robot.parameterSet?.parameters.map(
+        (param) =>
+          ({
+            name: param.name,
+            value: param.value,
+            variable: false,
+            min: 0,
+            max: 0,
+            step: 0,
+          }) as ExpertParameterConfig,
+      ) ?? [];
 
     const content = `<chart>
 symbol=${robot.symbol}
@@ -25,7 +38,7 @@ name=${ex5Name}
 path=Experts\\${ex5Name}.ex5
 expertmode=1
 <inputs>
-${parameters}
+${buildParametersInFile(robot, parameters)}
 
 </chart>
 `;

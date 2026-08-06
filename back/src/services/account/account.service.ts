@@ -23,14 +23,15 @@ export const accountService = {
     }
 
     // Generate reb reports for all robots without parameterSetId
-    const robots = (await robotService.findByAccount(accountId)).filter(
-      (robot) => !robot.parameterSetId,
-    );
+    const robots = await robotService.findByAccount(accountId);
+    // .filter(
+    //   (robot) => !robot.parameterSetId,
+    // );
     // const robots = await robotService.findRobotsWithoutReport(accountId);
 
     robots.forEach(
       async (robot) =>
-        await rebReportGenerator.createRebReport(robot, account.capital, account.leverage),
+        await rebReportGenerator.createEmptyRebReports(robot, account.capital, account.leverage),
     );
   },
   async generateProfile(accountId: string): Promise<void> {
