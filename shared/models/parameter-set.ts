@@ -10,6 +10,7 @@ export interface ParameterSet {
     id: string;
     reportId: string;
     passNumber: number;
+    capital: number;
     shortTermCount: number;
     shortTermUnit: TimeUnit;
     shortTermDuration: number;

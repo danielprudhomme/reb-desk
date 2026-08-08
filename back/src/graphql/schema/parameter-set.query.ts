@@ -9,6 +9,7 @@ export default /* GraphQL */ `
     id: ID!
     reportId: ID!
     passNumber: Int!
+    capital: Int!
     shortTermCount: Int!
     shortTermUnit: TimeUnit!
     shortTermDuration: Int!

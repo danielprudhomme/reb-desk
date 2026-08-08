@@ -86,6 +86,7 @@ export const robotService = {
           id: row.backtest.id,
           reportId: row.backtest.reportId,
           passNumber: row.backtest.passNumber,
+          capital: row.report!.capital,
           shortTermCount: row.report!.shortTermCount,
           shortTermUnit: row.report!.shortTermUnit as TimeUnit,
           shortTermDuration: row.report!.shortTermDuration,

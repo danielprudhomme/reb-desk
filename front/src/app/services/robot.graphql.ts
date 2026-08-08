@@ -17,6 +17,7 @@ const ROBOT_FIELDS = `
       id
       reportId
       passNumber
+      capital
       shortTermCount
       shortTermUnit
       shortTermDuration
