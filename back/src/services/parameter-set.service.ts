@@ -41,7 +41,7 @@ export const parameterSetService = {
       return { name, value: Number(value) } as Parameter;
     });
 
-    return { id: db.id, parameters };
+    return { id: db.id, parameters, backtests: [] };
   },
 };
 

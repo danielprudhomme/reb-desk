@@ -6,8 +6,6 @@ export default /* GraphQL */ `
 
     parameterSetId: ID!
 
-    parameterSet: ParameterSet!
-
     passNumber: Int!
   }
 

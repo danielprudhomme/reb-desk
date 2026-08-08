@@ -13,6 +13,34 @@ const ROBOT_FIELDS = `
       name
       value
     }
+    backtests {
+      id
+      reportId
+      passNumber
+      shortTermCount
+      shortTermUnit
+      shortTermDuration
+      longTermUnit
+      longTermDuration
+      shortTermResults {
+        position
+        result
+        trades
+        profitFactor
+        resultPerTrade
+        drawdownAmount
+        drawdownPercent
+      }
+      longTermResults {
+        position
+        result
+        trades
+        profitFactor
+        resultPerTrade
+        drawdownAmount
+        drawdownPercent
+      }
+    }
   }
 `;
 

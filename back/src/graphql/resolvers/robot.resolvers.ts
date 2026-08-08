@@ -20,6 +20,6 @@ export const robotResolvers = {
 
   Query: {
     robotsByAccount: (_: unknown, { accountId }: { accountId: string }) =>
-      robotService.findByAccount(accountId),
+      robotService.findByAccountWithBacktests(accountId),
   },
 };

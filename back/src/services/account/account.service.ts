@@ -23,10 +23,9 @@ export const accountService = {
     }
 
     // Generate reb reports for all robots without parameterSetId
-    const robots = await robotService.findByAccount(accountId);
-    // .filter(
-    //   (robot) => !robot.parameterSetId,
-    // );
+    const robots = (await robotService.findByAccount(accountId)).filter(
+      (robot) => !robot.parameterSetId,
+    );
     // const robots = await robotService.findRobotsWithoutReport(accountId);
 
     robots.forEach(

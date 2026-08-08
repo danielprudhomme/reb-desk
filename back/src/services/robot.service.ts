@@ -5,7 +5,10 @@ import { InsertRobotInput } from '@src/models/insert-robot.input.ts';
 import { UpdateRobotInput } from '@src/models/update-robot.input.ts';
 import {
   accountsTable,
+  backtestResultsTable,
+  backtestsTable,
   ParameterSetDb,
+  parameterSetsTable,
   rebReportsTable,
   RobotDb,
   robotsTable,
@@ -20,8 +23,94 @@ import { Symbol } from '@shared/models/symbol.ts';
 import { DiversifyRobotsInput } from '@src/models/diversify-robots-input.ts';
 import { diversifyRobots } from './diversify-robots.ts';
 import { RobotConfiguration } from '@shared/models/robot-configuration.ts';
+import { TimeUnit } from '@shared/models/time-unit.ts';
 
 export const robotService = {
+  async findByAccountWithBacktests(accountId: string): Promise<Robot[]> {
+    const rows = await db
+      .select({
+        robot: robotsTable,
+        account: accountsTable,
+        parameterSet: parameterSetsTable,
+        backtest: backtestsTable,
+        report: rebReportsTable,
+        results: backtestResultsTable,
+      })
+      .from(robotsTable)
+      .innerJoin(accountsTable, eq(accountsTable.id, robotsTable.accountId))
+      .leftJoin(parameterSetsTable, eq(parameterSetsTable.id, robotsTable.parameterSetId))
+      .leftJoin(backtestsTable, eq(backtestsTable.parameterSetId, parameterSetsTable.id))
+      .leftJoin(rebReportsTable, eq(rebReportsTable.id, backtestsTable.reportId))
+      .leftJoin(backtestResultsTable, eq(backtestResultsTable.backtestId, backtestsTable.id))
+      .where(
+        and(
+          eq(robotsTable.accountId, accountId),
+          eq(rebReportsTable.expert, robotsTable.expert),
+          eq(rebReportsTable.symbol, robotsTable.symbol),
+          eq(rebReportsTable.timeframe, robotsTable.timeframe),
+          eq(rebReportsTable.leverage, accountsTable.leverage),
+          eq(rebReportsTable.capital, accountsTable.capital),
+        ),
+      );
+
+    const robots = new Map<string, Robot>();
+
+    for (const row of rows) {
+      let robot = robots.get(row.robot.id);
+
+      if (!robot) {
+        robot = {
+          id: row.robot.id,
+          accountId: row.robot.accountId,
+          status: row.robot.status as RobotStatus,
+          expert: row.robot.expert as ExpertAdvisor,
+          timeframe: row.robot.timeframe as Timeframe,
+          symbol: row.robot.symbol as Symbol,
+          magicNumber: row.robot.magicNumber ?? undefined,
+          parameterSet: row.parameterSet
+            ? parameterSetService.mapDbToModel(row.parameterSet)
+            : undefined,
+        };
+
+        robots.set(row.robot.id, robot);
+      }
+
+      if (!row.backtest || !robot.parameterSet) {
+        continue;
+      }
+
+      let backtest = robot.parameterSet.backtests.find((x) => x.id === row.backtest!.id);
+
+      if (!backtest) {
+        backtest = {
+          id: row.backtest.id,
+          reportId: row.backtest.reportId,
+          passNumber: row.backtest.passNumber,
+          shortTermCount: row.report!.shortTermCount,
+          shortTermUnit: row.report!.shortTermUnit as TimeUnit,
+          shortTermDuration: row.report!.shortTermDuration,
+          longTermUnit: row.report!.longTermUnit as TimeUnit,
+          longTermDuration: row.report!.longTermDuration,
+          shortTermResults: [],
+          longTermResults: [],
+        };
+
+        robot.parameterSet.backtests.push(backtest);
+      }
+
+      if (row.results) {
+        if (row.results.type === 'short_term') {
+          backtest.shortTermResults.push(row.results);
+        }
+        if (row.results.type === 'long_term') {
+          backtest.longTermResults.push(row.results);
+        }
+      }
+    }
+
+    return [...robots.values()];
+  },
+
   async findByAccount(accountId: string): Promise<Robot[]> {
     return (
       await db.query.robotsTable.findMany({
