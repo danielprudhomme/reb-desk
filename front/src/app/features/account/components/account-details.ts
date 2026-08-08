@@ -1,12 +1,4 @@
-import {
-  Component,
-  computed,
-  effect,
-  inject,
-  signal,
-  viewChild,
-  ChangeDetectionStrategy,
-} from '@angular/core';
+import { Component, computed, effect, inject, signal, viewChild } from '@angular/core';
 import { ActivatedRoute, RouterLink } from '@angular/router';
 import { AccountService } from '@app/services/account.service';
 import { MatButtonModule } from '@angular/material/button';
@@ -30,6 +22,7 @@ import { RobotDrawer } from './robot-drawer';
 import { MatTabsModule } from '@angular/material/tabs';
 import { Diversification } from './diversification';
 import { ExpertDistribution } from '@shared/models/expert-distribution';
+import { PercentPipe } from '@angular/common';
 
 @Component({
   selector: 'app-account-details',
@@ -45,8 +38,8 @@ import { ExpertDistribution } from '@shared/models/expert-distribution';
     RouterLink,
     MatSidenavModule,
     MatTabsModule,
+    PercentPipe,
   ],
-  changeDetection: ChangeDetectionStrategy.Eager,
   template: `
     <mat-sidenav-container class="h-full" (backdropClick)="closeDrawer()">
       <!-- MAIN CONTENT -->
@@ -56,6 +49,8 @@ import { ExpertDistribution } from '@shared/models/expert-distribution';
             <button mat-icon-button aria-label="Back to accounts" [routerLink]="['..']">
               <mat-icon>arrow_back</mat-icon>
             </button>
+
+            <div>{{ account().name }} - {{ averageMonthlyPerformance() | percent: '1.2-2' }}</div>
 
             <button
               mat-icon-button
@@ -147,6 +142,26 @@ export class AccountDetails {
   drawer = viewChild.required(MatSidenav);
   selectedRobot = signal<Robot | null>(null);
 
+  averageMonthlyPerformance = computed(() => {
+    const backtests = this.robots()
+      .map((robot) => robot.parameterSet?.backtests[0])
+      .filter((backtest) => !!backtest);
+
+    if (!backtests.length) {
+      return undefined;
+    }
+
+    const totalResult = backtests.reduce(
+      (sum, backtest) => sum + avg(backtest.longTermResults.map((r) => r.result)),
+      0,
+    );
+
+    const duration = backtests[0].longTermDuration;
+    const capital = backtests[0].capital;
+
+    return totalResult / capital / duration / 12;
+  });
+
   constructor() {
     this.robotService.setAccountId(this.accountId!);
 
@@ -224,4 +239,8 @@ export class AccountDetails {
     this.selectedRobot.set(null);
     this.drawer().close();
   }
+}
+
+function avg(v: number[]) {
+  return v.reduce((a, b) => a + b, 0) / v.length;
 }
