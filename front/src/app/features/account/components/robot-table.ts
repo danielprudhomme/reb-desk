@@ -6,7 +6,6 @@ import { MatMenuModule } from '@angular/material/menu';
 import { RobotService } from '@app/services/robot.service';
 import { ExpertAdvisor } from '@shared/models/expert-advisor';
 import { MatButtonModule } from '@angular/material/button';
-import { ConfirmationService } from '@app/core/services/confirmation.service';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { RobotTile } from './robot-tile';
 import { RobotCreateTile } from './robot-create-tile';
@@ -72,7 +71,6 @@ export class RobotTable {
   symbols = input.required<Symbol[]>();
   robotClicked = output<Robot>();
   private robotService = inject(RobotService);
-  private confirmationService = inject(ConfirmationService);
   displayedColumns = computed(() => ['symbol', ...this.timeframes()]);
   dataSource = computed(() => {
     const robots = this.robots();
@@ -92,8 +90,6 @@ export class RobotTable {
 
     return new MatTableDataSource(rows);
   });
-
-  // modifyRobot(robot: Robot) {}
 
   createRobot(timeframe: Timeframe, symbol: Symbol, expert: ExpertAdvisor) {
     this.robotService.insertRobot(this.accountId(), { expert, symbol, timeframe });
